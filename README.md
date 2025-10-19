@@ -1,6 +1,6 @@
 # stonks
 
-Real-time portfolio tracking meets HFT-style analysis.
+Terminal-based stock portfolio tracker inspired by [mop](https://github.com/mop-tracker/mop).
 
 ## Quick Start
 
@@ -17,35 +17,37 @@ python3 portfolio_tracker.py
 
 ## Features
 
-- **Portfolio Tracking** - Real-time holdings analysis with sector breakdown
-- **HFT-Style Streaming** - Live price updates with volatility detection
-- **Price Alerts** - Custom notifications when stocks hit targets
-- **Stock Screener** - Filter by volume, P/E, market cap
-- **Technical Indicators** - RSI, MACD, momentum analysis
-- **Multi-Asset** - Stocks, crypto (BTC-USD), commodities (GC=F)
+- **Market Indices** - Live data for Dow, S&P 500, NASDAQ, Tokyo, HK, London, 10-Year Yield, Euro, Yen, Oil, Gold
+- **Portfolio Tracking** - Real-time holdings with color-coded gains/losses
+- **Mop-Style Display** - Clean terminal table with Last, Change, Change%, Open, Low, High, 52w Low/High
+- **Multi-Asset** - Stocks, crypto (BTC-USD), commodities (GC=F, SLV), ETFs (IAU)
+
+## Example Output
+
+```
+stonks - market tracker
+
+Dow 46,190.61 (+0.72%) S&P 500 6,664.01 (+0.77%) NASDAQ 22,679.97 (+0.85%)
+Tokyo 47,582.15 (-0.50%) HK 25,247.10 (-2.34%) London 9,354.60 (-0.86%)
+10-Year Yield 4.007 (+0.300%) Euro $1.166 (-0.31%) Yen $150.584 (+0.12%)
+Oil $57.54 (+0.07%) Gold $4189.90 (-3.78%)
+
+Ticker         Last     Change    Change%       Open        Low       High    52w Low   52w High
+================================================================================================
+AAPL     $   252.29 +$    4.84 +    1.96% $   248.02 $   247.27 $   253.38 $   169.21 $   260.10
+HOOD     $   129.91 $    1.53    -1.16% $   128.16 $   125.60 $   131.21 $    23.00 $   153.86
+SLV      $    46.99 $    2.18    -4.43% $    48.46 $    45.88 $    48.59 $    26.19 $    49.25
+```
 
 ## Configuration
-
-Edit `config.json` to customize:
-
-```json
-{
-    "watchlist": ["AAPL", "NVDA", "BTC-USD"],
-    "alerts": {
-        "AAPL": {"above": 260, "below": 240}
-    },
-    "screener_criteria": {
-        "min_volume": 1000000,
-        "max_pe": 50
-    }
-}
-```
 
 Edit `portfolio.json` with your holdings:
 
 ```json
 {
     "AAPL": {"shares": 0.3042},
+    "HOOD": {"shares": 0.0229},
+    "SLV": {"shares": 0.5251},
     "BTC-USD": {"shares": 0.5}
 }
 ```
@@ -54,12 +56,11 @@ Edit `portfolio.json` with your holdings:
 
 - Python 3
 - yfinance (market data)
-- pandas (analysis)
 - colorama (terminal colors)
 
 ## Demo
 
-[View live demo page](https://nulljosh.github.io/stonks)
+[View landing page](https://nulljosh.github.io/stonks)
 
 ---
 
