@@ -1,100 +1,66 @@
-# Portfolio Tracker & Stock Screener
+# stonks
 
-A Python tool to track your portfolio, check price alerts, and screen stocks based on your criteria.
+Real-time portfolio tracking meets HFT-style analysis.
 
-## Setup
+## Quick Start
 
-1. Install dependencies:
 ```bash
+# Install dependencies
 pip3 install -r requirements.txt
-```
 
-2. Configure your settings in `config.json`:
-   - `portfolio_url`: Your portfolio website (currently set to heyitsmejosh.com/marlin)
-   - `watchlist`: Stocks to screen
-   - `alerts`: Price alerts (above/below triggers)
-   - `screener_criteria`: Filtering criteria for stock screening
+# Edit your portfolio
+nano portfolio.json
 
-## Usage
-
-Run at market open (9:30 AM ET):
-```bash
+# Run the tracker
 python3 portfolio_tracker.py
-```
-
-Run at market close (4:00 PM ET):
-```bash
-python3 portfolio_tracker.py
-```
-
-Or set up cron jobs to run automatically:
-```bash
-# Edit crontab
-crontab -e
-
-# Add these lines (adjust times for your timezone):
-30 9 * * 1-5 cd /Users/joshua/Documents/Videos && python3 portfolio_tracker.py >> tracker.log 2>&1
-0 16 * * 1-5 cd /Users/joshua/Documents/Videos && python3 portfolio_tracker.py >> tracker.log 2>&1
 ```
 
 ## Features
 
-### Portfolio Tracking
-- Scrapes your portfolio from heyitsmejosh.com/marlin
-- Shows current value, allocation, and performance
-- Displays sector breakdown
-- Calculates total portfolio value
+- **Portfolio Tracking** - Real-time holdings analysis with sector breakdown
+- **HFT-Style Streaming** - Live price updates with volatility detection
+- **Price Alerts** - Custom notifications when stocks hit targets
+- **Stock Screener** - Filter by volume, P/E, market cap
+- **Technical Indicators** - RSI, MACD, momentum analysis
+- **Multi-Asset** - Stocks, crypto (BTC-USD), commodities (GC=F)
 
-### Price Alerts
-- Set price targets (above/below)
-- Get notified when triggered
-- Works for stocks, crypto (BTC-USD, ETH-USD), commodities (GC=F for gold)
+## Configuration
 
-### Stock Screener
-- Filter by volume, P/E ratio, market cap
-- See distance from 52-week highs
-- Customize criteria in config.json
+Edit `config.json` to customize:
 
-## Configuration Examples
-
-### Add Price Alert
 ```json
-"alerts": {
-    "AAPL": {
-        "above": 260,
-        "below": 240
+{
+    "watchlist": ["AAPL", "NVDA", "BTC-USD"],
+    "alerts": {
+        "AAPL": {"above": 260, "below": 240}
+    },
+    "screener_criteria": {
+        "min_volume": 1000000,
+        "max_pe": 50
     }
 }
 ```
 
-### Customize Screener
+Edit `portfolio.json` with your holdings:
+
 ```json
-"screener_criteria": {
-    "min_volume": 1000000,
-    "max_pe": 50,
-    "min_market_cap": 10000000000
+{
+    "AAPL": {"shares": 0.3042},
+    "BTC-USD": {"shares": 0.5}
 }
 ```
 
-### Add to Watchlist
-```json
-"watchlist": [
-    "AAPL",
-    "NVDA",
-    "BTC-USD",
-    "ETH-USD"
-]
-```
+## Tech Stack
 
-## Supported Tickers
+- Python 3
+- yfinance (market data)
+- pandas (analysis)
+- colorama (terminal colors)
 
-- Stocks: AAPL, NVDA, TSLA, etc.
-- Crypto: BTC-USD, ETH-USD
-- Commodities: GC=F (Gold), SI=F (Silver)
-- ETFs: GLD, SLV, SPY, QQQ
+## Demo
 
-## Notes
+[View live demo page](https://nulljosh.github.io/stonks)
 
-- If website scraping fails, you'll be prompted to manually enter your portfolio
-- All data comes from Yahoo Finance via yfinance
-- No buy/sell recommendations are provided - this is purely informational
+---
+
+**Disclaimer:** Not financial advice. Educational purposes only.
