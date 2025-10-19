@@ -51,14 +51,15 @@
             height: 100%;
             pointer-events: none;
             z-index: 0;
-            opacity: 0.03;
+            opacity: 0.15;
         }
 
         .stock-line {
             position: absolute;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--accent), transparent);
             animation: floatLine 20s infinite ease-in-out;
+            box-shadow: 0 0 10px var(--accent);
         }
 
         .stock-line:nth-child(1) {
@@ -156,22 +157,22 @@
         @keyframes floatNumber {
             0%, 100% {
                 transform: translateY(0) rotate(0deg);
-                opacity: 0.3;
+                opacity: 0.8;
             }
             50% {
                 transform: translateY(-50px) rotate(5deg);
-                opacity: 0.6;
+                opacity: 1;
             }
         }
 
         @keyframes floatTicker {
             0%, 100% {
                 transform: translateY(0) translateX(0);
-                opacity: 0.2;
+                opacity: 0.6;
             }
             50% {
                 transform: translateY(-40px) translateX(20px);
-                opacity: 0.5;
+                opacity: 0.9;
             }
         }
 
@@ -459,11 +460,15 @@
         <div class="stock-line"></div>
         <div class="stock-line"></div>
         <div class="stock-line"></div>
-        <div class="rsi-indicator">RSI 72</div>
-        <div class="rsi-indicator">RSI 45</div>
-        <div class="rsi-indicator">RSI 58</div>
+        <div class="rsi-indicator">RSI 72.4</div>
+        <div class="rsi-indicator">RSI 45.8</div>
+        <div class="rsi-indicator">RSI 58.2</div>
+        <div class="rsi-indicator" style="top: 35%; left: 25%; animation-delay: 5s;">MACD +12.5</div>
+        <div class="rsi-indicator" style="top: 85%; right: 30%; animation-delay: 18s;">MACD -8.3</div>
         <div class="ticker-symbol">AAPL</div>
         <div class="ticker-symbol">BTC</div>
+        <div class="ticker-symbol" style="top: 40%; left: 80%; animation-delay: 14s;">NVDA</div>
+        <div class="ticker-symbol" style="top: 80%; left: 10%; animation-delay: 20s;">ETH</div>
     </div>
 
     <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">☀</button>
