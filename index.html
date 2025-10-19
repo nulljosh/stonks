@@ -39,12 +39,148 @@
             color: var(--text-primary);
             line-height: 1.6;
             transition: background 0.3s, color 0.3s;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .ambient-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.03;
+        }
+
+        .stock-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            animation: floatLine 20s infinite ease-in-out;
+        }
+
+        .stock-line:nth-child(1) {
+            width: 300px;
+            top: 10%;
+            animation-delay: 0s;
+            animation-duration: 25s;
+        }
+
+        .stock-line:nth-child(2) {
+            width: 400px;
+            top: 30%;
+            animation-delay: 5s;
+            animation-duration: 30s;
+        }
+
+        .stock-line:nth-child(3) {
+            width: 250px;
+            top: 50%;
+            animation-delay: 10s;
+            animation-duration: 22s;
+        }
+
+        .stock-line:nth-child(4) {
+            width: 350px;
+            top: 70%;
+            animation-delay: 15s;
+            animation-duration: 28s;
+        }
+
+        .stock-line:nth-child(5) {
+            width: 200px;
+            top: 90%;
+            animation-delay: 8s;
+            animation-duration: 24s;
+        }
+
+        .rsi-indicator {
+            position: absolute;
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--accent);
+            animation: floatNumber 15s infinite ease-in-out;
+            font-family: monospace;
+        }
+
+        .rsi-indicator:nth-child(6) {
+            top: 15%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .rsi-indicator:nth-child(7) {
+            top: 45%;
+            left: 5%;
+            animation-delay: 7s;
+        }
+
+        .rsi-indicator:nth-child(8) {
+            top: 75%;
+            right: 20%;
+            animation-delay: 12s;
+        }
+
+        .ticker-symbol {
+            position: absolute;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            animation: floatTicker 18s infinite ease-in-out;
+            font-family: monospace;
+        }
+
+        .ticker-symbol:nth-child(9) {
+            top: 20%;
+            left: 15%;
+            animation-delay: 3s;
+        }
+
+        .ticker-symbol:nth-child(10) {
+            top: 60%;
+            right: 15%;
+            animation-delay: 9s;
+        }
+
+        @keyframes floatLine {
+            0%, 100% {
+                transform: translateX(-100%) translateY(0);
+            }
+            50% {
+                transform: translateX(100vw) translateY(-30px);
+            }
+        }
+
+        @keyframes floatNumber {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-50px) rotate(5deg);
+                opacity: 0.6;
+            }
+        }
+
+        @keyframes floatTicker {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0.2;
+            }
+            50% {
+                transform: translateY(-40px) translateX(20px);
+                opacity: 0.5;
+            }
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            position: relative;
+            z-index: 1;
         }
 
         .theme-toggle {
@@ -317,6 +453,19 @@
     </style>
 </head>
 <body>
+    <div class="ambient-background">
+        <div class="stock-line"></div>
+        <div class="stock-line"></div>
+        <div class="stock-line"></div>
+        <div class="stock-line"></div>
+        <div class="stock-line"></div>
+        <div class="rsi-indicator">RSI 72</div>
+        <div class="rsi-indicator">RSI 45</div>
+        <div class="rsi-indicator">RSI 58</div>
+        <div class="ticker-symbol">AAPL</div>
+        <div class="ticker-symbol">BTC</div>
+    </div>
+
     <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">☀</button>
 
     <div class="container">
