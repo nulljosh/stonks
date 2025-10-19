@@ -51,128 +51,54 @@
             height: 100%;
             pointer-events: none;
             z-index: 0;
-            opacity: 0.15;
+            opacity: 0.04;
         }
 
-        .stock-line {
+        .chart-line {
             position: absolute;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--accent), var(--accent), transparent);
-            animation: floatLine 20s infinite ease-in-out;
-            box-shadow: 0 0 10px var(--accent);
+            width: 600px;
+            height: 150px;
         }
 
-        .stock-line:nth-child(1) {
-            width: 300px;
-            top: 10%;
-            animation-delay: 0s;
-            animation-duration: 25s;
+        .chart-line svg {
+            width: 100%;
+            height: 100%;
         }
 
-        .stock-line:nth-child(2) {
-            width: 400px;
-            top: 30%;
-            animation-delay: 5s;
-            animation-duration: 30s;
-        }
-
-        .stock-line:nth-child(3) {
-            width: 250px;
-            top: 50%;
-            animation-delay: 10s;
-            animation-duration: 22s;
-        }
-
-        .stock-line:nth-child(4) {
-            width: 350px;
-            top: 70%;
-            animation-delay: 15s;
-            animation-duration: 28s;
-        }
-
-        .stock-line:nth-child(5) {
-            width: 200px;
-            top: 90%;
-            animation-delay: 8s;
-            animation-duration: 24s;
-        }
-
-        .rsi-indicator {
-            position: absolute;
-            font-size: 3rem;
-            font-weight: 900;
-            color: var(--accent);
-            animation: floatNumber 15s infinite ease-in-out;
-            font-family: monospace;
-        }
-
-        .rsi-indicator:nth-child(6) {
+        .chart-line:nth-child(1) {
             top: 15%;
-            right: 10%;
-            animation-delay: 2s;
+            left: -20%;
+            animation: driftRight 60s infinite linear;
         }
 
-        .rsi-indicator:nth-child(7) {
-            top: 45%;
-            left: 5%;
-            animation-delay: 7s;
+        .chart-line:nth-child(2) {
+            top: 40%;
+            right: -20%;
+            animation: driftLeft 70s infinite linear;
         }
 
-        .rsi-indicator:nth-child(8) {
-            top: 75%;
-            right: 20%;
-            animation-delay: 12s;
+        .chart-line:nth-child(3) {
+            top: 65%;
+            left: -20%;
+            animation: driftRight 80s infinite linear;
+            animation-delay: 10s;
         }
 
-        .ticker-symbol {
-            position: absolute;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            animation: floatTicker 18s infinite ease-in-out;
-            font-family: monospace;
-        }
-
-        .ticker-symbol:nth-child(9) {
-            top: 20%;
-            left: 15%;
-            animation-delay: 3s;
-        }
-
-        .ticker-symbol:nth-child(10) {
-            top: 60%;
-            right: 15%;
-            animation-delay: 9s;
-        }
-
-        @keyframes floatLine {
-            0%, 100% {
-                transform: translateX(-100%) translateY(0);
+        @keyframes driftRight {
+            from {
+                transform: translateX(0);
             }
-            50% {
-                transform: translateX(100vw) translateY(-30px);
+            to {
+                transform: translateX(calc(100vw + 600px));
             }
         }
 
-        @keyframes floatNumber {
-            0%, 100% {
-                transform: translateY(0) rotate(0deg);
-                opacity: 0.8;
+        @keyframes driftLeft {
+            from {
+                transform: translateX(0);
             }
-            50% {
-                transform: translateY(-50px) rotate(5deg);
-                opacity: 1;
-            }
-        }
-
-        @keyframes floatTicker {
-            0%, 100% {
-                transform: translateY(0) translateX(0);
-                opacity: 0.6;
-            }
-            50% {
-                transform: translateY(-40px) translateX(20px);
-                opacity: 0.9;
+            to {
+                transform: translateX(calc(-100vw - 600px));
             }
         }
 
@@ -455,20 +381,21 @@
 </head>
 <body>
     <div class="ambient-background">
-        <div class="stock-line"></div>
-        <div class="stock-line"></div>
-        <div class="stock-line"></div>
-        <div class="stock-line"></div>
-        <div class="stock-line"></div>
-        <div class="rsi-indicator">RSI 72.4</div>
-        <div class="rsi-indicator">RSI 45.8</div>
-        <div class="rsi-indicator">RSI 58.2</div>
-        <div class="rsi-indicator" style="top: 35%; left: 25%; animation-delay: 5s;">MACD +12.5</div>
-        <div class="rsi-indicator" style="top: 85%; right: 30%; animation-delay: 18s;">MACD -8.3</div>
-        <div class="ticker-symbol">AAPL</div>
-        <div class="ticker-symbol">BTC</div>
-        <div class="ticker-symbol" style="top: 40%; left: 80%; animation-delay: 14s;">NVDA</div>
-        <div class="ticker-symbol" style="top: 80%; left: 10%; animation-delay: 20s;">ETH</div>
+        <div class="chart-line">
+            <svg viewBox="0 0 600 150" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 0 75 Q 100 20, 200 60 T 400 80 T 600 50" stroke="#667eea" stroke-width="2" fill="none"/>
+            </svg>
+        </div>
+        <div class="chart-line">
+            <svg viewBox="0 0 600 150" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 0 50 Q 150 100, 300 70 T 600 90" stroke="#667eea" stroke-width="2" fill="none"/>
+            </svg>
+        </div>
+        <div class="chart-line">
+            <svg viewBox="0 0 600 150" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 0 80 Q 120 40, 240 85 T 480 60 T 600 100" stroke="#667eea" stroke-width="2" fill="none"/>
+            </svg>
+        </div>
     </div>
 
     <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">☀</button>
