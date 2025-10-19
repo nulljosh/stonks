@@ -21,6 +21,7 @@ python3 portfolio_tracker.py
 - **Portfolio Tracking** - Real-time holdings with color-coded gains/losses
 - **Mop-Style Display** - Clean terminal table with Last, Change, Change%, Open, Low, High, 52w Low/High
 - **Multi-Asset** - Stocks, crypto (BTC-USD), commodities (GC=F, SLV), ETFs (IAU)
+- **Prediction Markets** - Trending prediction markets from Manifold Markets with YES/NO probabilities, volume, and close dates
 
 ## Example Output
 
@@ -39,7 +40,34 @@ HOOD     $   129.91 $    1.53    -1.16% $   128.16 $   125.60 $   131.21 $    23
 SLV      $    46.99 $    2.18    -4.43% $    48.46 $    45.88 $    48.59 $    26.19 $    49.25
 ```
 
-## Configuration
+## Prediction Markets
+
+stonks now integrates **Manifold Markets** - a platform for creating and trading prediction markets on any topic. The tracker displays trending markets with:
+
+- **YES Probability** - Current probability of YES outcome (0-100%)
+- **Status** - Market status (Open, Closed, or Resolved)
+- **Volume** - Total trading volume
+- **Close Date** - Days until market resolution
+
+Markets are fetched from the public Manifold Markets API with no authentication required.
+
+### Configuration
+
+Control prediction markets in `config.json`:
+
+```json
+{
+  "show_prediction_markets": true,
+  "prediction_market_limit": 10,
+  "prediction_market_categories": ["politics", "sports", "crypto", "technology"]
+}
+```
+
+- `show_prediction_markets` - Enable/disable prediction markets display
+- `prediction_market_limit` - Number of markets to fetch (1-100)
+- `prediction_market_categories` - Categories to watch (optional, defaults to trending)
+
+## Portfolio Configuration
 
 Edit `portfolio.json` with your holdings:
 
@@ -55,8 +83,10 @@ Edit `portfolio.json` with your holdings:
 ## Tech Stack
 
 - Python 3
-- yfinance (market data)
+- yfinance (stock market data)
+- Manifold Markets API (prediction markets)
 - colorama (terminal colors)
+- requests (HTTP client)
 
 ## Demo
 

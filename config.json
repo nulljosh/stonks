@@ -44,5 +44,13 @@
         "Communication Services",
         "Consumer Cyclical"
     ],
-    "notification_email": ""
+    "notification_email": "",
+    "show_prediction_markets": true,
+    "prediction_market_categories": [
+        "politics",
+        "sports",
+        "crypto",
+        "technology"
+    ],
+    "prediction_market_limit": 10
 }

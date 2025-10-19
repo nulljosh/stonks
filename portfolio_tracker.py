@@ -12,6 +12,7 @@ import os
 import sys
 from typing import Dict, List
 from colorama import Fore, Style, init
+from prediction_markets import PredictionMarketsTracker
 
 # Initialize colorama
 init(autoreset=True)
@@ -23,6 +24,7 @@ class StonksTracker:
         self.portfolio = {}
         self.market_data = {}
         self.indices_data = {}
+        self.prediction_tracker = PredictionMarketsTracker()
 
     def load_config(self) -> dict:
         """Load configuration from JSON file"""
@@ -206,6 +208,19 @@ class StonksTracker:
             )
             print(row)
 
+    def display_prediction_markets(self):
+        """Display trending prediction markets"""
+        print(f"\n{Fore.MAGENTA}Prediction Markets (Manifold){Style.RESET_ALL}")
+
+        # Check if prediction markets are enabled in config
+        show_predictions = self.config.get('show_prediction_markets', True)
+        if not show_predictions:
+            return
+
+        # Fetch and display prediction markets
+        markets = self.prediction_tracker.get_trending_markets(limit=10)
+        self.prediction_tracker.display_markets_table(markets, max_rows=8)
+
     def run(self):
         """Main execution"""
         # Clear screen
@@ -225,6 +240,9 @@ class StonksTracker:
 
         # Display portfolio table
         self.display_portfolio_table()
+
+        # Display prediction markets
+        self.display_prediction_markets()
 
         print(f"\n{Fore.YELLOW}Press 'q' to quit, 'r' to refresh")
 
