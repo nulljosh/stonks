@@ -1,321 +1,236 @@
 #!/usr/bin/env python3
 """
-Portfolio Tracker & Stock Screener
-Run at market open/close to track portfolio and find opportunities
-Now with HFT-style real-time streaming and technical analysis!
+stonks - Terminal-based stock portfolio tracker
+Inspired by mop: stock market tracker for hackers
 """
 
-import requests
-from bs4 import BeautifulSoup
 import yfinance as yf
 import pandas as pd
 from datetime import datetime
 import json
 import os
 import sys
-import time
-import argparse
-from typing import Dict, List, Tuple
+from typing import Dict, List
 from colorama import Fore, Style, init
-from collections import deque
 
-# Initialize colorama for colored terminal output
+# Initialize colorama
 init(autoreset=True)
 
-class PortfolioTracker:
+class StonksTracker:
     def __init__(self, config_file='config.json'):
         self.config_file = config_file
         self.config = self.load_config()
         self.portfolio = {}
         self.market_data = {}
+        self.indices_data = {}
 
     def load_config(self) -> dict:
         """Load configuration from JSON file"""
         if os.path.exists(self.config_file):
             with open(self.config_file, 'r') as f:
                 return json.load(f)
-        else:
-            # Default configuration
-            default_config = {
-                "portfolio_url": "https://heyitsmejosh.com/marlin",
-                "watchlist": [],
-                "alerts": {},
-                "screener_criteria": {
-                    "min_volume": 1000000,
-                    "max_pe": 50,
-                    "min_market_cap": 1000000000
-                },
-                "sectors_to_watch": ["Technology", "Healthcare", "Energy"],
-                "notification_email": ""
+        return {
+            "watchlist": ["AAPL", "NVDA", "MSFT"],
+            "alerts": {},
+            "screener_criteria": {
+                "min_volume": 1000000,
+                "max_pe": 50,
+                "min_market_cap": 10000000000
             }
-            with open(self.config_file, 'w') as f:
-                json.dump(default_config, f, indent=4)
-            return default_config
+        }
 
-    def save_config(self):
-        """Save current configuration"""
-        with open(self.config_file, 'w') as f:
-            json.dump(self.config, f, indent=4)
-
-    def scrape_portfolio(self) -> Dict[str, dict]:
-        """Scrape portfolio from user's website"""
-        try:
-            url = self.config['portfolio_url']
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()
-
-            soup = BeautifulSoup(response.content, 'html.parser')
-
-            # Look for portfolio tracker table/column
-            # This is a generic scraper - may need adjustment based on actual site structure
-            portfolio = {}
-
-            # Try to find tables
-            tables = soup.find_all('table')
-            for table in tables:
-                rows = table.find_all('tr')
-                for row in rows[1:]:  # Skip header
-                    cols = row.find_all('td')
-                    if len(cols) >= 2:
-                        ticker = cols[0].text.strip().upper()
-                        try:
-                            shares = float(cols[1].text.strip().replace(',', ''))
-                            portfolio[ticker] = {'shares': shares}
-                        except (ValueError, IndexError):
-                            continue
-
-            if not portfolio:
-                print(f"{Fore.YELLOW}Warning: Could not parse portfolio from website")
-                print(f"{Fore.YELLOW}Using manual entry mode...")
-                return self.manual_portfolio_entry()
-
-            return portfolio
-
-        except Exception as e:
-            print(f"{Fore.RED}Error scraping portfolio: {e}")
-            print(f"{Fore.YELLOW}Using manual entry mode...")
-            return self.manual_portfolio_entry()
-
-    def manual_portfolio_entry(self) -> Dict[str, dict]:
-        """Fallback: load portfolio from portfolio.json file"""
+    def load_portfolio(self) -> Dict[str, dict]:
+        """Load portfolio from portfolio.json"""
         portfolio_file = 'portfolio.json'
 
         if os.path.exists(portfolio_file):
-            print(f"{Fore.YELLOW}Loading portfolio from {portfolio_file}")
             try:
                 with open(portfolio_file, 'r') as f:
-                    portfolio = json.load(f)
-                print(f"{Fore.GREEN}Loaded {len(portfolio)} positions from file")
-                return portfolio
+                    return json.load(f)
             except Exception as e:
-                print(f"{Fore.RED}Error loading portfolio file: {e}")
+                print(f"{Fore.RED}Error loading portfolio: {e}")
 
-        print(f"{Fore.YELLOW}No portfolio.json found. Using demo portfolio...")
-        # Demo portfolio
         return {
-            "AAPL": {"shares": 10},
-            "NVDA": {"shares": 5},
-            "AVGO": {"shares": 3}
+            "AAPL": {"shares": 0.01},
+            "NVDA": {"shares": 0.01}
         }
 
+    def fetch_indices(self):
+        """Fetch major market indices - mop style"""
+        indices = {
+            '^DJI': 'Dow',
+            '^GSPC': 'S&P 500',
+            '^IXIC': 'NASDAQ',
+            '^N225': 'Tokyo',
+            '^HSI': 'HK',
+            '^FTSE': 'London',
+            '^TNX': '10-Year Yield',
+            'EURUSD=X': 'Euro',
+            'JPY=X': 'Yen',
+            'CL=F': 'Oil',
+            'GC=F': 'Gold'
+        }
+
+        self.indices_data = {}
+        for symbol, name in indices.items():
+            try:
+                ticker = yf.Ticker(symbol)
+                hist = ticker.history(period='1d')
+
+                if not hist.empty:
+                    current = hist['Close'].iloc[-1]
+                    previous = hist['Open'].iloc[0] if len(hist) > 0 else current
+                    change = current - previous
+                    change_pct = (change / previous) * 100 if previous != 0 else 0
+
+                    self.indices_data[name] = {
+                        'value': current,
+                        'change': change,
+                        'change_pct': change_pct
+                    }
+            except Exception:
+                continue
+
+    def display_indices(self):
+        """Display market indices - mop style top bar"""
+        if not self.indices_data:
+            return
+
+        parts = []
+        for name, data in self.indices_data.items():
+            value = data['value']
+            change = data['change']
+            change_pct = data['change_pct']
+
+            # Color code based on change
+            color = Fore.GREEN if change >= 0 else Fore.RED
+            sign = '+' if change >= 0 else ''
+
+            # Format differently for currencies and commodities
+            if name in ['Euro', 'Yen']:
+                parts.append(f"{name} ${value:.3f} ({color}{sign}{change_pct:.2f}%{Style.RESET_ALL})")
+            elif name == '10-Year Yield':
+                parts.append(f"{name} {value:.3f} ({color}{sign}{change_pct:.3f}%{Style.RESET_ALL})")
+            elif name in ['Oil', 'Gold']:
+                parts.append(f"{name} ${value:.2f} ({color}{sign}{change_pct:.2f}%{Style.RESET_ALL})")
+            else:
+                parts.append(f"{name} {value:,.2f} ({color}{sign}{change_pct:.2f}%{Style.RESET_ALL})")
+
+        # Print indices in rows
+        print()
+        idx = 0
+        while idx < len(parts):
+            print(' '.join(parts[idx:idx+3]))
+            idx += 3
+        print()
+
     def fetch_market_data(self, tickers: List[str]) -> Dict[str, dict]:
-        """Fetch current market data for tickers"""
+        """Fetch market data for tickers"""
         market_data = {}
 
         for ticker in tickers:
             try:
                 stock = yf.Ticker(ticker)
                 info = stock.info
-                hist = stock.history(period='1d')
+                hist = stock.history(period='5d')
 
                 if not hist.empty:
                     current_price = hist['Close'].iloc[-1]
+                    open_price = hist['Open'].iloc[-1]
+                    low_price = hist['Low'].iloc[-1]
+                    high_price = hist['High'].iloc[-1]
+                    previous_close = info.get('previousClose', current_price)
                 else:
                     current_price = info.get('currentPrice', 0)
+                    open_price = current_price
+                    low_price = current_price
+                    high_price = current_price
+                    previous_close = current_price
 
                 market_data[ticker] = {
-                    'price': current_price,
-                    'previous_close': info.get('previousClose', current_price),
-                    'market_cap': info.get('marketCap', 0),
-                    'pe_ratio': info.get('trailingPE', 0),
+                    'last': current_price,
+                    'open': open_price,
+                    'low': low_price,
+                    'high': high_price,
+                    'previous_close': previous_close,
+                    'change': current_price - previous_close,
+                    'change_pct': ((current_price - previous_close) / previous_close * 100) if previous_close != 0 else 0,
                     'volume': info.get('volume', 0),
-                    'sector': info.get('sector', 'Unknown'),
-                    '52w_high': info.get('fiftyTwoWeekHigh', 0),
                     '52w_low': info.get('fiftyTwoWeekLow', 0),
+                    '52w_high': info.get('fiftyTwoWeekHigh', 0),
                 }
             except Exception as e:
-                print(f"{Fore.RED}Error fetching data for {ticker}: {e}")
-                market_data[ticker] = {'price': 0, 'error': str(e)}
+                market_data[ticker] = {'error': str(e)}
 
         return market_data
 
-    def analyze_portfolio(self) -> pd.DataFrame:
-        """Analyze portfolio holdings"""
+    def display_portfolio_table(self):
+        """Display portfolio in mop-style table"""
         tickers = list(self.portfolio.keys())
         self.market_data = self.fetch_market_data(tickers)
 
-        rows = []
-        total_value = 0
+        # Header
+        header = f"{'Ticker':<8} {'Last':>10} {'Change':>10} {'Change%':>10} {'Open':>10} {'Low':>10} {'High':>10} {'52w Low':>10} {'52w High':>10}"
+        print(Fore.CYAN + header)
+        print(Fore.CYAN + '=' * len(header))
 
-        for ticker, holding in self.portfolio.items():
-            if ticker in self.market_data and 'error' not in self.market_data[ticker]:
-                data = self.market_data[ticker]
-                shares = holding['shares']
-                value = shares * data['price']
-                total_value += value
-
-                change = ((data['price'] - data['previous_close']) / data['previous_close']) * 100
-
-                rows.append({
-                    'Ticker': ticker,
-                    'Shares': shares,
-                    'Price': f"${data['price']:.2f}",
-                    'Value': f"${value:,.2f}",
-                    'Change%': f"{change:+.2f}%",
-                    'Sector': data['sector'],
-                    'PE': f"{data['pe_ratio']:.2f}" if data['pe_ratio'] else 'N/A'
-                })
-
-        # Add allocation percentages
-        for row in rows:
-            value = float(row['Value'].replace('$', '').replace(',', ''))
-            allocation = (value / total_value) * 100 if total_value > 0 else 0
-            row['Allocation%'] = f"{allocation:.1f}%"
-
-        df = pd.DataFrame(rows)
-        return df, total_value
-
-    def display_portfolio(self, df: pd.DataFrame, total_value: float):
-        """Display portfolio analysis"""
-        print(f"\n{Fore.CYAN}{'='*80}")
-        print(f"{Fore.CYAN}PORTFOLIO ANALYSIS - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"{Fore.CYAN}{'='*80}\n")
-
-        print(df.to_string(index=False))
-
-        print(f"\n{Fore.GREEN}Total Portfolio Value: ${total_value:,.2f}")
-
-        # Sector breakdown
-        if not df.empty:
-            print(f"\n{Fore.YELLOW}Sector Allocation:")
-            sector_values = {}
-            for _, row in df.iterrows():
-                sector = row['Sector']
-                value = float(row['Value'].replace('$', '').replace(',', ''))
-                sector_values[sector] = sector_values.get(sector, 0) + value
-
-            for sector, value in sorted(sector_values.items(), key=lambda x: x[1], reverse=True):
-                pct = (value / total_value) * 100
-                print(f"  {sector}: ${value:,.2f} ({pct:.1f}%)")
-
-    def check_alerts(self):
-        """Check if any price alerts have been triggered"""
-        alerts = self.config.get('alerts', {})
-        triggered = []
-
-        for ticker, targets in alerts.items():
-            if ticker in self.market_data:
-                current_price = self.market_data[ticker]['price']
-
-                if 'above' in targets and current_price >= targets['above']:
-                    triggered.append(f"{ticker} is above ${targets['above']:.2f} (now ${current_price:.2f})")
-
-                if 'below' in targets and current_price <= targets['below']:
-                    triggered.append(f"{ticker} is below ${targets['below']:.2f} (now ${current_price:.2f})")
-
-        if triggered:
-            print(f"\n{Fore.RED}{'='*80}")
-            print(f"{Fore.RED}PRICE ALERTS TRIGGERED!")
-            print(f"{Fore.RED}{'='*80}")
-            for alert in triggered:
-                print(f"{Fore.YELLOW}{alert}")
-
-    def screen_stocks(self, universe: List[str] = None) -> pd.DataFrame:
-        """Screen stocks based on criteria"""
-        if universe is None:
-            # Default universe: S&P 500 or user watchlist
-            universe = self.config.get('watchlist', [])
-            if not universe:
-                print(f"{Fore.YELLOW}No watchlist defined. Add tickers to config.json")
-                return pd.DataFrame()
-
-        criteria = self.config['screener_criteria']
-        market_data = self.fetch_market_data(universe)
-
-        matches = []
-        for ticker, data in market_data.items():
-            if 'error' in data:
+        for ticker in tickers:
+            if ticker not in self.market_data or 'error' in self.market_data[ticker]:
                 continue
 
-            # Apply screening criteria
-            if data['volume'] < criteria.get('min_volume', 0):
-                continue
-            if data['pe_ratio'] and data['pe_ratio'] > criteria.get('max_pe', float('inf')):
-                continue
-            if data['market_cap'] < criteria.get('min_market_cap', 0):
-                continue
+            data = self.market_data[ticker]
 
-            # Calculate distance from 52w high
-            distance_from_high = ((data['52w_high'] - data['price']) / data['52w_high']) * 100 if data['52w_high'] else 0
+            # Color code based on change
+            if data['change'] > 0:
+                color = Fore.GREEN
+                sign = '+'
+            elif data['change'] < 0:
+                color = Fore.RED
+                sign = ''
+            else:
+                color = Fore.WHITE
+                sign = ' '
 
-            matches.append({
-                'Ticker': ticker,
-                'Price': f"${data['price']:.2f}",
-                'PE': f"{data['pe_ratio']:.2f}" if data['pe_ratio'] else 'N/A',
-                'Volume': f"{data['volume']:,}",
-                'Sector': data['sector'],
-                'From_52w_High': f"-{distance_from_high:.1f}%"
-            })
-
-        df = pd.DataFrame(matches)
-        return df
-
-    def display_screener_results(self, df: pd.DataFrame):
-        """Display stock screener results"""
-        if df.empty:
-            print(f"\n{Fore.YELLOW}No stocks match screening criteria")
-            return
-
-        print(f"\n{Fore.CYAN}{'='*80}")
-        print(f"{Fore.CYAN}STOCK SCREENER RESULTS")
-        print(f"{Fore.CYAN}{'='*80}\n")
-        print(df.to_string(index=False))
+            # Format row
+            row = (
+                f"{color}{ticker:<8} "
+                f"${data['last']:>9.2f} "
+                f"{sign}${abs(data['change']):>8.2f} "
+                f"{sign}{data['change_pct']:>8.2f}% "
+                f"${data['open']:>9.2f} "
+                f"${data['low']:>9.2f} "
+                f"${data['high']:>9.2f} "
+                f"${data['52w_low']:>9.2f} "
+                f"${data['52w_high']:>9.2f}"
+                f"{Style.RESET_ALL}"
+            )
+            print(row)
 
     def run(self):
-        """Main execution flow"""
-        print(f"{Fore.MAGENTA}")
-        print("╔════════════════════════════════════════════════════════════╗")
-        print("║        Portfolio Tracker & Stock Screener v1.0             ║")
-        print("╚════════════════════════════════════════════════════════════╝")
-        print(Style.RESET_ALL)
+        """Main execution"""
+        # Clear screen
+        os.system('clear' if os.name != 'nt' else 'cls')
 
-        # 1. Load portfolio
-        print(f"\n{Fore.CYAN}[1/4] Loading portfolio...")
-        self.portfolio = self.scrape_portfolio()
+        # Load portfolio
+        self.portfolio = self.load_portfolio()
 
         if not self.portfolio:
-            print(f"{Fore.RED}No portfolio data available. Exiting.")
+            print(f"{Fore.RED}No portfolio loaded")
             return
 
-        # 2. Analyze portfolio
-        print(f"\n{Fore.CYAN}[2/4] Analyzing portfolio...")
-        df, total_value = self.analyze_portfolio()
-        self.display_portfolio(df, total_value)
+        # Fetch and display indices
+        print(f"{Fore.MAGENTA}stonks - market tracker{Style.RESET_ALL}")
+        self.fetch_indices()
+        self.display_indices()
 
-        # 3. Check alerts
-        print(f"\n{Fore.CYAN}[3/4] Checking price alerts...")
-        self.check_alerts()
+        # Display portfolio table
+        self.display_portfolio_table()
 
-        # 4. Run screener
-        print(f"\n{Fore.CYAN}[4/4] Running stock screener...")
-        screener_df = self.screen_stocks()
-        self.display_screener_results(screener_df)
-
-        print(f"\n{Fore.GREEN}Analysis complete!")
+        print(f"\n{Fore.YELLOW}Press 'q' to quit, 'r' to refresh")
 
 
 def main():
-    tracker = PortfolioTracker()
+    tracker = StonksTracker()
     tracker.run()
 
 
