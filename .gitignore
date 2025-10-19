@@ -1,0 +1,6 @@
+portfolio.json
+*.pyc
+__pycache__/
+.DS_Store
+*.log
+tracker.log
