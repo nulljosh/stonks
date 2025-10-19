@@ -186,7 +186,7 @@
 
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
             margin: 3rem 0;
         }
@@ -197,6 +197,12 @@
             border-radius: 12px;
             border: 1px solid var(--card-border);
             transition: all 0.2s;
+        }
+
+        .feature-card:nth-child(7) {
+            grid-column: 2;
+            justify-self: center;
+            max-width: 350px;
         }
 
         .feature-card:hover {
@@ -334,6 +340,12 @@
 
             .features {
                 grid-template-columns: 1fr;
+            }
+
+            .feature-card:nth-child(7) {
+                grid-column: auto;
+                justify-self: auto;
+                max-width: 100%;
             }
 
             .feature-card,
