@@ -2,6 +2,7 @@
 """
 Portfolio Tracker & Stock Screener
 Run at market open/close to track portfolio and find opportunities
+Now with HFT-style real-time streaming and technical analysis!
 """
 
 import requests
@@ -11,8 +12,12 @@ import pandas as pd
 from datetime import datetime
 import json
 import os
+import sys
+import time
+import argparse
 from typing import Dict, List, Tuple
 from colorama import Fore, Style, init
+from collections import deque
 
 # Initialize colorama for colored terminal output
 init(autoreset=True)
