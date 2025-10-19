@@ -11,11 +11,34 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #1a1f3a;
+            --text-secondary: #666;
+            --accent: #667eea;
+            --card-bg: #ffffff;
+            --card-border: #e0e0e0;
+            --code-bg: #f5f5f5;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f1419;
+            --bg-secondary: #1a1f3a;
+            --text-primary: #e0e6f0;
+            --text-secondary: #b8c1d3;
+            --accent: #8b9dc3;
+            --card-bg: #1a1f3a;
+            --card-border: #2a3150;
+            --code-bg: #0a0e1a;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
         }
 
         .container {
@@ -24,22 +47,40 @@
             padding: 2rem;
         }
 
+        .theme-toggle {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 8px;
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-primary);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
         header {
             text-align: center;
             padding: 4rem 0 2rem;
-            color: white;
         }
 
         h1 {
             font-size: 4rem;
             font-weight: 900;
             margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         .tagline {
             font-size: 1.5rem;
-            opacity: 0.9;
+            color: var(--text-secondary);
             margin-bottom: 2rem;
         }
 
@@ -52,30 +93,28 @@
 
         .btn {
             padding: 1rem 2rem;
-            border: none;
+            border: 2px solid var(--accent);
             border-radius: 8px;
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.2s;
         }
 
         .btn-primary {
-            background: white;
-            color: #667eea;
+            background: var(--accent);
+            color: white;
         }
 
         .btn-secondary {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid white;
+            background: transparent;
+            color: var(--accent);
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
         .features {
@@ -86,55 +125,61 @@
         }
 
         .feature-card {
-            background: white;
+            background: var(--card-bg);
             padding: 2rem;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            border: 1px solid var(--card-border);
+            transition: all 0.2s;
         }
 
         .feature-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-        }
-
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            border-color: var(--accent);
         }
 
         .feature-card h3 {
-            color: #667eea;
+            color: var(--accent);
             margin-bottom: 0.5rem;
             font-size: 1.5rem;
         }
 
         .feature-card p {
-            color: #666;
+            color: var(--text-secondary);
         }
 
         .demo-section {
-            background: white;
+            background: var(--card-bg);
             border-radius: 12px;
             padding: 2rem;
             margin: 3rem 0;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid var(--card-border);
         }
 
         .demo-section h2 {
-            color: #667eea;
+            color: var(--text-primary);
             margin-bottom: 1.5rem;
             font-size: 2rem;
         }
 
+        .demo-section h3 {
+            color: var(--accent);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .demo-section p {
+            color: var(--text-secondary);
+        }
+
         pre {
-            background: #1e1e1e;
-            color: #d4d4d4;
+            background: var(--code-bg);
+            color: var(--text-primary);
             padding: 1.5rem;
             border-radius: 8px;
             overflow-x: auto;
             font-size: 0.9rem;
             line-height: 1.5;
+            border: 1px solid var(--card-border);
         }
 
         .code-comment {
@@ -152,12 +197,15 @@
         footer {
             text-align: center;
             padding: 2rem 0;
-            color: white;
-            opacity: 0.8;
+            color: var(--text-secondary);
         }
 
         footer a {
-            color: white;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
             text-decoration: underline;
         }
 
@@ -170,12 +218,21 @@
         }
 
         .tech-badge {
-            background: rgba(255,255,255,0.2);
-            color: white;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
             padding: 0.5rem 1rem;
             border-radius: 20px;
             font-size: 0.9rem;
             font-weight: 600;
+            border: 1px solid var(--card-border);
+        }
+
+        code {
+            background: var(--bg-secondary);
+            color: var(--accent);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
         }
 
         @media (max-width: 768px) {
@@ -191,10 +248,18 @@
                 flex-direction: column;
                 align-items: center;
             }
+
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem 1rem;
+            }
         }
     </style>
 </head>
 <body>
+    <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark Mode</button>
+
     <div class="container">
         <header>
             <h1>stonks</h1>
@@ -214,37 +279,31 @@
 
         <section id="features" class="features">
             <div class="feature-card">
-                <div class="feature-icon">📊</div>
                 <h3>Portfolio Tracking</h3>
                 <p>Real-time tracking of your holdings with automatic sector allocation analysis and performance metrics.</p>
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">⚡</div>
                 <h3>HFT-Style Streaming</h3>
                 <p>Live price updates every second with volatility detection and momentum indicators for fast-moving opportunities.</p>
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">🔔</div>
                 <h3>Price Alerts</h3>
                 <p>Set custom price targets and get instant notifications when your stocks hit key levels.</p>
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">🔍</div>
                 <h3>Stock Screener</h3>
                 <p>Filter stocks by volume, P/E ratio, market cap, and distance from 52-week highs. Find opportunities that match your criteria.</p>
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">📈</div>
                 <h3>Technical Indicators</h3>
                 <p>RSI, MACD, and volatility metrics calculated in real-time to help identify entry and exit points.</p>
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">💎</div>
                 <h3>Multi-Asset Support</h3>
                 <p>Track stocks, crypto (BTC, ETH), and commodities (gold, silver) all in one dashboard.</p>
             </div>
@@ -275,7 +334,7 @@ python3 portfolio_tracker.py --stream</code></pre>
 
         <section class="demo-section">
             <h2>Features in Action</h2>
-            <h3 style="margin-top: 1.5rem; color: #667eea;">Portfolio Analysis</h3>
+            <h3>Portfolio Analysis</h3>
             <pre><code>================================================================================
 PORTFOLIO ANALYSIS - 2025-10-18 17:14:00
 ================================================================================
@@ -292,7 +351,7 @@ Sector Allocation:
   Technology: $85.74 (73.7%)
   Unknown: $27.62 (23.7%)</code></pre>
 
-            <h3 style="margin-top: 1.5rem; color: #667eea;">Stock Screener Results</h3>
+            <h3>Stock Screener Results</h3>
             <pre><code>================================================================================
 STOCK SCREENER RESULTS
 ================================================================================
@@ -302,7 +361,7 @@ Ticker   Price    PE     Volume                 Sector From_52w_High
   GOOGL $253.30 27.03 29,564,548 Communication Services        -1.4%
   MSFT $513.58 37.60 19,205,931             Technology         -7.5%</code></pre>
 
-            <h3 style="margin-top: 1.5rem; color: #667eea;">Real-time Volatility Alerts</h3>
+            <h3>Real-time Volatility Alerts</h3>
             <pre><code>================================================================================
 VOLATILITY ALERTS!
 ================================================================================
@@ -313,7 +372,7 @@ AAPL volume spike: 5.2x average - Unusual activity detected</code></pre>
 
         <section class="demo-section">
             <h2>Configuration</h2>
-            <p style="margin-bottom: 1rem; color: #666;">Customize alerts, watchlist, and screener criteria in <code style="background: #f0f0f0; padding: 0.2rem 0.5rem; border-radius: 4px;">config.json</code>:</p>
+            <p style="margin-bottom: 1rem;">Customize alerts, watchlist, and screener criteria in <code>config.json</code>:</p>
             <pre><code>{
     <span class="code-string">"portfolio_url"</span>: <span class="code-string">"https://your-portfolio-site.com"</span>,
     <span class="code-string">"watchlist"</span>: [<span class="code-string">"AAPL"</span>, <span class="code-string">"NVDA"</span>, <span class="code-string">"BTC-USD"</span>],
@@ -336,5 +395,21 @@ AAPL volume spike: 5.2x average - Unusual activity detected</code></pre>
             <p style="margin-top: 0.5rem; font-size: 0.9rem;">Not financial advice. For educational purposes only.</p>
         </footer>
     </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? '' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+    </script>
 </body>
 </html>
