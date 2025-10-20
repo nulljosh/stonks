@@ -2,15 +2,18 @@
     "portfolio_url": "https://heyitsmejosh.com/marlin",
     "watchlist": [
         "AAPL",
-        "NVDA",
-        "AVGO",
+        "IBM",
         "COIN",
-        "MSTR",
-        "TSLA",
-        "AMD",
-        "GOOGL",
-        "MSFT",
-        "META"
+        "XOM",
+        "HD",
+        "NVDA",
+        "DIS",
+        "META",
+        "T",
+        "PLTR",
+        "HOOD",
+        "CRM",
+        "AVGO"
     ],
     "alerts": {
         "AAPL": {
