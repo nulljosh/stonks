@@ -8,14 +8,14 @@ Inspired by [mop](https://github.com/mop-tracker/mop), enhanced with professiona
 
 ## Features
 
-### 📈 Portfolio Tracking
+### Portfolio Tracking
 - **Real-time market data** - Stocks, crypto, commodities, ETFs
 - **Multi-market indices** - Dow, S&P 500, NASDAQ, Tokyo, HK, London
 - **Color-coded P&L** - Instant visual feedback on gains/losses
 - **Terminal interface** - Fast, lightweight, always-on monitoring
 - **Prediction markets** - Manifold Markets integration
 
-### 📊 Options Screening
+### Options Screening
 - **Multi-strategy analysis** - Iron Condors, Butterflies, Straddles, Strangles, Spreads
 - **Statistical edge detection** - IV Rank, probability of profit, expected value
 - **Dual data sources** - Interactive Brokers (real-time) or yfinance (free)
@@ -23,7 +23,7 @@ Inspired by [mop](https://github.com/mop-tracker/mop), enhanced with professiona
 - **Smart scoring system** - 6-factor weighted analysis for trade quality
 - **Risk visualization** - P&L diagrams and breakeven analysis
 
-### 🤖 AI Price Prediction
+### AI Price Prediction
 - **xLSTM neural network** - Extended LSTM with exponential gating
 - **CUDA acceleration** - GPU-optimized for fast training and inference
 - **Financial time-series** - Trained on ES futures and equity data
@@ -430,10 +430,10 @@ cd frontend && npm run dev
 ## Roadmap
 
 **Current (v1.0):**
-- ✅ Portfolio tracking (terminal + web)
-- ✅ Options screening (multi-strategy)
-- ✅ AI predictions (xLSTM, CUDA)
-- ✅ Prediction markets integration
+- Portfolio tracking (terminal + web)
+- Options screening (multi-strategy)
+- AI predictions (xLSTM, CUDA)
+- Prediction markets integration
 
 **Upcoming (v1.1):**
 - [ ] Trade execution via IBKR
@@ -453,7 +453,7 @@ cd frontend && npm run dev
 
 ## Limitations & Disclaimers
 
-⚠️ **IMPORTANT**
+**IMPORTANT**
 
 - This tool is for **educational purposes only**
 - Options and futures trading involve **substantial risk of loss**
@@ -490,4 +490,4 @@ MIT License - Use freely, trade responsibly.
 
 ---
 
-**Built for traders who want a statistical edge.** 📈🤖
+**Built for traders who want a statistical edge.**
