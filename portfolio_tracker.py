@@ -90,8 +90,9 @@ class StonksTracker:
                         'change': change,
                         'change_pct': change_pct
                     }
-            except Exception:
-                continue
+            except Exception as e:
+                # Skip failed indices silently
+                pass
 
     def display_indices(self):
         """Display market indices - mop style top bar"""

@@ -19,10 +19,10 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Enable CORS for frontend
+# CORS - restrict in production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # TODO: Set to specific origins in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,51 +37,25 @@ app.mount("/api/options", options_api.app)
 async def get_portfolio():
     """Get current portfolio holdings and P&L"""
     import json
+    from pathlib import Path
+
+    portfolio_file = Path("portfolio.json")
+    if not portfolio_file.exists():
+        return {"success": False, "error": "portfolio.json not found"}
+
     try:
-        with open("portfolio.json", "r") as f:
+        with open(portfolio_file) as f:
             portfolio = json.load(f)
         return {"success": True, "portfolio": portfolio}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
+    except json.JSONDecodeError as e:
+        return {"success": False, "error": f"Invalid JSON: {e}"}
 
 @app.get("/api/markets")
 async def get_market_indices():
     """Get current market indices data"""
-    import yfinance as yf
+    from market_utils import fetch_market_indices
 
-    indices = {
-        "dow": "^DJI",
-        "sp500": "^GSPC",
-        "nasdaq": "^IXIC",
-        "tokyo": "^N225",
-        "hong_kong": "^HSI",
-        "london": "^FTSE",
-        "ten_year": "^TNX",
-        "euro": "EURUSD=X",
-        "yen": "JPY=X",
-        "oil": "CL=F",
-        "gold": "GC=F",
-    }
-
-    data = {}
-    for name, symbol in indices.items():
-        try:
-            ticker = yf.Ticker(symbol)
-            info = ticker.history(period="1d")
-            if not info.empty:
-                current = info['Close'].iloc[-1]
-                open_price = info['Open'].iloc[-1]
-                change = current - open_price
-                change_pct = (change / open_price) * 100
-                data[name] = {
-                    "symbol": symbol,
-                    "price": round(current, 2),
-                    "change": round(change, 2),
-                    "change_percent": round(change_pct, 2)
-                }
-        except:
-            data[name] = None
-
+    data = fetch_market_indices()
     return {"success": True, "data": data}
 
 @app.get("/api/predictions/forecast")
@@ -112,11 +86,12 @@ async def root():
 @app.get("/index", response_class=HTMLResponse)
 async def serve_landing():
     """Serve the landing page"""
-    try:
-        with open("index.html", "r") as f:
-            return f.read()
-    except:
-        return HTMLResponse("<h1>stonks</h1><p>Landing page not found</p>")
+    from pathlib import Path
+
+    index_file = Path("index.html")
+    if index_file.exists():
+        return index_file.read_text()
+    return HTMLResponse("<h1>stonks</h1><p>Landing page not found</p>")
 
 if __name__ == "__main__":
     import uvicorn
