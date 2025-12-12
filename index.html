@@ -525,7 +525,7 @@
                 const response = await fetch('https://api.manifold.markets/v0/markets?limit=20&sort=last-bet-time');
                 const markets = await response.json();
 
-                // Filter markets with valid probability and sort by completeness
+                // Filter markets with valid probability and sort by probability (most to least likely)
                 const validMarkets = markets
                     .filter(market => {
                         // Only show binary markets with valid probability
@@ -534,6 +534,7 @@
                                !isNaN(market.probability) &&
                                market.outcomeType === 'BINARY';
                     })
+                    .sort((a, b) => b.probability - a.probability) // Sort highest to lowest
                     .slice(0, 8); // Take top 8 valid markets
 
                 container.innerHTML = '';
