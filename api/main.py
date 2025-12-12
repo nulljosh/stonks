@@ -29,8 +29,9 @@ app.add_middleware(
 )
 
 # Mount options screener API routes
-from options_screener.api import main as options_api
-app.mount("/api/options", options_api.app)
+# DISABLED: Python 3.14 compatibility issue with ib_insync/eventkit
+# from options_screener.api import main as options_api
+# app.mount("/api/options", options_api.app)
 
 # Portfolio endpoints
 @app.get("/api/portfolio")
