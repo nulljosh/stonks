@@ -146,17 +146,28 @@ def analyze_stock(ticker):
         print("(❌ POOR)")
 
     # Monte Carlo Simulation (1 year forward)
-    print(f"\n🎲 MONTE CARLO SIMULATION (1 Year, 10,000 runs)")
-    mc_results = monte_carlo_simulation(current_price, returns)
+    # Calculate current date and target dates
+    from datetime import datetime, timedelta
+    current_year = datetime.now().year
+    one_year = current_year + 1
+    five_years = current_year + 5
 
-    print(f"   Expected Price (Mean): ${mc_results['mean']:.2f}")
-    print(f"   Median Price: ${mc_results['median']:.2f}")
-    print(f"   5th Percentile (Bear): ${mc_results['percentile_5']:.2f}")
-    print(f"   95th Percentile (Bull): ${mc_results['percentile_95']:.2f}")
-    print(f"   Probability of Profit: {mc_results['prob_profit']:.1f}%")
+    print(f"\n🎲 MONTE CARLO SIMULATION (10,000 runs)")
+    print(f"\n   📅 BY {one_year} (1 Year Forecast):")
+    mc_1y = monte_carlo_simulation(current_price, returns, days=252)
+    upside_1y = ((mc_1y['median'] - current_price) / current_price) * 100
+    print(f"      Target Price: ${mc_1y['median']:.2f} ({upside_1y:+.1f}%)")
+    print(f"      Bear Case (5%): ${mc_1y['percentile_5']:.2f}")
+    print(f"      Bull Case (95%): ${mc_1y['percentile_95']:.2f}")
+    print(f"      Win Probability: {mc_1y['prob_profit']:.1f}%")
 
-    upside = ((mc_results['median'] - current_price) / current_price) * 100
-    print(f"   Expected Return: {upside:+.2f}%")
+    print(f"\n   📅 BY {five_years} (5 Year Forecast):")
+    mc_5y = monte_carlo_simulation(current_price, returns, days=252*5)
+    upside_5y = ((mc_5y['median'] - current_price) / current_price) * 100
+    print(f"      Target Price: ${mc_5y['median']:.2f} ({upside_5y:+.1f}%)")
+    print(f"      Bear Case (5%): ${mc_5y['percentile_5']:.2f}")
+    print(f"      Bull Case (95%): ${mc_5y['percentile_95']:.2f}")
+    print(f"      Win Probability: {mc_5y['prob_profit']:.1f}%")
 
     # Black-Scholes for ATM call option (1 year)
     strike = current_price
@@ -180,9 +191,11 @@ def analyze_stock(ticker):
         'price': current_price,
         'volatility': annual_volatility,
         'sharpe': sharpe,
-        'mc_median': mc_results['median'],
-        'expected_return': upside,
-        'prob_profit': mc_results['prob_profit']
+        'mc_1y_target': mc_1y['median'],
+        'mc_5y_target': mc_5y['median'],
+        'expected_return_1y': upside_1y,
+        'expected_return_5y': upside_5y,
+        'prob_profit': mc_1y['prob_profit']
     }
 
 def main():
@@ -206,24 +219,32 @@ def main():
             results.append(result)
 
     # Summary comparison
+    from datetime import datetime
+    current_year = datetime.now().year
+
     print(f"\n{'=' * 80}")
     print("🏆 COMPARATIVE SUMMARY")
     print(f"{'=' * 80}")
-    print(f"{'Ticker':<10} {'Price':<12} {'Volatility':<12} {'Sharpe':<10} {'Expected 1Y':<15} {'Win %':<10}")
+    print(f"{'Ticker':<10} {'Current':<12} {'2026 Target':<15} {'2030 Target':<15} {'Sharpe':<10} {'Win %':<10}")
     print("-" * 80)
 
     for r in results:
-        print(f"{r['ticker']:<10} ${r['price']:<11.2f} {r['volatility']:<11.2f}% {r['sharpe']:<10.2f} {r['expected_return']:+.2f}%{'':<8} {r['prob_profit']:.1f}%")
+        print(f"{r['ticker']:<10} ${r['price']:<11.2f} ${r['mc_1y_target']:<9.2f} ({r['expected_return_1y']:+.0f}%) ${r['mc_5y_target']:<9.2f} ({r['expected_return_5y']:+.0f}%) {r['sharpe']:<10.2f} {r['prob_profit']:.0f}%")
 
     print("\n🎯 RECOMMENDATIONS:")
 
     # Best Sharpe
     best_sharpe = max(results, key=lambda x: x['sharpe'])
     print(f"   Best Risk/Reward: {best_sharpe['ticker']} (Sharpe: {best_sharpe['sharpe']:.2f})")
+    print(f"      → ${best_sharpe['price']:.2f} to ${best_sharpe['mc_1y_target']:.2f} by 2026, ${best_sharpe['mc_5y_target']:.2f} by 2030")
 
-    # Highest expected return
-    best_return = max(results, key=lambda x: x['expected_return'])
-    print(f"   Highest Expected Return: {best_return['ticker']} ({best_return['expected_return']:+.2f}%)")
+    # Highest expected return (1 year)
+    best_return_1y = max(results, key=lambda x: x['expected_return_1y'])
+    print(f"   Highest 1Y Return: {best_return_1y['ticker']} (${best_return_1y['mc_1y_target']:.2f} by 2026, {best_return_1y['expected_return_1y']:+.0f}%)")
+
+    # Highest expected return (5 year)
+    best_return_5y = max(results, key=lambda x: x['expected_return_5y'])
+    print(f"   Highest 5Y Return: {best_return_5y['ticker']} (${best_return_5y['mc_5y_target']:.2f} by 2030, {best_return_5y['expected_return_5y']:+.0f}%)")
 
     # Most volatile
     most_volatile = max(results, key=lambda x: x['volatility'])
