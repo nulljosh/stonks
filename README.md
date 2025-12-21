@@ -1,97 +1,45 @@
 # stonks
 
-Terminal-based stock portfolio tracker inspired by [mop](https://github.com/mop-tracker/mop).
+Financial platform: portfolio + options + AI predictions
 
 ## Quick Start
 
 ```bash
-# Install dependencies
-pip3 install -r requirements.txt
+# Web UI (no installation required!)
+open index.html                    # Browser-based portfolio tracker
 
-# Edit your portfolio
-nano portfolio.json
+# Terminal UI
+pip install -r requirements.txt
+python portfolio_tracker.py
 
-# Run the tracker
-python3 portfolio_tracker.py
+# API Server
+python -m uvicorn api.main:app     # localhost:8000
+```
+
+## Config
+
+`portfolio.json`:
+```json
+{"AAPL": {"shares": 10}, "SPY": {"shares": 5}}
 ```
 
 ## Features
 
-- **Market Indices** - Live data for Dow, S&P 500, NASDAQ, Tokyo, HK, London, 10-Year Yield, Euro, Yen, Oil, Gold
-- **Portfolio Tracking** - Real-time holdings with color-coded gains/losses
-- **Mop-Style Display** - Clean terminal table with Last, Change, Change%, Open, Low, High, 52w Low/High
-- **Multi-Asset** - Stocks, crypto (BTC-USD), commodities (GC=F, SLV), ETFs (IAU)
-- **Prediction Markets** - Trending prediction markets from Manifold Markets with YES/NO probabilities, volume, and close dates
+- Portfolio tracking (stocks/crypto/commodities)
+- Options screening (IV Rank, multi-strategy)
+- AI predictions (xLSTM neural network)
+- Web UI with live market data and prediction markets
 
-## Example Output
+## Web UI
 
-```
-stonks - market tracker
+`index.html` provides a browser-based portfolio tracker with Apple Liquid Glass design:
+- **Real-time market data** - Dow, S&P 500, NASDAQ, commodities, currencies
+- **Live portfolio tracking** - Color-coded gains/losses
+- **Prediction markets** - Manifold Markets integration
+- **Light/Dark mode** - Toggle button with localStorage persistence
+- **Auto-refresh** - Every 60 seconds, or press 'r' to refresh manually
+- **100% vanilla JS** - No frameworks, no build process, no server needed
 
-Dow 46,190.61 (+0.72%) S&P 500 6,664.01 (+0.77%) NASDAQ 22,679.97 (+0.85%)
-Tokyo 47,582.15 (-0.50%) HK 25,247.10 (-2.34%) London 9,354.60 (-0.86%)
-10-Year Yield 4.007 (+0.300%) Euro $1.166 (-0.31%) Yen $150.584 (+0.12%)
-Oil $57.54 (+0.07%) Gold $4189.90 (-3.78%)
+Just open `index.html` in any browser!
 
-Ticker         Last     Change    Change%       Open        Low       High    52w Low   52w High
-================================================================================================
-AAPL     $   252.29 +$    4.84 +    1.96% $   248.02 $   247.27 $   253.38 $   169.21 $   260.10
-HOOD     $   129.91 $    1.53    -1.16% $   128.16 $   125.60 $   131.21 $    23.00 $   153.86
-SLV      $    46.99 $    2.18    -4.43% $    48.46 $    45.88 $    48.59 $    26.19 $    49.25
-```
-
-## Prediction Markets
-
-stonks now integrates **Manifold Markets** - a platform for creating and trading prediction markets on any topic. The tracker displays trending markets with:
-
-- **YES Probability** - Current probability of YES outcome (0-100%)
-- **Status** - Market status (Open, Closed, or Resolved)
-- **Volume** - Total trading volume
-- **Close Date** - Days until market resolution
-
-Markets are fetched from the public Manifold Markets API with no authentication required.
-
-### Configuration
-
-Control prediction markets in `config.json`:
-
-```json
-{
-  "show_prediction_markets": true,
-  "prediction_market_limit": 10,
-  "prediction_market_categories": ["politics", "sports", "crypto", "technology"]
-}
-```
-
-- `show_prediction_markets` - Enable/disable prediction markets display
-- `prediction_market_limit` - Number of markets to fetch (1-100)
-- `prediction_market_categories` - Categories to watch (optional, defaults to trending)
-
-## Portfolio Configuration
-
-Edit `portfolio.json` with your holdings:
-
-```json
-{
-    "AAPL": {"shares": 0.3042},
-    "HOOD": {"shares": 0.0229},
-    "SLV": {"shares": 0.5251},
-    "BTC-USD": {"shares": 0.5}
-}
-```
-
-## Tech Stack
-
-- Python 3
-- yfinance (stock market data)
-- Manifold Markets API (prediction markets)
-- colorama (terminal colors)
-- requests (HTTP client)
-
-## Demo
-
-[View landing page](https://nulljosh.github.io/stonks)
-
----
-
-**Disclaimer:** Not financial advice. Educational purposes only.
+**Educational only. Not financial advice.**

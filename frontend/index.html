@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>stonks - Financial Analysis Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #1a1f3a;
+            --text-primary: #e0e6f0;
+            --text-secondary: #b8c1d3;
+            --accent: #667eea;
+            --accent-hover: #5568d3;
+            --card-bg: #1a1f3a;
+            --card-border: #2a3150;
+            --green: #10b981;
+            --red: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        nav {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            transition: all 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+        }
+
+        .feature-card h2 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-card li {
+            color: var(--text-secondary);
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .feature-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .status-bar {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .status-item {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .status-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .status-value.positive {
+            color: var(--green);
+        }
+
+        .status-value.negative {
+            color: var(--red);
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--card-border);
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .tagline {
+                font-size: 1.2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>stonks</h1>
+            <p class="tagline">Full-stack financial analysis platform</p>
+            <p class="tagline">Portfolio tracking · Options screening · AI predictions</p>
+        </header>
+
+        <nav>
+            <div class="nav-links">
+                <a href="/api/docs" class="nav-link">API Docs</a>
+                <a href="https://github.com/nulljosh/stonks" class="nav-link" target="_blank">GitHub</a>
+            </div>
+        </nav>
+
+        <div class="status-bar" id="statusBar">
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-label">API Status</div>
+                    <div class="status-value" id="apiStatus">Checking...</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Market Status</div>
+                    <div class="status-value" id="marketStatus">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <h2>Portfolio Tracking</h2>
+                <p>Real-time monitoring of your holdings with live P&L tracking</p>
+                <ul>
+                    <li>Multi-asset support (stocks, crypto, commodities)</li>
+                    <li>Real-time price updates via yfinance</li>
+                    <li>Color-coded gains and losses</li>
+                    <li>Terminal and web interfaces</li>
+                    <li>Market indices dashboard</li>
+                </ul>
+                <a href="#" class="btn" onclick="runPortfolio()">View Portfolio</a>
+            </div>
+
+            <div class="feature-card">
+                <h2>Options Screening</h2>
+                <p>Professional-grade options analysis with statistical edge detection</p>
+                <ul>
+                    <li>Multi-strategy screening (Iron Condors, Butterflies, Spreads)</li>
+                    <li>IV Rank and probability analysis</li>
+                    <li>IBKR and yfinance data sources</li>
+                    <li>Futures options support (ES, NQ, CL, GC)</li>
+                    <li>Risk/reward visualization</li>
+                </ul>
+                <a href="/api/options/docs" class="btn">Options Dashboard</a>
+            </div>
+
+            <div class="feature-card">
+                <h2>AI Price Prediction</h2>
+                <p>xLSTM neural network for financial time-series forecasting</p>
+                <ul>
+                    <li>Extended LSTM with exponential gating</li>
+                    <li>CUDA-accelerated training and inference</li>
+                    <li>Trained on ES futures and equity data</li>
+                    <li>Matrix memory for pattern recognition</li>
+                    <li>Confidence intervals and risk metrics</li>
+                </ul>
+                <a href="#" class="btn" onclick="alert('AI predictions coming soon!')">Coming Soon</a>
+            </div>
+        </div>
+
+        <div class="feature-card" style="margin-top: 2rem;">
+            <h2>Quick Start</h2>
+            <pre style="background: var(--bg-primary); padding: 1.5rem; border-radius: 8px; overflow-x: auto; color: var(--text-primary);">
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the API server
+uvicorn api.main:app --reload --port 8000
+
+# Run portfolio tracker (terminal)
+python portfolio_tracker.py
+
+# Access options screener
+curl http://localhost:8000/api/options/health
+            </pre>
+        </div>
+
+        <footer>
+            <p><strong>Built for traders who want a statistical edge</strong></p>
+            <p style="margin-top: 1rem; font-size: 0.9rem;">
+                Not financial advice. For educational purposes only.
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Check API status
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/markets');
+                const data = await response.json();
+                document.getElementById('apiStatus').textContent = '✓ Online';
+                document.getElementById('apiStatus').className = 'status-value positive';
+
+                if (data.success) {
+                    document.getElementById('marketStatus').textContent = '✓ Live';
+                    document.getElementById('marketStatus').className = 'status-value positive';
+                }
+            } catch (error) {
+                document.getElementById('apiStatus').textContent = '✗ Offline';
+                document.getElementById('apiStatus').className = 'status-value negative';
+                document.getElementById('marketStatus').textContent = '✗ Offline';
+                document.getElementById('marketStatus').className = 'status-value negative';
+            }
+        }
+
+        function runPortfolio() {
+            alert('Run: python portfolio_tracker.py\n\nConfigure your holdings in portfolio.json');
+        }
+
+        // Check status on load
+        checkStatus();
+
+        // Refresh every 30 seconds
+        setInterval(checkStatus, 30000);
+    </script>
+</body>
+</html>
