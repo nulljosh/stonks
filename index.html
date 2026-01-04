@@ -441,6 +441,13 @@
             </div>
         </div>
 
+        <div id="polymarket-container" class="prediction-section">
+            <h2>Polymarket - High Probability Events</h2>
+            <div id="polymarket-content">
+                <div class="loading">Loading Polymarket data...</div>
+            </div>
+        </div>
+
         <div id="indices-container">
             <div class="loading">Loading market indices...</div>
         </div>
@@ -547,7 +554,8 @@
                     change: isNaN(change) ? 0 : change,
                     changePercent: isNaN(changePercent) ? 0 : changePercent,
                     fiftyTwoWeekHigh: fiftyTwoWeekHigh || 0,
-                    fiftyTwoWeekLow: fiftyTwoWeekLow || 0
+                    fiftyTwoWeekLow: fiftyTwoWeekLow || 0,
+                    closes: closes
                 };
             } catch (error) {
                 console.error(`Error fetching ${symbol}:`, error);
@@ -684,6 +692,62 @@
             }
         }
 
+        async function loadPolymarket() {
+            const container = document.getElementById('polymarket-content');
+
+            try {
+                const response = await fetch('https://gamma-api.polymarket.com/markets?limit=50&active=true&closed=false');
+                const markets = await response.json();
+
+                // Filter for high probability events (>70%) and sort by probability descending
+                const highProbMarkets = markets
+                    .filter(m => {
+                        if (!m.outcomePrices || !m.question) return false;
+                        const prices = JSON.parse(m.outcomePrices);
+                        const yesProb = parseFloat(prices[0]) * 100;
+                        // High probability events (70-99%) that aren't too obvious
+                        return yesProb >= 70 && yesProb < 99;
+                    })
+                    .map(m => {
+                        const prices = JSON.parse(m.outcomePrices);
+                        return {
+                            ...m,
+                            yesProb: parseFloat(prices[0]) * 100
+                        };
+                    })
+                    .sort((a, b) => b.yesProb - a.yesProb)
+                    .slice(0, 5);
+
+                container.innerHTML = '';
+
+                if (highProbMarkets.length === 0) {
+                    container.innerHTML = '<div class="loading">No high-probability events found</div>';
+                    return;
+                }
+
+                highProbMarkets.forEach(market => {
+                    const prob = market.yesProb.toFixed(1);
+                    const probClass = prob >= 85 ? 'prob-high' : 'prob-mid';
+                    const volume = market.volume ? `$${Number(market.volume).toLocaleString()}` : 'N/A';
+                    const endDate = market.endDate ? new Date(market.endDate).toLocaleDateString() : 'TBD';
+
+                    container.innerHTML += `
+                        <div class="prediction-card">
+                            <div class="prediction-question">${market.question}</div>
+                            <div class="prediction-meta">
+                                <span>YES: <span class="${probClass}">${prob}%</span></span>
+                                <span>Volume: ${volume}</span>
+                                <span>Ends: ${endDate}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading Polymarket:', error);
+                container.innerHTML = '<div class="error">Failed to load Polymarket data</div>';
+            }
+        }
+
         // Monte Carlo simulation for stock prediction
         function monteCarloSimulation(currentPrice, returns, days = 252, simulations = 1000) {
             const mu = returns.reduce((a, b) => a + b, 0) / returns.length;
@@ -731,14 +795,11 @@
 
             for (const ticker of PORTFOLIO_TICKERS) {
                 try {
-                    const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=3mo`);
-                    const data = await response.json();
+                    const data = await fetchYahooFinance(ticker);
+                    if (!data || !data.closes || data.closes.length < 10) continue;
 
-                    if (!data.chart || !data.chart.result || data.chart.result.length === 0) continue;
-
-                    const result = data.chart.result[0];
-                    const closes = result.indicators.quote[0].close.filter(c => c !== null && !isNaN(c));
-                    const currentPrice = closes[closes.length - 1];
+                    const closes = data.closes;
+                    const currentPrice = data.currentPrice;
 
                     // Calculate daily returns
                     const returns = [];
@@ -816,6 +877,7 @@
             await loadPortfolio();
             await loadQuantAnalysis();
             await loadPredictionMarkets();
+            await loadPolymarket();
         }
 
         // Theme toggle
