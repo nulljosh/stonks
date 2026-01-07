@@ -19,28 +19,37 @@ export function usePolymarket() {
       const data = await response.json();
 
       // Transform to our format
-      const transformed = data.map(m => ({
-        id: m.id,
-        slug: m.slug,
-        question: m.question,
-        description: m.description,
-        category: m.category || 'General',
-        endDate: m.endDate,
-        volume24h: parseFloat(m.volume24hr) || 0,
-        volumeTotal: parseFloat(m.volume) || 0,
-        liquidity: parseFloat(m.liquidity) || 0,
-        outcomes: m.outcomes || [],
-        // Best bid/ask prices
-        bestBid: m.bestBid ? parseFloat(m.bestBid) : null,
-        bestAsk: m.bestAsk ? parseFloat(m.bestAsk) : null,
-        // Current probability (YES price)
-        probability: m.outcomePrices ? parseFloat(JSON.parse(m.outcomePrices)[0]) : null,
-        // 24h change
-        change24h: m.change24hr ? parseFloat(m.change24hr) : null,
-        image: m.image,
-        active: m.active,
-      }));
+      const transformed = data.map(m => {
+        // Try multiple ways to get probability
+        let prob = null;
+        if (m.outcomePrices) {
+          try { prob = parseFloat(JSON.parse(m.outcomePrices)[0]); } catch(e) {}
+        }
+        if (!prob && m.bestBid) prob = parseFloat(m.bestBid);
+        if (!prob && m.outcomes?.[0]?.price) prob = parseFloat(m.outcomes[0].price);
 
+        return {
+          id: m.id,
+          slug: m.slug,
+          question: m.question,
+          description: m.description,
+          category: m.category || 'General',
+          endDate: m.endDate,
+          volume24h: parseFloat(m.volume24hr) || 0,
+          volumeTotal: parseFloat(m.volume) || 0,
+          liquidity: parseFloat(m.liquidity) || 0,
+          outcomes: m.outcomes || [],
+          bestBid: m.bestBid ? parseFloat(m.bestBid) : null,
+          bestAsk: m.bestAsk ? parseFloat(m.bestAsk) : null,
+          probability: prob,
+          change24h: m.change24hr ? parseFloat(m.change24hr) : null,
+          image: m.image,
+          active: m.active,
+        };
+      });
+
+      // Sort by probability (highest first)
+      transformed.sort((a, b) => (b.probability || 0) - (a.probability || 0));
       setMarkets(transformed);
       setError(null);
     } catch (err) {
