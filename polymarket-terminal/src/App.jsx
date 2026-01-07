@@ -239,7 +239,14 @@ export default function App() {
             }}>90%+ Easy $</button>
           </div>
 
-          {pmLoading && <div style={{ textAlign: 'center', padding: 20, color: t.textTertiary, fontSize: 12 }}>Loading markets...</div>}
+          {pmLoading && (
+            <div style={{ textAlign: 'center', padding: 40 }}>
+              <div style={{ display: 'inline-block', animation: 'pulse 1.5s ease-in-out infinite' }}>
+                <span style={{ fontSize: 24 }}>📈</span>
+              </div>
+              <div style={{ color: t.textTertiary, fontSize: 12, marginTop: 8 }}>Loading markets<span style={{ animation: 'blink 1s infinite' }}>...</span></div>
+            </div>
+          )}
           {pmError && <div style={{ textAlign: 'center', padding: 20, color: t.red, fontSize: 12 }}>Error loading markets</div>}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
