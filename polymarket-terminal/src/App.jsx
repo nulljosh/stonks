@@ -337,22 +337,24 @@ export default function App() {
             </div>
           </div>
 
-          {/* Asset selector */}
-          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 12, paddingBottom: 4 }}>
-            {Object.entries(liveAssets).map(([k, v]) => (
-              <button key={k} onClick={() => setAsset(k)} style={{
-                padding: '8px 12px', borderRadius: 10,
-                border: asset === k ? `1.5px solid ${t.accent}` : `1px solid ${t.border}`,
-                background: asset === k ? `${t.accent}15` : t.glass,
-                color: asset === k ? t.accent : t.textSecondary,
-                fontSize: 11, fontWeight: 600, whiteSpace: 'nowrap', cursor: 'pointer', minWidth: 70, textAlign: 'center'
-              }}>
-                <div>{v.name}</div>
-                <div style={{ fontSize: 9, marginTop: 2, color: v.chgPct >= 0 ? t.green : t.red }}>
-                  {v.chgPct >= 0 ? '+' : ''}{v.chgPct.toFixed(1)}%
-                </div>
-              </button>
-            ))}
+          {/* Scrolling Asset Ticker */}
+          <div style={{ overflow: 'hidden', marginBottom: 12, marginLeft: -16, marginRight: -16, borderTop: `0.5px solid ${t.border}`, borderBottom: `0.5px solid ${t.border}`, background: t.surface }}>
+            <div style={{ display: 'flex', gap: 24, padding: '10px 0', animation: 'scroll 40s linear infinite', whiteSpace: 'nowrap' }}>
+              {[...Object.entries(liveAssets), ...Object.entries(liveAssets)].map(([k, v], i) => (
+                <span key={i} onClick={() => setAsset(k)} style={{
+                  display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, cursor: 'pointer',
+                  padding: '4px 12px', borderRadius: 8,
+                  background: asset === k ? `${t.accent}20` : 'transparent',
+                  border: asset === k ? `1px solid ${t.accent}` : '1px solid transparent',
+                }}>
+                  <span style={{ fontWeight: 600, color: asset === k ? t.accent : t.text }}>{v.name}</span>
+                  <span style={{ color: t.textSecondary }}>${v.spot.toLocaleString()}</span>
+                  <span style={{ color: v.chgPct >= 0 ? t.green : t.red, fontWeight: 500 }}>
+                    {v.chgPct >= 0 ? '▲' : '▼'}{Math.abs(v.chgPct).toFixed(2)}%
+                  </span>
+                </span>
+              ))}
+            </div>
           </div>
 
           {/* Compact Quote + MC Probabilities */}
