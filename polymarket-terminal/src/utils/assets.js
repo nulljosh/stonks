@@ -2,20 +2,20 @@
 export const defaultAssets = {
   // PRECIOUS METALS
   silver: {
-    name: 'XAGUSD', full: 'Silver Spot', spot: 30.25, chg: -0.45, chgPct: -1.47,
-    vol: 0.42, hi52: 35, lo52: 22,
-    support: [28, 26, 24],
-    resistance: [32, 35, 40],
-    targets: [35, 50, 75],
-    notes: '$50 is major resistance. Supply deficit persists.'
+    name: 'XAGUSD', full: 'Silver Spot', spot: 78.55, chg: -2.69, chgPct: -3.32,
+    vol: 0.42, hi52: 85, lo52: 22,
+    support: [70, 65, 60],
+    resistance: [85, 100, 130],
+    targets: [100, 130, 200],
+    notes: 'COMEX paper vs physical spread. Japan spot: $130+. Big short squeeze thesis.'
   },
   gold: {
-    name: 'XAUUSD', full: 'Gold Spot', spot: 2650, chg: 12.5, chgPct: 0.47,
+    name: 'XAUUSD', full: 'Gold Spot', spot: 2680, chg: 15.2, chgPct: 0.57,
     vol: 0.22, hi52: 2800, lo52: 1900,
     support: [2600, 2500, 2400],
-    resistance: [2750, 2800, 3000],
-    targets: [2800, 3000, 3500],
-    notes: 'Central banks buying 850t/year. $3000 is 2026 target.'
+    resistance: [2800, 3000, 3500],
+    targets: [3000, 3500, 5000],
+    notes: 'Central banks buying 850t/yr. De-dollarization accelerating. $5000 bull target.'
   },
   platinum: {
     name: 'XPTUSD', full: 'Platinum', spot: 980, chg: 5.2, chgPct: 0.53,

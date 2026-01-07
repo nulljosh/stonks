@@ -137,7 +137,7 @@ export default function App() {
       {/* Header */}
       <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `0.5px solid ${t.border}` }}>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>Polymarket Terminal</span>
+          <span style={{ fontSize: 15, fontWeight: 700 }}>stonks</span>
           <StatusBar t={t} />
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
