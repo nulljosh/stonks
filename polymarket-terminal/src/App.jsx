@@ -57,6 +57,15 @@ if (!document.head.querySelector('#bloomberg-animations')) {
   document.head.appendChild(styleSheet);
 }
 
+// TLDR function for long market questions
+const tldr = (question, maxLen = 50) => {
+  if (!question || question.length <= maxLen) return question;
+  // Smart truncation - cut at word boundary
+  const truncated = question.slice(0, maxLen);
+  const lastSpace = truncated.lastIndexOf(' ');
+  return (lastSpace > 20 ? truncated.slice(0, lastSpace) : truncated) + '...';
+};
+
 // Glass Card Component
 const Card = ({ children, style, onClick, dark, t }) => (
   <div onClick={onClick} style={{
@@ -80,7 +89,8 @@ export default function App() {
   const [simSeed, setSimSeed] = useState(42);
   const [showMacro, setShowMacro] = useState(false);
   const [pmCategory, setPmCategory] = useState('all');
-  const [showMC, setShowMC] = useState(false); // Expand MC details
+  const [showMC, setShowMC] = useState(false);
+  const [showHighProb, setShowHighProb] = useState(false); // 90%+ filter
 
   const t = getTheme(dark);
 
@@ -90,14 +100,20 @@ export default function App() {
   // Polymarket hook
   const { markets, loading: pmLoading, error: pmError, refetch: refetchPm } = usePolymarket();
 
-  // Filter polymarket by category
+  // Filter polymarket by category and probability
   const filteredMarkets = useMemo(() => {
-    if (pmCategory === 'all') return markets;
-    return markets.filter(m =>
-      m.category?.toLowerCase().includes(pmCategory) ||
-      m.question?.toLowerCase().includes(pmCategory)
-    );
-  }, [markets, pmCategory]);
+    let filtered = markets;
+    if (pmCategory !== 'all') {
+      filtered = filtered.filter(m =>
+        m.category?.toLowerCase().includes(pmCategory) ||
+        m.question?.toLowerCase().includes(pmCategory)
+      );
+    }
+    if (showHighProb) {
+      filtered = filtered.filter(m => m.probability >= 0.90 || m.probability <= 0.10);
+    }
+    return filtered;
+  }, [markets, pmCategory, showHighProb]);
 
   // Monte Carlo simulation
   const runSim = useCallback((key, sc) => {
@@ -207,6 +223,13 @@ export default function App() {
                 fontSize: 11, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap'
               }}>{cat.label}</button>
             ))}
+            <button onClick={() => setShowHighProb(!showHighProb)} style={{
+              padding: '6px 12px', borderRadius: 16,
+              border: showHighProb ? `1.5px solid ${t.green}` : `1px solid ${t.border}`,
+              background: showHighProb ? `${t.green}15` : 'transparent',
+              color: showHighProb ? t.green : t.textTertiary,
+              fontSize: 11, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap'
+            }}>90%+ Easy $</button>
           </div>
 
           {pmLoading && <div style={{ textAlign: 'center', padding: 20, color: t.textTertiary, fontSize: 12 }}>Loading markets...</div>}
@@ -214,25 +237,27 @@ export default function App() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {filteredMarkets.slice(0, 8).map(m => (
-              <Card key={m.id} dark={dark} t={t} style={{ padding: 12 }}>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                  {m.image && <img src={m.image} alt="" style={{ width: 36, height: 36, borderRadius: 6, objectFit: 'cover' }} />}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.question}</div>
-                    <div style={{ display: 'flex', gap: 8, fontSize: 10, color: t.textTertiary }}>
-                      <span>Vol: ${(m.volumeTotal / 1000000).toFixed(1)}M</span>
-                      {m.endDate && <span>Ends: {new Date(m.endDate).toLocaleDateString()}</span>}
+              <a key={m.id} href={`https://polymarket.com/event/${m.slug}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Card dark={dark} t={t} style={{ padding: 12, cursor: 'pointer', transition: 'transform 0.1s', ':hover': { transform: 'scale(1.01)' } }}>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    {m.image && <img src={m.image} alt="" style={{ width: 36, height: 36, borderRadius: 6, objectFit: 'cover' }} />}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }} title={m.question}>{tldr(m.question, 55)}</div>
+                      <div style={{ display: 'flex', gap: 8, fontSize: 10, color: t.textTertiary }}>
+                        <span>Vol: ${(m.volumeTotal / 1000000).toFixed(1)}M</span>
+                        {m.endDate && <span>Ends: {new Date(m.endDate).toLocaleDateString()}</span>}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      {m.probability !== null && (
+                        <div style={{ fontSize: 20, fontWeight: 700, color: m.probability > 0.5 ? t.green : t.red }}>
+                          {(m.probability * 100).toFixed(0)}%
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    {m.probability !== null && (
-                      <div style={{ fontSize: 20, fontWeight: 700, color: m.probability > 0.5 ? t.green : t.red }}>
-                        {(m.probability * 100).toFixed(0)}%
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Card>
+                </Card>
+              </a>
             ))}
           </div>
         </div>
