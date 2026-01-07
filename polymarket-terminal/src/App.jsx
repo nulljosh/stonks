@@ -178,7 +178,7 @@ export default function App() {
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <a href="https://heyitsmejosh.com" style={{ fontSize: 11, color: t.textTertiary, textDecoration: 'none' }}>heyitsmejosh.com</a>
           <span style={{ color: t.textTertiary, margin: '0 6px' }}>/</span>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>stonks</span>
+          <a href="https://stonks.vercel.app" style={{ fontSize: 15, fontWeight: 700, color: t.text, textDecoration: 'none' }}>stonks</a>
           <StatusBar t={t} />
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -461,7 +461,7 @@ export default function App() {
 
         {/* Footer */}
         <div style={{ textAlign: 'center', padding: '16px 0', fontSize: 10, color: t.textTertiary }}>
-          {new Date().getFullYear()} • Educational only • Not financial advice • <a href="https://github.com/nulljosh/stonks" target="_blank" rel="noopener noreferrer" style={{ color: t.textTertiary }}>GitHub</a>
+          {new Date().getFullYear()} • Educational only • Not financial advice • <a href="https://stonks.vercel.app" target="_blank" rel="noopener noreferrer" style={{ color: t.textTertiary }}>Live</a> • <a href="https://github.com/nulljosh/stonks" target="_blank" rel="noopener noreferrer" style={{ color: t.textTertiary }}>GitHub</a>
         </div>
       </div>
     </div>
