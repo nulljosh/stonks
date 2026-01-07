@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const DEFAULT_SYMBOLS = ['AAPL', 'GOOGL', 'PLTR', 'HOOD', 'NVDA'];
+const DEFAULT_SYMBOLS = ['AAPL', 'GOOGL', 'NVDA', 'TSLA', 'COST', 'JPM', 'PLTR', 'HOOD'];
 
 export function useStocks(symbols = DEFAULT_SYMBOLS) {
   const [stocks, setStocks] = useState({});
