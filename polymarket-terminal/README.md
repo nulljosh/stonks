@@ -8,7 +8,7 @@ Live prediction markets dashboard with Monte Carlo simulations.
 - **Monte Carlo Engine** - 5,000 path simulations
 - **Multi-Asset** - Crypto, metals, indices, energy, stocks
 - **90%+ Easy Money Filter** - High-probability market finder
-- **Live Stock Prices** - AAPL, GOOGL, NVDA, TSLA, COST, JPM, PLTR, HOOD via Yahoo Finance
+- **Live Stock Prices** - MAG7 (AAPL, MSFT, GOOGL, AMZN, META, TSLA, NVDA) + PLTR, HOOD via Yahoo Finance
 - **1-Year Historical Charts** - Price history for all assets
 
 ## Dev
@@ -38,7 +38,7 @@ vercel --prod
 ## iOS App (Vibe Code)
 
 ```
-SwiftUI iOS app "stonks". Dark Bloomberg terminal UI (#0a0a0c bg, green/red for gains/losses). Polymarket API for prediction markets sorted by probability. Yahoo Finance for stocks (AAPL, GOOGL, NVDA, TSLA, COST, JPM). Monte Carlo sim (5000 paths). 1Y historical charts. Scrolling ticker. 90%+ filter. Pull to refresh.
+SwiftUI iOS app "stonks". Dark Bloomberg terminal UI (#0a0a0c bg, green/red for gains/losses). Polymarket API for prediction markets sorted by probability. Yahoo Finance for MAG7 stocks (AAPL, MSFT, GOOGL, AMZN, META, TSLA, NVDA) + PLTR, HOOD. Monte Carlo sim (5000 paths). 1Y historical charts. Scrolling ticker. 90%+ filter. Pull to refresh.
 ```
 
 **Educational only. Not financial advice.**
