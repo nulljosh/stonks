@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, ComposedChart, ReferenceLine, BarChart, Bar, Cell } from 'recharts';
 import { usePolymarket, MARKET_CATEGORIES } from './hooks/usePolymarket';
 import { useLivePrices, formatLastUpdated } from './hooks/useLivePrices';
+import { useStocks } from './hooks/useStocks';
 import { runMonteCarlo, formatPrice, calcFibTargets } from './utils/math';
 import { getTheme, getProbColor } from './utils/theme';
 import { defaultAssets, scenarios, horizons, horizonLabels } from './utils/assets';
@@ -46,6 +47,10 @@ styleSheet.textContent = `
   @keyframes pulse {
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.1); opacity: 0.8; }
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
   @keyframes scroll {
     0% { transform: translateX(0); }
@@ -106,6 +111,9 @@ export default function App() {
 
   // Polymarket hook
   const { markets, loading: pmLoading, error: pmError, refetch: refetchPm } = usePolymarket();
+
+  // Stocks hook (live prices)
+  const { stocks } = useStocks();
 
   // Filter polymarket by category and probability
   const filteredMarkets = useMemo(() => {
@@ -189,12 +197,14 @@ export default function App() {
               </span>
             </span>
           ))}
-          {/* Stocks */}
-          {[{s:'AAPL',p:248.5,c:1.2},{s:'GOOGL',p:197.8,c:0.8},{s:'PLTR',p:78.2,c:3.4},{s:'HOOD',p:42.1,c:2.1},{s:'NVDA',p:142.5,c:-1.5}].map((stk, i) => (
+          {/* Stocks - Live from Yahoo Finance */}
+          {Object.values(stocks).map((stk, i) => (
             <span key={`stk-${i}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.7 }}>
-              <span style={{ fontWeight: 600 }}>{stk.s}</span>
-              <span>${stk.p}</span>
-              <span style={{ color: stk.c >= 0 ? t.green : t.red }}>{stk.c >= 0 ? '▲' : '▼'}{Math.abs(stk.c).toFixed(1)}%</span>
+              <span style={{ fontWeight: 600 }}>{stk.symbol}</span>
+              <span>${stk.price?.toFixed(2)}</span>
+              <span style={{ color: (stk.changePercent || 0) >= 0 ? t.green : t.red }}>
+                {(stk.changePercent || 0) >= 0 ? '▲' : '▼'}{Math.abs(stk.changePercent || 0).toFixed(2)}%
+              </span>
             </span>
           ))}
         </div>
@@ -241,10 +251,14 @@ export default function App() {
 
           {pmLoading && (
             <div style={{ textAlign: 'center', padding: 40 }}>
-              <div style={{ display: 'inline-block', animation: 'pulse 1.5s ease-in-out infinite' }}>
-                <span style={{ fontSize: 24 }}>📈</span>
-              </div>
-              <div style={{ color: t.textTertiary, fontSize: 12, marginTop: 8 }}>Loading markets<span style={{ animation: 'blink 1s infinite' }}>...</span></div>
+              <div style={{
+                width: 24, height: 24, margin: '0 auto',
+                border: `2px solid ${t.border}`,
+                borderTop: `2px solid ${t.accent}`,
+                borderRadius: '50%',
+                animation: 'spin 0.8s linear infinite'
+              }} />
+              <div style={{ color: t.textTertiary, fontSize: 12, marginTop: 12 }}>Loading markets...</div>
             </div>
           )}
           {pmError && <div style={{ textAlign: 'center', padding: 20, color: t.red, fontSize: 12 }}>Error loading markets</div>}
