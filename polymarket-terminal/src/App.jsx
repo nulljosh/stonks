@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, ComposedChart, ReferenceLine, BarChart, Bar, Cell } from 'recharts';
 import { usePolymarket, MARKET_CATEGORIES } from './hooks/usePolymarket';
 import { useLivePrices, formatLastUpdated } from './hooks/useLivePrices';
-import { useStocks } from './hooks/useStocks';
+import { useStocks, useStockHistory } from './hooks/useStocks';
 import { runMonteCarlo, formatPrice, calcFibTargets } from './utils/math';
 import { getTheme, getProbColor } from './utils/theme';
 import { defaultAssets, scenarios, horizons, horizonLabels } from './utils/assets';
@@ -114,6 +114,10 @@ export default function App() {
 
   // Stocks hook (live prices)
   const { stocks } = useStocks();
+
+  // Map asset keys to Yahoo Finance symbols for historical data
+  const assetToSymbol = { btc: 'BTC-USD', eth: 'ETH-USD', gold: 'GC=F', silver: 'SI=F', oil: 'CL=F', nas100: 'NQ=F', us500: 'ES=F' };
+  const { history: priceHistory, loading: historyLoading } = useStockHistory(assetToSymbol[asset] || 'GC=F', '1y');
 
   // Filter polymarket by category and probability
   const filteredMarkets = useMemo(() => {
@@ -406,8 +410,9 @@ export default function App() {
           )}
 
           {/* MC Chart */}
-          <Card dark={dark} t={t} style={{ padding: 12 }}>
-            <ResponsiveContainer width="100%" height={160}>
+          <Card dark={dark} t={t} style={{ padding: 12, marginBottom: 12 }}>
+            <div style={{ fontSize: 10, color: t.textTertiary, marginBottom: 8 }}>MONTE CARLO PROJECTION</div>
+            <ResponsiveContainer width="100%" height={140}>
               <ComposedChart data={res.pctData} margin={{ top: 5, right: 5, bottom: 5, left: -15 }}>
                 <defs>
                   <linearGradient id="band" x1="0" y1="0" x2="0" y2="1">
@@ -426,6 +431,31 @@ export default function App() {
                 {a?.targets.map((tgt, i) => <ReferenceLine key={tgt} y={tgt} stroke={[t.green, t.yellow, t.red][i]} strokeDasharray="4 4" strokeWidth={1.5} />)}
               </ComposedChart>
             </ResponsiveContainer>
+          </Card>
+
+          {/* Historical Price Chart - 1 Year */}
+          <Card dark={dark} t={t} style={{ padding: 12 }}>
+            <div style={{ fontSize: 10, color: t.textTertiary, marginBottom: 8 }}>1 YEAR HISTORICAL</div>
+            {historyLoading ? (
+              <div style={{ height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 20, height: 20, border: `2px solid ${t.border}`, borderTop: `2px solid ${t.accent}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={140}>
+                <ComposedChart data={priceHistory} margin={{ top: 5, right: 5, bottom: 5, left: -15 }}>
+                  <defs>
+                    <linearGradient id="histGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={t.cyan} stopOpacity={0.3} />
+                      <stop offset="100%" stopColor={t.cyan} stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="date" stroke={t.textTertiary} tick={{ fontSize: 9, fill: t.textTertiary }} tickFormatter={d => d?.slice(5, 7)} interval={Math.floor(priceHistory.length / 6)} />
+                  <YAxis stroke={t.textTertiary} tick={{ fontSize: 9, fill: t.textTertiary }} tickFormatter={fmt} domain={['auto', 'auto']} />
+                  <Tooltip contentStyle={{ background: t.glass, border: `0.5px solid ${t.border}`, borderRadius: 8, fontSize: 11 }} formatter={v => [`$${v?.toFixed(2)}`, 'Price']} labelFormatter={l => l} />
+                  <Area type="monotone" dataKey="close" stroke={t.cyan} strokeWidth={1.5} fill="url(#histGrad)" dot={false} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            )}
           </Card>
         </div>
 
