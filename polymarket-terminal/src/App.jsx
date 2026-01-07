@@ -141,6 +141,8 @@ export default function App() {
       {/* Header */}
       <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `0.5px solid ${t.border}` }}>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <a href="https://heyitsmejosh.com" style={{ fontSize: 11, color: t.textTertiary, textDecoration: 'none' }}>heyitsmejosh.com</a>
+          <span style={{ color: t.textTertiary, margin: '0 6px' }}>/</span>
           <span style={{ fontSize: 15, fontWeight: 700 }}>stonks</span>
           <StatusBar t={t} />
         </div>
