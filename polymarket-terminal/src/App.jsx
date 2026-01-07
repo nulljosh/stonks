@@ -325,7 +325,7 @@ export default function App() {
 
         {/* Footer */}
         <div style={{ textAlign: 'center', padding: '16px 0', fontSize: 10, color: t.textTertiary }}>
-          Educational only • Not financial advice • Polymarket data via public API
+          {new Date().getFullYear()} • Educational only • Not financial advice
         </div>
       </div>
     </div>
