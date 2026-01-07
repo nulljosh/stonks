@@ -91,8 +91,15 @@ export default function App() {
   const [pmCategory, setPmCategory] = useState('all');
   const [showMC, setShowMC] = useState(false);
   const [showHighProb, setShowHighProb] = useState(false); // 90%+ filter
+  const [hoveredMarket, setHoveredMarket] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const t = getTheme(dark);
+
+  // Track mouse position for tooltip
+  const handleMouseMove = (e) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
 
   // Live prices hook
   const { prices: liveAssets, lastUpdated } = useLivePrices(defaultAssets);
@@ -237,12 +244,21 @@ export default function App() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {filteredMarkets.slice(0, 8).map(m => (
-              <a key={m.id} href={`https://polymarket.com/event/${m.slug}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <a
+                key={m.id}
+                href={`https://polymarket.com/event/${m.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+                onMouseEnter={() => setHoveredMarket(m)}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={() => setHoveredMarket(null)}
+              >
                 <Card dark={dark} t={t} style={{ padding: 12, cursor: 'pointer', transition: 'transform 0.1s', ':hover': { transform: 'scale(1.01)' } }}>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     {m.image && <img src={m.image} alt="" style={{ width: 36, height: 36, borderRadius: 6, objectFit: 'cover' }} />}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }} title={m.question}>{tldr(m.question, 55)}</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{tldr(m.question, 55)}</div>
                       <div style={{ display: 'flex', gap: 8, fontSize: 10, color: t.textTertiary }}>
                         <span>Vol: ${(m.volumeTotal / 1000000).toFixed(1)}M</span>
                         {m.endDate && <span>Ends: {new Date(m.endDate).toLocaleDateString()}</span>}
@@ -260,6 +276,41 @@ export default function App() {
               </a>
             ))}
           </div>
+
+          {/* Cursor-following tooltip */}
+          {hoveredMarket && (
+            <div style={{
+              position: 'fixed',
+              left: mousePos.x + 15,
+              top: mousePos.y + 15,
+              background: dark ? 'rgba(20,20,22,0.95)' : 'rgba(255,255,255,0.95)',
+              backdropFilter: 'blur(20px)',
+              border: `1px solid ${t.border}`,
+              borderRadius: 12,
+              padding: 14,
+              maxWidth: 320,
+              zIndex: 1000,
+              boxShadow: dark ? '0 8px 32px rgba(0,0,0,0.5)' : '0 8px 32px rgba(0,0,0,0.15)',
+              pointerEvents: 'none',
+            }}>
+              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, lineHeight: 1.4 }}>{hoveredMarket.question}</div>
+              {hoveredMarket.description && (
+                <div style={{ fontSize: 11, color: t.textSecondary, marginBottom: 8, lineHeight: 1.5 }}>
+                  {hoveredMarket.description.length > 200 ? hoveredMarket.description.slice(0, 200) + '...' : hoveredMarket.description}
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 12, fontSize: 10, color: t.textTertiary }}>
+                <span>24h Vol: ${((hoveredMarket.volume24h || 0) / 1000).toFixed(0)}K</span>
+                <span>Liquidity: ${((hoveredMarket.liquidity || 0) / 1000).toFixed(0)}K</span>
+                {hoveredMarket.change24h !== null && (
+                  <span style={{ color: hoveredMarket.change24h >= 0 ? t.green : t.red }}>
+                    {hoveredMarket.change24h >= 0 ? '+' : ''}{(hoveredMarket.change24h * 100).toFixed(1)}% 24h
+                  </span>
+                )}
+              </div>
+              <div style={{ fontSize: 9, color: t.cyan, marginTop: 8 }}>Click to open on Polymarket</div>
+            </div>
+          )}
         </div>
 
         {/* MC ASSET ANALYSIS SECTION */}
