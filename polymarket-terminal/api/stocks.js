@@ -1,6 +1,6 @@
 // Vercel serverless proxy for Yahoo Finance
 export default async function handler(req, res) {
-  const symbols = req.query.symbols || 'AAPL,GOOGL,PLTR,HOOD,NVDA';
+  const symbols = req.query.symbols || 'AAPL,MSFT,GOOGL,AMZN,META,TSLA,NVDA,PLTR,HOOD';
 
   try {
     const response = await fetch(
