@@ -88,7 +88,7 @@ export function useLivePrices(initialAssets) {
   // Fetch on mount and every 60 seconds
   useEffect(() => {
     fetchAllPrices();
-    const interval = setInterval(fetchAllPrices, 60000);
+    const interval = setInterval(fetchAllPrices, 10000); // Refresh every 10s
     return () => clearInterval(interval);
   }, [fetchAllPrices]);
 

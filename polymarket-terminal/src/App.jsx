@@ -47,6 +47,10 @@ styleSheet.textContent = `
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.1); opacity: 0.8; }
   }
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
 `;
 if (!document.head.querySelector('#bloomberg-animations')) {
   styleSheet.id = 'bloomberg-animations';
@@ -148,17 +152,27 @@ export default function App() {
         </div>
       </div>
 
-      {/* Ticker Tape */}
-      <div style={{ padding: '8px 16px', display: 'flex', gap: 16, overflowX: 'auto', borderBottom: `0.5px solid ${t.border}`, background: t.surface }}>
-        {['silver', 'gold', 'btc', 'eth', 'nas100', 'us500', 'oil'].map(k => (
-          <span key={k} onClick={() => setAsset(k)} style={{ display: 'flex', gap: 6, fontSize: 12, cursor: 'pointer', opacity: asset === k ? 1 : 0.6 }}>
-            <span style={{ fontWeight: 600 }}>{liveAssets[k]?.name}</span>
-            <span>{fmt(liveAssets[k]?.spot || 0)}</span>
-            <span style={{ color: (liveAssets[k]?.chgPct || 0) >= 0 ? t.green : t.red }}>
-              {(liveAssets[k]?.chgPct || 0) >= 0 ? '+' : ''}{(liveAssets[k]?.chgPct || 0).toFixed(2)}%
+      {/* Scrolling Ticker Tape */}
+      <div style={{ overflow: 'hidden', borderBottom: `0.5px solid ${t.border}`, background: t.surface }}>
+        <div style={{ display: 'flex', gap: 24, padding: '8px 0', animation: 'scroll 30s linear infinite', whiteSpace: 'nowrap' }}>
+          {[...['silver', 'gold', 'btc', 'eth', 'nas100', 'us500', 'oil'], ...['silver', 'gold', 'btc', 'eth', 'nas100', 'us500', 'oil']].map((k, i) => (
+            <span key={i} onClick={() => setAsset(k)} style={{ display: 'flex', gap: 6, fontSize: 12, cursor: 'pointer', opacity: asset === k ? 1 : 0.7 }}>
+              <span style={{ fontWeight: 600 }}>{liveAssets[k]?.name}</span>
+              <span>{fmt(liveAssets[k]?.spot || 0)}</span>
+              <span style={{ color: (liveAssets[k]?.chgPct || 0) >= 0 ? t.green : t.red }}>
+                {(liveAssets[k]?.chgPct || 0) >= 0 ? '▲' : '▼'}{Math.abs(liveAssets[k]?.chgPct || 0).toFixed(2)}%
+              </span>
             </span>
-          </span>
-        ))}
+          ))}
+          {/* Stocks */}
+          {[{s:'AAPL',p:248.5,c:1.2},{s:'GOOGL',p:197.8,c:0.8},{s:'PLTR',p:78.2,c:3.4},{s:'HOOD',p:42.1,c:2.1},{s:'NVDA',p:142.5,c:-1.5}].map((stk, i) => (
+            <span key={`stk-${i}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.7 }}>
+              <span style={{ fontWeight: 600 }}>{stk.s}</span>
+              <span>${stk.p}</span>
+              <span style={{ color: stk.c >= 0 ? t.green : t.red }}>{stk.c >= 0 ? '▲' : '▼'}{Math.abs(stk.c).toFixed(1)}%</span>
+            </span>
+          ))}
+        </div>
       </div>
 
       {/* Macro Banner */}
@@ -273,12 +287,11 @@ export default function App() {
                 </div>
               </div>
 
-              {/* MC Target Probabilities inline */}
+              {/* MC Target Probabilities - sorted high to low */}
               <div style={{ display: 'flex', gap: 8 }}>
-                {res.probs.map((p, i) => (
+                {[...res.probs].sort((a, b) => b.mc - a.mc).map((p, i) => (
                   <div key={i} style={{ flex: 1, padding: 10, background: t.surface, borderRadius: 10, textAlign: 'center' }}>
-                    <div style={{ fontSize: 10, color: t.textTertiary }}>{horizonLabels[i]}</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: [t.green, t.yellow, t.red][i] }}>${fmt(p.tgt)}</div>
+                    <div style={{ fontSize: 10, color: t.textTertiary }}>${fmt(p.tgt)}</div>
                     <div style={{ fontSize: 18, fontWeight: 700, color: pCol(p.mc) }}>{(p.mc * 100).toFixed(0)}%</div>
                   </div>
                 ))}
