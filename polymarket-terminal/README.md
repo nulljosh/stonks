@@ -37,29 +37,8 @@ vercel --prod
 
 ## iOS App (Vibe Code)
 
-Prompt for converting to native iOS with Vibe Code:
-
 ```
-Build a native iOS app called "stonks" - a prediction markets dashboard.
-
-Features:
-1. Fetch Polymarket API (gamma-api.polymarket.com/markets) - show prediction markets sorted by probability
-2. Yahoo Finance API for live stock prices (AAPL, GOOGL, NVDA, TSLA, COST, JPM, PLTR, HOOD)
-3. Monte Carlo simulation engine (5000 paths, geometric Brownian motion)
-4. Historical price charts (1 year) using Swift Charts
-5. Dark mode Bloomberg terminal aesthetic
-6. Scrolling ticker tape at top with live prices
-7. 90%+ filter for high-probability bets
-8. Tap market to open Polymarket in Safari
-
-UI:
-- Dark background (#0a0a0c)
-- Green for gains (#30d158), red for losses (#ff453a)
-- SF Pro font, glass morphism cards
-- Pull to refresh
-- Blinking status indicators (LIVE, API, MC)
-
-Use SwiftUI, async/await for API calls, and Charts framework for visualizations.
+SwiftUI iOS app "stonks". Dark Bloomberg terminal UI (#0a0a0c bg, green/red for gains/losses). Polymarket API for prediction markets sorted by probability. Yahoo Finance for stocks (AAPL, GOOGL, NVDA, TSLA, COST, JPM). Monte Carlo sim (5000 paths). 1Y historical charts. Scrolling ticker. 90%+ filter. Pull to refresh.
 ```
 
 **Educational only. Not financial advice.**
