@@ -403,7 +403,7 @@ export default function App() {
 
         {/* Footer */}
         <div style={{ textAlign: 'center', padding: '16px 0', fontSize: 10, color: t.textTertiary }}>
-          {new Date().getFullYear()} • Educational only • Not financial advice
+          {new Date().getFullYear()} • Educational only • Not financial advice • <a href="https://github.com/nulljosh/stonks" target="_blank" rel="noopener noreferrer" style={{ color: t.textTertiary }}>GitHub</a>
         </div>
       </div>
     </div>
