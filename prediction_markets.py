@@ -146,10 +146,10 @@ class PredictionMarketsTracker:
             formatted = self.format_market_data(market)
 
             # Color code based on probability
-            prob = formatted['probability_yes']
-            if prob > 60:
+            prob_pct = formatted['probability_yes'] * 100
+            if prob_pct > 60:
                 color = Fore.GREEN
-            elif prob < 40:
+            elif prob_pct < 40:
                 color = Fore.RED
             else:
                 color = Fore.YELLOW
@@ -162,7 +162,7 @@ class PredictionMarketsTracker:
             # Format row
             row = (
                 f"{color}{question:<50} "
-                f"{prob:>9.1f}% "
+                f"{prob_pct:>9.1f}% "
                 f"{formatted['status']:>10} "
                 f"{formatted['volume_str']:>12} "
                 f"{formatted['days_until_close']:>8}"
