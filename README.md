@@ -1,45 +1,29 @@
-# stonks
+# Polymarket Terminal
 
-Financial platform: portfolio + options + AI predictions
+Live prediction markets dashboard with Monte Carlo simulations.
 
-## Quick Start
-
-```bash
-# Web UI (no installation required!)
-open index.html                    # Browser-based portfolio tracker
-
-# Terminal UI
-pip install -r requirements.txt
-python portfolio_tracker.py
-
-# API Server
-python -m uvicorn api.main:app     # localhost:8000
-```
-
-## Config
-
-`portfolio.json`:
-```json
-{"AAPL": {"shares": 10}, "SPY": {"shares": 5}}
-```
+**Live:** https://polymarket-terminal-orpin.vercel.app
 
 ## Features
 
-- Portfolio tracking (stocks/crypto/commodities)
-- Options screening (IV Rank, multi-strategy)
-- AI predictions (xLSTM neural network)
-- Web UI with live market data and prediction markets
+- **Polymarket Integration** - Real-time prediction markets
+- **Monte Carlo Engine** - 5,000 path simulations
+- **Multi-Asset** - Crypto, metals, indices, energy
+- **Scenario Analysis** - Bull/Base/Bear projections
+- **Bloomberg UI** - Dark mode, status indicators
 
-## Web UI
+## Dev
 
-`index.html` provides a browser-based portfolio tracker with Apple Liquid Glass design:
-- **Real-time market data** - Dow, S&P 500, NASDAQ, commodities, currencies
-- **Live portfolio tracking** - Color-coded gains/losses
-- **Prediction markets** - Manifold Markets integration
-- **Light/Dark mode** - Toggle button with localStorage persistence
-- **Auto-refresh** - Every 60 seconds, or press 'r' to refresh manually
-- **100% vanilla JS** - No frameworks, no build process, no server needed
+```bash
+cd polymarket-terminal
+npm install
+npm run dev
+```
 
-Just open `index.html` in any browser!
+## Deploy
+
+```bash
+vercel --prod
+```
 
 **Educational only. Not financial advice.**

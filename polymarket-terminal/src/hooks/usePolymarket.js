@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const POLYMARKET_API = 'https://gamma-api.polymarket.com';
+// Use local proxy to avoid CORS
+const POLYMARKET_API = '/api';
 
 export function usePolymarket() {
   const [markets, setMarkets] = useState([]);
@@ -11,9 +12,7 @@ export function usePolymarket() {
     try {
       setLoading(true);
       // Fetch active markets sorted by volume
-      const response = await fetch(
-        `${POLYMARKET_API}/markets?closed=false&limit=50&order=volume24hr&ascending=false`
-      );
+      const response = await fetch(`${POLYMARKET_API}/markets`);
 
       if (!response.ok) throw new Error('Failed to fetch markets');
 
