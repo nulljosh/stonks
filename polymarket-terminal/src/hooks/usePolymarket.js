@@ -63,7 +63,7 @@ export function usePolymarket() {
   // Fetch on mount and every 30 seconds
   useEffect(() => {
     fetchMarkets();
-    const interval = setInterval(fetchMarkets, 5000); // Refresh every 5s
+    const interval = setInterval(fetchMarkets, 30000); // Refresh every 30s (less jarring)
     return () => clearInterval(interval);
   }, [fetchMarkets]);
 
