@@ -180,7 +180,12 @@ export default function App() {
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <span style={{ fontSize: 10, color: t.textTertiary }}>Updated {formatLastUpdated(lastUpdated)}</span>
           <button onClick={() => setShowMacro(!showMacro)} style={{ background: showMacro ? t.accent : 'transparent', border: `1px solid ${t.border}`, borderRadius: 8, padding: '4px 10px', color: showMacro ? '#fff' : t.textSecondary, fontSize: 11, cursor: 'pointer' }}>MACRO</button>
-          <button onClick={() => setSimSeed(Date.now())} style={{ background: 'transparent', border: 'none', fontSize: 16, cursor: 'pointer' }}>🎲</button>
+          {markets.length > 0 && (
+            <button onClick={() => {
+              const randomMarket = markets[Math.floor(Math.random() * markets.length)];
+              if (randomMarket?.slug) window.open(`https://polymarket.com/event/${randomMarket.slug}`, '_blank');
+            }} style={{ background: 'transparent', border: 'none', fontSize: 16, cursor: 'pointer' }} title="Random bet">🎲</button>
+          )}
           <button onClick={() => setDark(!dark)} style={{ background: 'transparent', border: 'none', fontSize: 16, cursor: 'pointer' }}>{dark ? '☀️' : '🌙'}</button>
         </div>
       </div>
