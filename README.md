@@ -2,8 +2,6 @@
 
 Live prediction markets dashboard with Monte Carlo simulations.
 
-**Live:** https://polymarket-terminal-orpin.vercel.app
-
 ## Features
 
 - **Polymarket Integration** - Real-time prediction markets
