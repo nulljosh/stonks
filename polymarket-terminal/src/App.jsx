@@ -139,14 +139,24 @@ export default function App() {
   const assetToSymbol = { btc: 'BTC-USD', eth: 'ETH-USD', gold: 'GC=F', silver: 'SI=F', oil: 'CL=F', nas100: 'NQ=F', us500: 'ES=F' };
   const { history: priceHistory, loading: historyLoading } = useStockHistory(assetToSymbol[asset] || 'GC=F', '1y');
 
+  // Keyword mappings for category filters
+  const categoryKeywords = {
+    politics: ['trump', 'biden', 'election', 'president', 'congress', 'senate', 'republican', 'democrat', 'vote', 'governor', 'political', 'white house', 'supreme court', 'legislation', 'poll'],
+    crypto: ['bitcoin', 'btc', 'ethereum', 'eth', 'crypto', 'token', 'blockchain', 'solana', 'xrp', 'dogecoin', 'altcoin', 'defi', 'nft'],
+    sports: ['nfl', 'nba', 'mlb', 'nhl', 'soccer', 'football', 'basketball', 'baseball', 'hockey', 'super bowl', 'championship', 'playoffs', 'world cup', 'olympics', 'ufc', 'boxing', 'tennis', 'golf'],
+    finance: ['stock', 'market', 'fed', 'interest rate', 'inflation', 'gdp', 'recession', 'earnings', 's&p', 'nasdaq', 'dow', 'treasury', 'bond', 'ipo', 'merger'],
+    culture: ['oscar', 'grammy', 'emmy', 'movie', 'film', 'music', 'celebrity', 'award', 'netflix', 'spotify', 'tiktok', 'twitter', 'elon', 'kanye', 'taylor swift'],
+  };
+
   // Filter polymarket by category and probability
   const filteredMarkets = useMemo(() => {
     let filtered = markets;
     if (pmCategory !== 'all') {
-      filtered = filtered.filter(m =>
-        m.category?.toLowerCase().includes(pmCategory) ||
-        m.question?.toLowerCase().includes(pmCategory)
-      );
+      const keywords = categoryKeywords[pmCategory] || [];
+      filtered = filtered.filter(m => {
+        const text = `${m.question || ''} ${m.description || ''} ${m.category || ''}`.toLowerCase();
+        return keywords.some(kw => text.includes(kw));
+      });
     }
     if (showHighProb) {
       filtered = filtered.filter(m => m.probability >= 0.90 || m.probability <= 0.10);
