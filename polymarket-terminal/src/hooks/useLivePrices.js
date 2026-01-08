@@ -61,21 +61,20 @@ export function useLivePrices(initialAssets) {
 
   const fetchCommodityPrices = useCallback(async () => {
     try {
-      const symbols = Object.values(YAHOO_SYMBOLS).join(',');
-      const response = await fetch(`/api/stocks?symbols=${symbols}`);
-      if (!response.ok) throw new Error('Yahoo Finance API error');
+      // Use new multi-source commodities API
+      const response = await fetch('/api/commodities');
+      if (!response.ok) throw new Error('Commodities API error');
       const data = await response.json();
 
       const updates = {};
-      data.forEach(q => {
-        const key = SYMBOL_TO_KEY[q.symbol];
-        if (key && q.price) {
+      Object.entries(data).forEach(([key, q]) => {
+        if (q.price) {
           updates[key] = {
             spot: q.price,
             chgPct: q.changePercent || 0,
             chg: q.change || 0,
-            hi52: q.fiftyTwoWeekHigh,
-            lo52: q.fiftyTwoWeekLow,
+            hi52: q.high52,
+            lo52: q.low52,
           };
         }
       });
