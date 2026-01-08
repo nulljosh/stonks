@@ -306,8 +306,8 @@ export default function App() {
           )}
           {pmError && <div style={{ textAlign: 'center', padding: 20, color: t.red, fontSize: 12 }}>Error loading markets</div>}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {filteredMarkets.slice(0, 12).map(m => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 480, overflowY: 'auto', paddingRight: 4 }}>
+            {filteredMarkets.map(m => (
               <a
                 key={m.id}
                 href={`https://polymarket.com/event/${m.slug}`}
