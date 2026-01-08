@@ -121,4 +121,14 @@ export const scenarios = {
 
 // Time horizons (days)
 export const horizons = [90, 180, 365];
-export const horizonLabels = ['Q1', 'H1', 'FY'];
+
+// Generate date labels dynamically from today
+export const getHorizonLabels = () => {
+  const now = new Date();
+  return horizons.map(days => {
+    const date = new Date(now);
+    date.setDate(date.getDate() + days);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  });
+};
+export const horizonLabels = getHorizonLabels();

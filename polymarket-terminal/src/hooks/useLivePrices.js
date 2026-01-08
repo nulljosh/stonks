@@ -9,6 +9,7 @@ const CRYPTO_IDS = {
   eth: 'ethereum',
 };
 
+// Yahoo Finance symbols for commodities & indices
 const YAHOO_SYMBOLS = {
   gold: 'GC=F',
   silver: 'SI=F',
@@ -22,6 +23,11 @@ const YAHOO_SYMBOLS = {
   us30: '^DJI',
   dxy: 'DX-Y.NYB',
 };
+
+// Reverse lookup: symbol -> asset key
+const SYMBOL_TO_KEY = Object.fromEntries(
+  Object.entries(YAHOO_SYMBOLS).map(([k, v]) => [v, k])
+);
 
 export function useLivePrices(initialAssets) {
   const [prices, setPrices] = useState(initialAssets);
@@ -39,11 +45,11 @@ export function useLivePrices(initialAssets) {
 
       return {
         btc: {
-          spot: data.bitcoin?.usd || prices.btc.spot,
+          spot: data.bitcoin?.usd,
           chgPct: data.bitcoin?.usd_24h_change || 0,
         },
         eth: {
-          spot: data.ethereum?.usd || prices.eth.spot,
+          spot: data.ethereum?.usd,
           chgPct: data.ethereum?.usd_24h_change || 0,
         },
       };
@@ -51,31 +57,85 @@ export function useLivePrices(initialAssets) {
       console.error('Crypto price fetch error:', err);
       return null;
     }
-  }, [prices]);
+  }, []);
+
+  const fetchCommodityPrices = useCallback(async () => {
+    try {
+      const symbols = Object.values(YAHOO_SYMBOLS).join(',');
+      const response = await fetch(`/api/stocks?symbols=${symbols}`);
+      if (!response.ok) throw new Error('Yahoo Finance API error');
+      const data = await response.json();
+
+      const updates = {};
+      data.forEach(q => {
+        const key = SYMBOL_TO_KEY[q.symbol];
+        if (key && q.price) {
+          updates[key] = {
+            spot: q.price,
+            chgPct: q.changePercent || 0,
+            chg: q.change || 0,
+            hi52: q.fiftyTwoWeekHigh,
+            lo52: q.fiftyTwoWeekLow,
+          };
+        }
+      });
+      return updates;
+    } catch (err) {
+      console.error('Commodity price fetch error:', err);
+      return null;
+    }
+  }, []);
 
   const fetchAllPrices = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch crypto prices
-      const cryptoPrices = await fetchCryptoPrices();
+      // Fetch crypto and commodities in parallel
+      const [cryptoPrices, commodityPrices] = await Promise.all([
+        fetchCryptoPrices(),
+        fetchCommodityPrices(),
+      ]);
 
-      if (cryptoPrices) {
-        setPrices(prev => ({
-          ...prev,
-          btc: {
-            ...prev.btc,
-            spot: cryptoPrices.btc.spot,
-            chgPct: cryptoPrices.btc.chgPct,
-            chg: cryptoPrices.btc.spot * (cryptoPrices.btc.chgPct / 100),
-          },
-          eth: {
-            ...prev.eth,
-            spot: cryptoPrices.eth.spot,
-            chgPct: cryptoPrices.eth.chgPct,
-            chg: cryptoPrices.eth.spot * (cryptoPrices.eth.chgPct / 100),
-          },
-        }));
-      }
+      setPrices(prev => {
+        const updated = { ...prev };
+
+        // Update crypto
+        if (cryptoPrices) {
+          if (cryptoPrices.btc.spot) {
+            updated.btc = {
+              ...prev.btc,
+              spot: cryptoPrices.btc.spot,
+              chgPct: cryptoPrices.btc.chgPct,
+              chg: cryptoPrices.btc.spot * (cryptoPrices.btc.chgPct / 100),
+            };
+          }
+          if (cryptoPrices.eth.spot) {
+            updated.eth = {
+              ...prev.eth,
+              spot: cryptoPrices.eth.spot,
+              chgPct: cryptoPrices.eth.chgPct,
+              chg: cryptoPrices.eth.spot * (cryptoPrices.eth.chgPct / 100),
+            };
+          }
+        }
+
+        // Update commodities & indices
+        if (commodityPrices) {
+          Object.entries(commodityPrices).forEach(([key, data]) => {
+            if (prev[key]) {
+              updated[key] = {
+                ...prev[key],
+                spot: data.spot,
+                chgPct: data.chgPct,
+                chg: data.chg,
+                hi52: data.hi52 || prev[key].hi52,
+                lo52: data.lo52 || prev[key].lo52,
+              };
+            }
+          });
+        }
+
+        return updated;
+      });
 
       setLastUpdated(new Date());
     } catch (err) {
@@ -83,12 +143,12 @@ export function useLivePrices(initialAssets) {
     } finally {
       setLoading(false);
     }
-  }, [fetchCryptoPrices]);
+  }, [fetchCryptoPrices, fetchCommodityPrices]);
 
-  // Fetch on mount and every 60 seconds
+  // Fetch on mount and every 5 seconds
   useEffect(() => {
     fetchAllPrices();
-    const interval = setInterval(fetchAllPrices, 10000); // Refresh every 10s
+    const interval = setInterval(fetchAllPrices, 5000);
     return () => clearInterval(interval);
   }, [fetchAllPrices]);
 

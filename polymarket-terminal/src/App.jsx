@@ -97,6 +97,7 @@ export default function App() {
   const [showMC, setShowMC] = useState(false);
   const [showHighProb, setShowHighProb] = useState(false); // 90%+ filter
   const [hoveredMarket, setHoveredMarket] = useState(null);
+  const [tappedMarket, setTappedMarket] = useState(null); // For mobile tap-to-show
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const t = getTheme(dark);
@@ -105,6 +106,25 @@ export default function App() {
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
   };
+
+  // Mobile tap handler - first tap shows tooltip, second tap follows link
+  const handleMarketClick = (e, market) => {
+    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isMobile && tappedMarket?.id !== market.id) {
+      e.preventDefault();
+      setTappedMarket(market);
+      setMousePos({ x: window.innerWidth / 2 - 150, y: window.innerHeight / 2 - 100 });
+    }
+  };
+
+  // Close mobile tooltip when tapping outside
+  useEffect(() => {
+    const handleOutsideClick = () => setTappedMarket(null);
+    if (tappedMarket) {
+      document.addEventListener('click', handleOutsideClick);
+      return () => document.removeEventListener('click', handleOutsideClick);
+    }
+  }, [tappedMarket]);
 
   // Live prices hook
   const { prices: liveAssets, lastUpdated } = useLivePrices(defaultAssets);
@@ -280,6 +300,7 @@ export default function App() {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ textDecoration: 'none', color: 'inherit' }}
+                onClick={(e) => handleMarketClick(e, m)}
                 onMouseEnter={() => setHoveredMarket(m)}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={() => setHoveredMarket(null)}
@@ -307,40 +328,58 @@ export default function App() {
             ))}
           </div>
 
-          {/* Cursor-following tooltip */}
-          {hoveredMarket && (
-            <div style={{
-              position: 'fixed',
-              left: mousePos.x + 15,
-              top: mousePos.y + 15,
-              background: dark ? 'rgba(20,20,22,0.95)' : 'rgba(255,255,255,0.95)',
-              backdropFilter: 'blur(20px)',
-              border: `1px solid ${t.border}`,
-              borderRadius: 12,
-              padding: 14,
-              maxWidth: 320,
-              zIndex: 1000,
-              boxShadow: dark ? '0 8px 32px rgba(0,0,0,0.5)' : '0 8px 32px rgba(0,0,0,0.15)',
-              pointerEvents: 'none',
-            }}>
-              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, lineHeight: 1.4 }}>{hoveredMarket.question}</div>
-              {hoveredMarket.description && (
-                <div style={{ fontSize: 11, color: t.textSecondary, marginBottom: 8, lineHeight: 1.5 }}>
-                  {hoveredMarket.description.length > 200 ? hoveredMarket.description.slice(0, 200) + '...' : hoveredMarket.description}
+          {/* Cursor-following tooltip (desktop hover) or centered tooltip (mobile tap) */}
+          {(hoveredMarket || tappedMarket) && (() => {
+            const market = tappedMarket || hoveredMarket;
+            const isMobile = !!tappedMarket;
+            return (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  position: 'fixed',
+                  left: isMobile ? '50%' : mousePos.x + 15,
+                  top: isMobile ? '50%' : mousePos.y + 15,
+                  transform: isMobile ? 'translate(-50%, -50%)' : 'none',
+                  background: dark ? 'rgba(20,20,22,0.95)' : 'rgba(255,255,255,0.95)',
+                  backdropFilter: 'blur(20px)',
+                  border: `1px solid ${t.border}`,
+                  borderRadius: 12,
+                  padding: 14,
+                  maxWidth: 320,
+                  zIndex: 1000,
+                  boxShadow: dark ? '0 8px 32px rgba(0,0,0,0.5)' : '0 8px 32px rgba(0,0,0,0.15)',
+                  pointerEvents: isMobile ? 'auto' : 'none',
+                }}>
+                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, lineHeight: 1.4 }}>{market.question}</div>
+                {market.description && (
+                  <div style={{ fontSize: 11, color: t.textSecondary, marginBottom: 8, lineHeight: 1.5 }}>
+                    {market.description.length > 200 ? market.description.slice(0, 200) + '...' : market.description}
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: 12, fontSize: 10, color: t.textTertiary }}>
+                  <span>24h Vol: ${((market.volume24h || 0) / 1000).toFixed(0)}K</span>
+                  <span>Liquidity: ${((market.liquidity || 0) / 1000).toFixed(0)}K</span>
+                  {market.change24h !== null && (
+                    <span style={{ color: market.change24h >= 0 ? t.green : t.red }}>
+                      {market.change24h >= 0 ? '+' : ''}{(market.change24h * 100).toFixed(1)}% 24h
+                    </span>
+                  )}
                 </div>
-              )}
-              <div style={{ display: 'flex', gap: 12, fontSize: 10, color: t.textTertiary }}>
-                <span>24h Vol: ${((hoveredMarket.volume24h || 0) / 1000).toFixed(0)}K</span>
-                <span>Liquidity: ${((hoveredMarket.liquidity || 0) / 1000).toFixed(0)}K</span>
-                {hoveredMarket.change24h !== null && (
-                  <span style={{ color: hoveredMarket.change24h >= 0 ? t.green : t.red }}>
-                    {hoveredMarket.change24h >= 0 ? '+' : ''}{(hoveredMarket.change24h * 100).toFixed(1)}% 24h
-                  </span>
+                {isMobile ? (
+                  <a
+                    href={`https://polymarket.com/event/${market.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: 'block', fontSize: 11, color: t.cyan, marginTop: 10, textDecoration: 'underline' }}
+                  >
+                    Open on Polymarket →
+                  </a>
+                ) : (
+                  <div style={{ fontSize: 9, color: t.cyan, marginTop: 8 }}>Click to open on Polymarket</div>
                 )}
               </div>
-              <div style={{ fontSize: 9, color: t.cyan, marginTop: 8 }}>Click to open on Polymarket</div>
-            </div>
-          )}
+            );
+          })()}
         </div>
 
         {/* MC ASSET ANALYSIS SECTION */}
