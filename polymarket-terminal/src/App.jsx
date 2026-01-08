@@ -254,9 +254,13 @@ export default function App() {
         <div style={{ padding: 16, background: `linear-gradient(135deg, ${t.red}20, ${t.orange}20)`, borderBottom: `0.5px solid ${t.border}` }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: t.orange, marginBottom: 8 }}>⚠️ MACRO RISK SYNTHESIS</div>
           <div style={{ fontSize: 12, lineHeight: 1.6, color: t.textSecondary }}>
-            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.red }}>AI Bubble Risk:</strong> Circular funding between OpenAI ↔ Nvidia ↔ CoreWeave. $1T+ interconnected.</p>
-            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.yellow }}>US Debt:</strong> $36T national debt. Interest payments exceeding defense budget.</p>
-            <p style={{ margin: 0 }}><strong style={{ color: t.cyan }}>Crypto Thesis:</strong> BTC as digital gold hedge. ETF institutional flows accelerating.</p>
+            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.red }}>AI Bubble Risk:</strong> Circular funding between OpenAI ↔ Nvidia ↔ CoreWeave. $1T+ interconnected. Mag7 = 35% of S&P.</p>
+            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.yellow }}>US Debt:</strong> $36T national debt. Interest payments exceeding defense budget. 120% debt-to-GDP ratio.</p>
+            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.cyan }}>Crypto Thesis:</strong> BTC as digital gold hedge. ETF inflows $40B+ in 2025. Halving supply shock in effect.</p>
+            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.green }}>Gold/Silver:</strong> Central banks bought 1,037t in 2024. De-dollarization accelerating. BRICS gold-backed currency speculation.</p>
+            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.purple }}>Geopolitics:</strong> Taiwan/China tensions. Middle East instability. Ukraine war ongoing. Trump tariff threats.</p>
+            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.orange }}>Fed Watch:</strong> Rate cuts expected 2026. Inflation sticky at 3%. Recession odds ~25% per yield curve.</p>
+            <p style={{ margin: 0 }}><strong style={{ color: t.textSecondary }}>Black Swans:</strong> Commercial real estate ($1.5T maturing), Japan carry trade unwind, China property crisis spillover.</p>
           </div>
         </div>
       )}
