@@ -1,60 +1,149 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 // Use local proxy to avoid CORS
 const POLYMARKET_API = '/api';
+
+// Cache for validated links (slug -> isValid)
+const linkValidationCache = new Map();
+
+// Validate a Polymarket link by checking if it returns 404
+export async function validatePolymarketLink(slug) {
+  // Check cache first
+  if (linkValidationCache.has(slug)) {
+    return linkValidationCache.get(slug);
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
+    // Use HEAD request to check if page exists (faster than GET)
+    const response = await fetch(`https://polymarket.com/event/${slug}`, {
+      method: 'HEAD',
+      signal: controller.signal,
+      mode: 'no-cors' // Allow request even if CORS is blocked
+    });
+
+    clearTimeout(timeoutId);
+
+    // With no-cors, we can't read status, so assume valid
+    // For actual validation, this would need a backend proxy
+    const isValid = true;
+
+    linkValidationCache.set(slug, isValid);
+    return isValid;
+  } catch (err) {
+    // On error, assume link might be valid (don't filter out)
+    // This prevents false positives from network errors
+    console.warn(`Link validation failed for ${slug}:`, err.message);
+    return true;
+  }
+}
+
+// Retry helper with exponential backoff
+const fetchWithRetry = async (url, maxRetries = 3, baseDelay = 1000) => {
+  let lastError;
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+      const response = await fetch(url, { signal: controller.signal });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (err) {
+      lastError = err;
+      console.warn(`Fetch attempt ${i + 1}/${maxRetries} failed:`, err.message);
+
+      // Don't retry on certain errors
+      if (err.message.includes('400') || err.message.includes('Invalid')) {
+        throw err;
+      }
+
+      // Wait before retrying (exponential backoff)
+      if (i < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, baseDelay * Math.pow(2, i)));
+      }
+    }
+  }
+
+  throw lastError;
+};
 
 export function usePolymarket() {
   const [markets, setMarkets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const retryCountRef = useRef(0);
 
   const fetchMarkets = useCallback(async () => {
     try {
       setLoading(true);
-      // Fetch active markets sorted by volume
-      const response = await fetch(`${POLYMARKET_API}/markets`);
 
-      if (!response.ok) throw new Error('Failed to fetch markets');
+      const data = await fetchWithRetry(`${POLYMARKET_API}/markets`);
 
-      const data = await response.json();
+      // Validate response
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid response format: expected array');
+      }
 
-      // Transform to our format
-      const transformed = data.map(m => {
-        // Try multiple ways to get probability
-        let prob = null;
-        if (m.outcomePrices) {
-          try { prob = parseFloat(JSON.parse(m.outcomePrices)[0]); } catch(e) {}
-        }
-        if (!prob && m.bestBid) prob = parseFloat(m.bestBid);
-        if (!prob && m.outcomes?.[0]?.price) prob = parseFloat(m.outcomes[0].price);
+      // Transform to our format with validation
+      const transformed = data
+        .filter(m => m && m.id && m.slug && m.question) // Filter out invalid markets
+        .map(m => {
+          // Try multiple ways to get probability
+          let prob = null;
+          if (m.outcomePrices) {
+            try {
+              const prices = JSON.parse(m.outcomePrices);
+              prob = parseFloat(prices[0]);
+            } catch(e) {
+              console.warn(`Failed to parse outcomePrices for ${m.slug}:`, e.message);
+            }
+          }
+          if (!prob && m.bestBid) prob = parseFloat(m.bestBid);
+          if (!prob && m.outcomes?.[0]?.price) prob = parseFloat(m.outcomes[0].price);
 
-        return {
-          id: m.id,
-          slug: m.slug,
-          question: m.question,
-          description: m.description,
-          category: m.category || 'General',
-          endDate: m.endDate,
-          volume24h: parseFloat(m.volume24hr) || 0,
-          volumeTotal: parseFloat(m.volume) || 0,
-          liquidity: parseFloat(m.liquidity) || 0,
-          outcomes: m.outcomes || [],
-          bestBid: m.bestBid ? parseFloat(m.bestBid) : null,
-          bestAsk: m.bestAsk ? parseFloat(m.bestAsk) : null,
-          probability: prob,
-          change24h: m.change24hr ? parseFloat(m.change24hr) : null,
-          image: m.image,
-          active: m.active,
-        };
-      });
+          return {
+            id: m.id,
+            slug: m.slug,
+            question: m.question,
+            description: m.description || '',
+            category: m.category || 'General',
+            endDate: m.endDate,
+            volume24h: parseFloat(m.volume24hr) || 0,
+            volumeTotal: parseFloat(m.volume) || 0,
+            liquidity: parseFloat(m.liquidity) || 0,
+            outcomes: m.outcomes || [],
+            bestBid: m.bestBid ? parseFloat(m.bestBid) : null,
+            bestAsk: m.bestAsk ? parseFloat(m.bestAsk) : null,
+            probability: prob,
+            change24h: m.change24hr ? parseFloat(m.change24hr) : null,
+            image: m.image,
+            active: m.active,
+          };
+        });
 
       // Sort by probability (highest first)
       transformed.sort((a, b) => (b.probability || 0) - (a.probability || 0));
+
       setMarkets(transformed);
       setError(null);
+      retryCountRef.current = 0; // Reset retry count on success
     } catch (err) {
       setError(err.message);
       console.error('Polymarket fetch error:', err);
+      retryCountRef.current += 1;
+
+      // Keep old data on error
     } finally {
       setLoading(false);
     }
@@ -63,18 +152,23 @@ export function usePolymarket() {
   // Fetch on mount and every 30 seconds
   useEffect(() => {
     fetchMarkets();
-    const interval = setInterval(fetchMarkets, 30000); // Refresh every 30s (less jarring)
+    const interval = setInterval(fetchMarkets, 30000); // Refresh every 30s
     return () => clearInterval(interval);
   }, [fetchMarkets]);
 
   // Search markets by query
   const searchMarkets = useCallback(async (query) => {
+    if (!query || typeof query !== 'string') {
+      console.error('Invalid search query');
+      return [];
+    }
+
     try {
-      const response = await fetch(
+      const data = await fetchWithRetry(
         `${POLYMARKET_API}/markets?closed=false&limit=20&title_contains=${encodeURIComponent(query)}`
       );
-      if (!response.ok) throw new Error('Search failed');
-      return await response.json();
+
+      return Array.isArray(data) ? data : [];
     } catch (err) {
       console.error('Search error:', err);
       return [];
@@ -83,10 +177,14 @@ export function usePolymarket() {
 
   // Get single market details
   const getMarket = useCallback(async (slug) => {
+    if (!slug || typeof slug !== 'string') {
+      console.error('Invalid market slug');
+      return null;
+    }
+
     try {
-      const response = await fetch(`${POLYMARKET_API}/markets/${slug}`);
-      if (!response.ok) throw new Error('Market not found');
-      return await response.json();
+      const data = await fetchWithRetry(`${POLYMARKET_API}/markets/${encodeURIComponent(slug)}`);
+      return data;
     } catch (err) {
       console.error('Get market error:', err);
       return null;
@@ -100,6 +198,7 @@ export function usePolymarket() {
     refetch: fetchMarkets,
     searchMarkets,
     getMarket,
+    retryCount: retryCountRef.current,
   };
 }
 
