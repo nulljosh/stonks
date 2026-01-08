@@ -101,6 +101,63 @@ export const defaultAssets = {
     targets: [4500, 6000, 10000],
     notes: 'Staking yield. L2 scaling. ETF potential.'
   },
+  // MAG7 STOCKS (Magnificent 7)
+  aapl: {
+    name: 'AAPL', full: 'Apple Inc', spot: 250, chg: 2.5, chgPct: 1.0,
+    vol: 0.28, hi52: 260, lo52: 165,
+    support: [240, 225, 210],
+    resistance: [260, 280, 300],
+    targets: [280, 320, 400],
+    notes: 'iPhone 16 cycle. Services growth. AI integration.'
+  },
+  msft: {
+    name: 'MSFT', full: 'Microsoft', spot: 440, chg: 3.2, chgPct: 0.73,
+    vol: 0.26, hi52: 468, lo52: 362,
+    support: [425, 400, 380],
+    resistance: [470, 500, 550],
+    targets: [500, 600, 750],
+    notes: 'Azure AI dominance. OpenAI partnership. Cloud growth.'
+  },
+  googl: {
+    name: 'GOOGL', full: 'Alphabet', spot: 185, chg: -1.5, chgPct: -0.8,
+    vol: 0.30, hi52: 193, lo52: 130,
+    support: [175, 165, 155],
+    resistance: [195, 210, 230],
+    targets: [210, 250, 300],
+    notes: 'Search dominance. Gemini AI. YouTube strength.'
+  },
+  amzn: {
+    name: 'AMZN', full: 'Amazon', spot: 220, chg: 1.8, chgPct: 0.82,
+    vol: 0.32, hi52: 230, lo52: 144,
+    support: [210, 195, 180],
+    resistance: [230, 250, 275],
+    targets: [250, 300, 400],
+    notes: 'AWS margins expanding. Retail dominance. AI compute.'
+  },
+  meta: {
+    name: 'META', full: 'Meta Platforms', spot: 625, chg: 8.5, chgPct: 1.38,
+    vol: 0.38, hi52: 638, lo52: 362,
+    support: [600, 575, 550],
+    resistance: [640, 700, 750],
+    targets: [700, 850, 1000],
+    notes: 'AI ad targeting. Reality Labs. Instagram/WhatsApp growth.'
+  },
+  tsla: {
+    name: 'TSLA', full: 'Tesla', spot: 390, chg: -5.2, chgPct: -1.32,
+    vol: 0.55, hi52: 488, lo52: 138,
+    support: [360, 320, 280],
+    resistance: [420, 480, 550],
+    targets: [500, 700, 1000],
+    notes: 'FSD potential. Energy storage. Robotaxi narrative.'
+  },
+  nvda: {
+    name: 'NVDA', full: 'NVIDIA', spot: 145, chg: 2.8, chgPct: 1.97,
+    vol: 0.48, hi52: 152, lo52: 39,
+    support: [135, 120, 105],
+    resistance: [155, 175, 200],
+    targets: [175, 225, 300],
+    notes: 'AI chip monopoly. H100/H200 demand. Blackwell ramp.'
+  },
   // MACRO
   dxy: {
     name: 'DXY', full: 'US Dollar Index', spot: 104.5, chg: -0.25, chgPct: -0.24,

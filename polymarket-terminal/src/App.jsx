@@ -136,7 +136,10 @@ export default function App() {
   const { stocks } = useStocks();
 
   // Map asset keys to Yahoo Finance symbols for historical data
-  const assetToSymbol = { btc: 'BTC-USD', eth: 'ETH-USD', gold: 'GC=F', silver: 'SI=F', oil: 'CL=F', nas100: 'NQ=F', us500: 'ES=F' };
+  const assetToSymbol = {
+    btc: 'BTC-USD', eth: 'ETH-USD', gold: 'GC=F', silver: 'SI=F', oil: 'CL=F', nas100: 'NQ=F', us500: 'ES=F',
+    aapl: 'AAPL', msft: 'MSFT', googl: 'GOOGL', amzn: 'AMZN', meta: 'META', tsla: 'TSLA', nvda: 'NVDA'
+  };
   const { history: priceHistory, loading: historyLoading } = useStockHistory(assetToSymbol[asset] || 'GC=F', '1y');
 
   // Keyword mappings for category filters
