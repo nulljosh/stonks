@@ -224,7 +224,7 @@ export default function App() {
     }
   }, [tick, running, position, balance, lastTraded, prices]);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setBalance(100);
     setPosition(null);
     setPrices(Object.fromEntries(SYMS.map(s => [s, [ASSETS[s].price]])));
@@ -233,7 +233,7 @@ export default function App() {
     setTick(0);
     setLastTraded(null);
     trends.current = Object.fromEntries(SYMS.map(s => [s, 0]));
-  };
+  }, []);
 
   const pnl = balance - 100;
   const currentPrice = position ? prices[position.sym][prices[position.sym].length - 1] : 0;
@@ -279,6 +279,29 @@ export default function App() {
       return () => document.removeEventListener('click', handleOutsideClick);
     }
   }, [tappedMarket]);
+
+  // Keyboard shortcuts for trading simulator
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Ignore if typing in input fields
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      // Space bar: Toggle start/stop
+      if (e.code === 'Space' && !busted && !won) {
+        e.preventDefault();
+        setRunning(r => !r);
+      }
+
+      // R key: Reset
+      if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        reset();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
+  }, [busted, won, reset]);
 
   const filteredMarkets = useMemo(() => {
     let filtered = markets;
@@ -426,7 +449,7 @@ export default function App() {
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+            <div style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
               <button
                 onClick={() => setRunning(!running)}
                 disabled={busted || won}
@@ -435,6 +458,9 @@ export default function App() {
                 {busted ? 'Busted' : won ? 'Won!' : running ? 'Stop' : 'Start'}
               </button>
               <button onClick={reset} style={{ padding: 16, borderRadius: 12, border: '1px solid #333', background: 'transparent', color: '#666', fontFamily: font, fontSize: 16, cursor: 'pointer' }}>↺</button>
+            </div>
+            <div style={{ textAlign: 'center', fontSize: 10, color: '#444', marginBottom: 14 }}>
+              [Space] Start/Stop • [R] Reset
             </div>
 
             <div style={{ background: '#1a1a1a', borderRadius: 12, overflow: 'hidden' }}>
