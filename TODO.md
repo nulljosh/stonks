@@ -1,0 +1,44 @@
+# Autopilot TODO
+
+## Critical Bugs (Fix First)
+- [ ] Fix simulator crash after 5-10s (React render loop issue)
+- [ ] Fix horizontal ticker not rendering (data loading issue)
+- [ ] Add error logging/test cases to catch crashes
+
+## Features Not Implemented
+- [ ] Integrate newt news feed at bottom (code at ~/Documents/Code/newt)
+- [ ] Add SHOO stock ticker
+- [ ] Add S&P 500 full coverage (500 stocks)
+- [ ] Add Kalshi prediction market integration
+- [ ] Implement tabbed interface for multi-view dashboard
+- [ ] Add news API for auto-parameterized Monte Carlo (drift/vol from sentiment)
+- [ ] Implement Black-Scholes options pricing model
+- [ ] Add Delta-Threshold bandwidth optimization algorithm
+- [ ] Document TradingView webhook integration
+- [ ] Document cTrader API integration
+- [ ] Document Wealthsimple/broker connection strategies
+
+## Performance Optimizations
+- [ ] Bundle splitting (target <200KB main bundle, currently 577KB)
+- [ ] WebSocket feeds (replace polling)
+- [ ] Binary payloads (compress API responses)
+- [ ] Vectorized math (SIMD-optimized Monte Carlo)
+- [ ] Code-split Recharts library
+
+## Memory Conservation (Core Goal)
+- [ ] Cap all arrays properly (prices, trades, etc.)
+- [ ] Implement lazy loading for S&P 500 data
+- [ ] Add virtualized rendering for large lists
+- [ ] Profile memory usage and optimize hot paths
+
+## Documentation
+- [ ] Create INSTRUCTIONS.md for real-world replication
+- [ ] Document algorithms for white paper
+- [ ] Add API rate limit handling docs
+- [ ] Create deployment troubleshooting guide
+
+## Future Phases
+- [ ] C++ core modules (WebAssembly)
+- [ ] Custom RTOS research
+- [ ] White paper publication
+- [ ] iOS/Android apps
