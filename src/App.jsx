@@ -156,13 +156,15 @@ export default function App() {
           const last = prev[sym][prev[sym].length - 1];
           const base = ASSETS[sym].price;
           const newPrice = Math.max(base * 0.7, Math.min(base * 1.5, last * (1 + move)));
-          next[sym] = [...prev[sym].slice(-99), newPrice];
+          // Keep only last 50 prices to reduce memory
+          const priceHistory = prev[sym].length >= 50 ? prev[sym].slice(-49) : prev[sym];
+          next[sym] = [...priceHistory, newPrice];
         });
         return next;
       });
 
       setTick(t => t + 1);
-    }, 50);
+    }, 100); // Increased from 50ms to 100ms
 
     return () => clearInterval(iv);
   }, [running, balance]);
