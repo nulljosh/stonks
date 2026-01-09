@@ -124,6 +124,7 @@ export default function App() {
   const [tick, setTick] = useState(0);
   const [showTrades, setShowTrades] = useState(false);
   const [lastTraded, setLastTraded] = useState(null);
+  const [perfMode, setPerfMode] = useState(false); // Performance mode for older hardware
   const trends = useRef(Object.fromEntries(SYMS.map(s => [s, 0])));
 
   // Prediction Market State
@@ -164,15 +165,17 @@ export default function App() {
       });
 
       setTick(t => t + 1);
-    }, 100); // Increased from 50ms to 100ms
+    }, perfMode ? 250 : 100); // 250ms for old hardware, 100ms normal
 
     return () => clearInterval(iv);
-  }, [running, balance]);
+  }, [running, balance, perfMode]);
 
   useEffect(() => {
     if (!position || !running) return;
 
     const p = prices[position.sym];
+    if (!p || p.length === 0) return;
+
     const current = p[p.length - 1];
     const pnl = (current - position.entry) * position.size;
     const pnlPct = (current - position.entry) / position.entry;
@@ -194,7 +197,7 @@ export default function App() {
     if (pnlPct > 0.02) {
       setPosition(pos => ({ ...pos, stop: Math.max(pos.stop, current * 0.97) }));
     }
-  }, [prices, position, running]);
+  }, [tick, position, running, prices]);
 
   useEffect(() => {
     if (!running || position || balance <= 10 || balance >= 10000) return;
@@ -355,6 +358,7 @@ export default function App() {
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <span style={{ fontSize: 10, color: t.textTertiary }}>Updated {formatLastUpdated(lastUpdated)}</span>
+          <button onClick={() => setPerfMode(!perfMode)} style={{ background: perfMode ? t.green : 'transparent', border: `1px solid ${t.border}`, borderRadius: 8, padding: '4px 10px', color: perfMode ? '#fff' : t.textSecondary, fontSize: 11, cursor: 'pointer' }} title="Slow mode for older hardware">⚡{perfMode && ' SLOW'}</button>
           <button onClick={() => setShowMacro(!showMacro)} style={{ background: showMacro ? t.accent : 'transparent', border: `1px solid ${t.border}`, borderRadius: 8, padding: '4px 10px', color: showMacro ? '#fff' : t.textSecondary, fontSize: 11, cursor: 'pointer' }}>MACRO</button>
           <button onClick={() => setDark(!dark)} style={{ background: 'transparent', border: 'none', fontSize: 16, cursor: 'pointer' }}>{dark ? '☀️' : '🌙'}</button>
         </div>
