@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, ComposedChart, ReferenceLine, BarChart, Bar, Cell } from 'recharts';
 import { usePolymarket, MARKET_CATEGORIES } from './hooks/usePolymarket';
 import { useLivePrices, formatLastUpdated } from './hooks/useLivePrices';
@@ -6,6 +6,24 @@ import { useStocks, useStockHistory } from './hooks/useStocks';
 import { runMonteCarlo, formatPrice, calcFibTargets } from './utils/math';
 import { getTheme, getProbColor } from './utils/theme';
 import { defaultAssets, scenarios, horizons, horizonLabels } from './utils/assets';
+
+// Trading Simulator Assets
+const ASSETS = {
+  NAS100: { name: 'Nasdaq 100', price: 21500, color: '#00d4ff' },
+  SP500: { name: 'S&P 500', price: 6000, color: '#ff6b6b' },
+  US30: { name: 'Dow Jones', price: 43800, color: '#4ecdc4' },
+  XAU: { name: 'Gold', price: 2650, color: '#FFD700' },
+  XAG: { name: 'Silver', price: 31, color: '#A0A0A0' },
+  AAPL: { name: 'Apple', price: 243, color: '#555' },
+  MSFT: { name: 'Microsoft', price: 418, color: '#00A2ED' },
+  GOOGL: { name: 'Google', price: 192, color: '#4285F4' },
+  NVDA: { name: 'Nvidia', price: 140, color: '#76B900' },
+  TSLA: { name: 'Tesla', price: 380, color: '#CC0000' },
+  META: { name: 'Meta', price: 595, color: '#0668E1' },
+  COIN: { name: 'Coinbase', price: 265, color: '#0052FF' },
+  PLTR: { name: 'Palantir', price: 71, color: '#9d4edd' },
+};
+const SYMS = Object.keys(ASSETS);
 
 // Bloomberg-style blinking indicators
 const BlinkingDot = ({ color, delay = 0, speed = 2 }) => (
@@ -62,16 +80,13 @@ if (!document.head.querySelector('#bloomberg-animations')) {
   document.head.appendChild(styleSheet);
 }
 
-// TLDR function for long market questions
 const tldr = (question, maxLen = 50) => {
   if (!question || question.length <= maxLen) return question;
-  // Smart truncation - cut at word boundary
   const truncated = question.slice(0, maxLen);
   const lastSpace = truncated.lastIndexOf(' ');
   return (lastSpace > 20 ? truncated.slice(0, lastSpace) : truncated) + '...';
 };
 
-// Glass Card Component
 const Card = ({ children, style, onClick, dark, t }) => (
   <div onClick={onClick} style={{
     background: t.glass,
@@ -88,26 +103,157 @@ const Card = ({ children, style, onClick, dark, t }) => (
 
 export default function App() {
   const [dark, setDark] = useState(true);
-  const [asset, setAsset] = useState('silver'); // Default to silver
+  const t = getTheme(dark);
+  const font = '-apple-system, BlinkMacSystemFont, system-ui, sans-serif';
+
+  // Trading Simulator State
+  const [balance, setBalance] = useState(100);
+  const [position, setPosition] = useState(null);
+  const [prices, setPrices] = useState(() => Object.fromEntries(SYMS.map(s => [s, [ASSETS[s].price]])));
+  const [trades, setTrades] = useState([]);
+  const [running, setRunning] = useState(false);
+  const [tick, setTick] = useState(0);
+  const [showTrades, setShowTrades] = useState(false);
+  const [lastTraded, setLastTraded] = useState(null);
+  const trends = useRef(Object.fromEntries(SYMS.map(s => [s, 0])));
+
+  // Prediction Market State
+  const [asset, setAsset] = useState('silver');
   const [scenario, setScenario] = useState('base');
   const [sel, setSel] = useState(0);
   const [simSeed, setSimSeed] = useState(42);
   const [showMacro, setShowMacro] = useState(false);
   const [pmCategory, setPmCategory] = useState('all');
-  const [showMC, setShowMC] = useState(false);
-  const [showHighProb, setShowHighProb] = useState(false); // 90%+ filter
+  const [showHighProb, setShowHighProb] = useState(false);
   const [hoveredMarket, setHoveredMarket] = useState(null);
-  const [tappedMarket, setTappedMarket] = useState(null); // For mobile tap-to-show
+  const [tappedMarket, setTappedMarket] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  const t = getTheme(dark);
+  const { prices: liveAssets, lastUpdated } = useLivePrices(defaultAssets);
+  const { markets, loading: pmLoading, error: pmError, refetch: refetchPm } = usePolymarket();
+  const { stocks } = useStocks();
 
-  // Track mouse position for tooltip
+  // Trading Simulator Logic
+  useEffect(() => {
+    if (!running || balance <= 10 || balance >= 10000) return;
+
+    const iv = setInterval(() => {
+      setPrices(prev => {
+        const next = {};
+        SYMS.forEach(sym => {
+          if (Math.random() < 0.05) trends.current[sym] = (Math.random() - 0.45) * 0.008;
+          const drift = 0.0001;
+          const move = drift + trends.current[sym] + (Math.random() - 0.5) * 0.012;
+          const last = prev[sym][prev[sym].length - 1];
+          const base = ASSETS[sym].price;
+          const newPrice = Math.max(base * 0.7, Math.min(base * 1.5, last * (1 + move)));
+          next[sym] = [...prev[sym].slice(-99), newPrice];
+        });
+        return next;
+      });
+
+      setTick(t => t + 1);
+    }, 50);
+
+    return () => clearInterval(iv);
+  }, [running, balance]);
+
+  useEffect(() => {
+    if (!position || !running) return;
+
+    const p = prices[position.sym];
+    const current = p[p.length - 1];
+    const pnl = (current - position.entry) * position.size;
+    const pnlPct = (current - position.entry) / position.entry;
+
+    if (current <= position.stop) {
+      setBalance(b => Math.max(10, b + pnl));
+      setTrades(t => [...t, { type: 'STOP', sym: position.sym, pnl: pnl.toFixed(2) }]);
+      setPosition(null);
+      return;
+    }
+
+    if (current >= position.target) {
+      setBalance(b => b + pnl);
+      setTrades(t => [...t, { type: 'WIN', sym: position.sym, pnl: pnl.toFixed(2) }]);
+      setPosition(null);
+      return;
+    }
+
+    if (pnlPct > 0.02) {
+      setPosition(pos => ({ ...pos, stop: Math.max(pos.stop, current * 0.97) }));
+    }
+  }, [prices, position, running]);
+
+  useEffect(() => {
+    if (!running || position || balance <= 10 || balance >= 10000) return;
+
+    let best = null;
+    SYMS.forEach(sym => {
+      if (sym === lastTraded) return;
+      const p = prices[sym];
+      if (p.length < 10) return;
+      const avg = p.slice(-10).reduce((a, b) => a + b, 0) / 10;
+      const current = p[p.length - 1];
+      const strength = (current - avg) / avg;
+      if (strength > 0.001 && (!best || strength > best.strength)) {
+        best = { sym, price: current, strength };
+      }
+    });
+
+    if (best) {
+      const size = Math.floor(balance * 0.08);
+      setPosition({
+        sym: best.sym,
+        entry: best.price,
+        size,
+        stop: best.price * 0.965,
+        target: best.price * 1.07,
+      });
+      setLastTraded(best.sym);
+      setTrades(t => [...t, { type: 'BUY', sym: best.sym, price: best.price.toFixed(2) }]);
+    }
+  }, [tick]);
+
+  const reset = () => {
+    setBalance(100);
+    setPosition(null);
+    setPrices(Object.fromEntries(SYMS.map(s => [s, [ASSETS[s].price]])));
+    setTrades([]);
+    setRunning(false);
+    setTick(0);
+    setLastTraded(null);
+    trends.current = Object.fromEntries(SYMS.map(s => [s, 0]));
+  };
+
+  const pnl = balance - 100;
+  const currentPrice = position ? prices[position.sym][prices[position.sym].length - 1] : 0;
+  const unrealized = position ? (currentPrice - position.entry) * position.size : 0;
+  const equity = balance + unrealized;
+  const busted = balance <= 10;
+  const won = balance >= 10000;
+  const exits = trades.filter(t => t.pnl);
+  const wins = exits.filter(t => parseFloat(t.pnl) > 0);
+  const winRate = exits.length ? (wins.length / exits.length * 100) : 0;
+
+  // Chart
+  const W = 320, H = 120;
+  const allNorm = SYMS.flatMap(s => prices[s].map(p => (p - ASSETS[s].price) / ASSETS[s].price));
+  const nMin = Math.min(...allNorm, -0.02);
+  const nMax = Math.max(...allNorm, 0.02);
+  const toY = v => H - ((v - nMin) / (nMax - nMin || 0.01)) * H;
+  const makePath = sym => {
+    return prices[sym].map((p, i) => {
+      const norm = (p - ASSETS[sym].price) / ASSETS[sym].price;
+      return `${i ? 'L' : 'M'} ${(i / 99) * W} ${toY(norm)}`;
+    }).join(' ');
+  };
+
+  // Prediction Markets Logic
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
   };
 
-  // Mobile tap handler - first tap shows tooltip, second tap follows link
   const handleMarketClick = (e, market) => {
     const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isMobile && tappedMarket?.id !== market.id) {
@@ -117,7 +263,6 @@ export default function App() {
     }
   };
 
-  // Close mobile tooltip when tapping outside
   useEffect(() => {
     const handleOutsideClick = () => setTappedMarket(null);
     if (tappedMarket) {
@@ -126,23 +271,6 @@ export default function App() {
     }
   }, [tappedMarket]);
 
-  // Live prices hook
-  const { prices: liveAssets, lastUpdated } = useLivePrices(defaultAssets);
-
-  // Polymarket hook
-  const { markets, loading: pmLoading, error: pmError, refetch: refetchPm } = usePolymarket();
-
-  // Stocks hook (live prices)
-  const { stocks } = useStocks();
-
-  // Map asset keys to Yahoo Finance symbols for historical data
-  const assetToSymbol = {
-    btc: 'BTC-USD', eth: 'ETH-USD', gold: 'GC=F', silver: 'SI=F', oil: 'CL=F', nas100: 'NQ=F', us500: 'ES=F',
-    aapl: 'AAPL', msft: 'MSFT', googl: 'GOOGL', amzn: 'AMZN', meta: 'META', tsla: 'TSLA', nvda: 'NVDA'
-  };
-  const { history: priceHistory, loading: historyLoading } = useStockHistory(assetToSymbol[asset] || 'GC=F', '1y');
-
-  // Keyword mappings for category filters
   const categoryKeywords = {
     politics: ['trump', 'biden', 'election', 'president', 'congress', 'senate', 'republican', 'democrat', 'vote', 'governor', 'political', 'white house', 'supreme court', 'legislation', 'poll'],
     crypto: ['bitcoin', 'btc', 'ethereum', 'eth', 'crypto', 'token', 'blockchain', 'solana', 'xrp', 'dogecoin', 'altcoin', 'defi', 'nft'],
@@ -151,7 +279,6 @@ export default function App() {
     culture: ['oscar', 'grammy', 'emmy', 'movie', 'film', 'music', 'celebrity', 'award', 'netflix', 'spotify', 'tiktok', 'twitter', 'elon', 'kanye', 'taylor swift'],
   };
 
-  // Filter polymarket by category and probability
   const filteredMarkets = useMemo(() => {
     let filtered = markets;
     if (pmCategory !== 'all') {
@@ -167,7 +294,12 @@ export default function App() {
     return filtered;
   }, [markets, pmCategory, showHighProb]);
 
-  // Monte Carlo simulation
+  const assetToSymbol = {
+    btc: 'BTC-USD', eth: 'ETH-USD', gold: 'GC=F', silver: 'SI=F', oil: 'CL=F', nas100: 'NQ=F', us500: 'ES=F',
+    aapl: 'AAPL', msft: 'MSFT', googl: 'GOOGL', amzn: 'AMZN', meta: 'META', tsla: 'TSLA', nvda: 'NVDA'
+  };
+  const { history: priceHistory, loading: historyLoading } = useStockHistory(assetToSymbol[asset] || 'GC=F', '1y');
+
   const runSim = useCallback((key, sc) => {
     const a = liveAssets[key];
     if (!a) return { pctData: [], probs: [], finals: [] };
@@ -176,24 +308,8 @@ export default function App() {
   }, [liveAssets, simSeed]);
 
   const res = useMemo(() => runSim(asset, scenario), [asset, scenario, runSim]);
-  const allRes = useMemo(() =>
-    Object.fromEntries(Object.keys(scenarios).map(k => [k, runSim(asset, k)])),
-    [asset, runSim]
-  );
-
-  // Histogram
-  const hist = useMemo(() => {
-    const f = res.finals[sel];
-    if (!f?.length) return [];
-    const min = Math.min(...f), max = Math.max(...f), sz = (max - min) / 20 || 1;
-    return Array(20).fill(0).map((_, i) => ({
-      r: min + i * sz,
-      c: f.filter(x => x >= min + i * sz && x < min + (i + 1) * sz).length
-    }));
-  }, [res.finals, sel]);
 
   const a = liveAssets[asset];
-  const fibs = a ? calcFibTargets(a.spot, a.lo52, a.hi52) : {};
   const fmt = formatPrice;
   const pCol = (p) => getProbColor(p, t);
 
@@ -204,51 +320,17 @@ export default function App() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: t.bg, color: t.text, fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif' }}>
-
+    <div style={{ minHeight: '100vh', background: t.bg, color: t.text, fontFamily: font }}>
       {/* Header */}
       <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `0.5px solid ${t.border}` }}>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <a href="https://heyitsmejosh.com" style={{ fontSize: 11, color: t.textTertiary, textDecoration: 'none' }}>heyitsmejosh.com</a>
-          <span style={{ color: t.textTertiary, margin: '0 6px' }}>/</span>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>stonks</span>
+          <span style={{ fontSize: 15, fontWeight: 700 }}>autopilot</span>
           <StatusBar t={t} />
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <span style={{ fontSize: 10, color: t.textTertiary }}>Updated {formatLastUpdated(lastUpdated)}</span>
           <button onClick={() => setShowMacro(!showMacro)} style={{ background: showMacro ? t.accent : 'transparent', border: `1px solid ${t.border}`, borderRadius: 8, padding: '4px 10px', color: showMacro ? '#fff' : t.textSecondary, fontSize: 11, cursor: 'pointer' }}>MACRO</button>
-          {markets.length > 0 && (
-            <button onClick={() => {
-              const randomMarket = markets[Math.floor(Math.random() * markets.length)];
-              if (randomMarket?.slug) window.open(`https://polymarket.com/event/${randomMarket.slug}`, '_blank');
-            }} style={{ background: 'transparent', border: 'none', fontSize: 16, cursor: 'pointer' }} title="Random bet">🎲</button>
-          )}
           <button onClick={() => setDark(!dark)} style={{ background: 'transparent', border: 'none', fontSize: 16, cursor: 'pointer' }}>{dark ? '☀️' : '🌙'}</button>
-        </div>
-      </div>
-
-      {/* Scrolling Ticker Tape */}
-      <div style={{ overflow: 'hidden', borderBottom: `0.5px solid ${t.border}`, background: t.surface }}>
-        <div style={{ display: 'flex', gap: 24, padding: '8px 0', animation: 'scroll 30s linear infinite', whiteSpace: 'nowrap' }}>
-          {[...['silver', 'gold', 'btc', 'eth', 'nas100', 'us500', 'oil'], ...['silver', 'gold', 'btc', 'eth', 'nas100', 'us500', 'oil']].map((k, i) => (
-            <span key={i} onClick={() => setAsset(k)} style={{ display: 'flex', gap: 6, fontSize: 12, cursor: 'pointer', opacity: asset === k ? 1 : 0.7 }}>
-              <span style={{ fontWeight: 600 }}>{liveAssets[k]?.name}</span>
-              <span>{fmt(liveAssets[k]?.spot || 0)}</span>
-              <span style={{ color: (liveAssets[k]?.chgPct || 0) >= 0 ? t.green : t.red }}>
-                {(liveAssets[k]?.chgPct || 0) >= 0 ? '▲' : '▼'}{Math.abs(liveAssets[k]?.chgPct || 0).toFixed(2)}%
-              </span>
-            </span>
-          ))}
-          {/* Stocks - Live from Yahoo Finance */}
-          {Object.values(stocks).map((stk, i) => (
-            <span key={`stk-${i}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.7 }}>
-              <span style={{ fontWeight: 600 }}>{stk.symbol}</span>
-              <span>${stk.price?.toFixed(2)}</span>
-              <span style={{ color: (stk.changePercent || 0) >= 0 ? t.green : t.red }}>
-                {(stk.changePercent || 0) >= 0 ? '▲' : '▼'}{Math.abs(stk.changePercent || 0).toFixed(2)}%
-              </span>
-            </span>
-          ))}
         </div>
       </div>
 
@@ -261,14 +343,124 @@ export default function App() {
             <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.yellow }}>US Debt:</strong> $36T national debt. Interest payments exceeding defense budget. 120% debt-to-GDP ratio.</p>
             <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.cyan }}>Crypto Thesis:</strong> BTC as digital gold hedge. ETF inflows $40B+ in 2025. Halving supply shock in effect.</p>
             <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.green }}>Gold/Silver:</strong> Central banks bought 1,037t in 2024. De-dollarization accelerating. BRICS gold-backed currency speculation.</p>
-            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.purple }}>Geopolitics:</strong> Taiwan/China tensions. Middle East instability. Ukraine war ongoing. Trump tariff threats.</p>
-            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.orange }}>Fed Watch:</strong> Rate cuts expected 2026. Inflation sticky at 3%. Recession odds ~25% per yield curve.</p>
-            <p style={{ margin: 0 }}><strong style={{ color: t.textSecondary }}>Black Swans:</strong> Commercial real estate ($1.5T maturing), Japan carry trade unwind, China property crisis spillover.</p>
+            <p style={{ margin: 0 }}><strong style={{ color: t.textSecondary }}>Nothing Ever Happens:</strong> Markets rarely move. Stay patient. Trust the trend.</p>
           </div>
         </div>
       )}
 
       <div style={{ padding: 16 }}>
+        {/* TRADING SIMULATOR - MAIN UI */}
+        <div style={{ marginBottom: 24 }}>
+          <Card dark={dark} t={t} style={{ padding: 16 }}>
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-1px', marginBottom: 4 }}>Trading Simulator</div>
+              <div style={{ fontSize: 12, color: '#666' }}>$100 → $10K • 13 assets</div>
+            </div>
+
+            {busted && (
+              <div style={{ background: '#7f1d1d', borderRadius: 12, padding: 16, marginBottom: 16, textAlign: 'center' }}>
+                <div style={{ fontSize: 20 }}>💀</div>
+                <div style={{ fontWeight: 600 }}>Busted at ${balance.toFixed(0)}</div>
+              </div>
+            )}
+            {won && (
+              <div style={{ background: '#14532d', borderRadius: 12, padding: 16, marginBottom: 16, textAlign: 'center' }}>
+                <div style={{ fontSize: 20 }}>🏆</div>
+                <div style={{ fontWeight: 600 }}>${balance.toLocaleString()} reached!</div>
+                <div style={{ fontSize: 12, color: '#86efac' }}>{exits.length} trades • {winRate.toFixed(0)}% wins</div>
+              </div>
+            )}
+
+            {!busted && !won && (
+              <div style={{ background: '#1a1a1a', borderRadius: 14, padding: 16, marginBottom: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontSize: 36, fontWeight: 700 }}>${equity.toFixed(0)}</span>
+                  <span style={{ fontSize: 16, color: pnl >= 0 ? '#4ade80' : '#f87171' }}>
+                    {pnl >= 0 ? '+' : ''}{pnl.toFixed(0)}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#666', marginTop: 8 }}>
+                  <span>#{tick} {running && <span style={{ color: '#4ade80' }}>● live</span>}</span>
+                  <span>{winRate.toFixed(0)}% wins • {exits.length} trades</span>
+                </div>
+              </div>
+            )}
+
+            <div style={{ background: '#1a1a1a', borderRadius: 14, padding: 14, marginBottom: 14, minHeight: 160 }}>
+              <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+                <line x1="0" y1={toY(0)} x2={W} y2={toY(0)} stroke="#333" strokeDasharray="4" />
+                {SYMS.map(sym => prices[sym].length > 1 && (
+                  <path
+                    key={sym}
+                    d={makePath(sym)}
+                    fill="none"
+                    stroke={ASSETS[sym].color}
+                    strokeWidth={position?.sym === sym ? 2.5 : 1}
+                    opacity={position ? (position.sym === sym ? 1 : 0.15) : 0.5}
+                  />
+                ))}
+              </svg>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+                {SYMS.map(sym => (
+                  <div key={sym} style={{ display: 'flex', alignItems: 'center', gap: 4, opacity: position ? (position.sym === sym ? 1 : 0.3) : 0.6 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: 1, background: ASSETS[sym].color }} />
+                    <span style={{ fontSize: 9 }}>{sym}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {position && (
+              <div style={{ background: '#1a1a1a', borderRadius: 12, padding: 12, marginBottom: 14, display: 'flex', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: ASSETS[position.sym].color }}>{position.sym}</div>
+                  <div style={{ fontSize: 10, color: '#666' }}>${position.entry.toFixed(2)} × {position.size}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 18, fontWeight: 600, color: unrealized >= 0 ? '#4ade80' : '#f87171' }}>
+                    {unrealized >= 0 ? '+' : ''}{unrealized.toFixed(2)}
+                  </div>
+                  <div style={{ fontSize: 10, color: '#666' }}>SL ${position.stop.toFixed(2)}</div>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+              <button
+                onClick={() => setRunning(!running)}
+                disabled={busted || won}
+                style={{ flex: 1, padding: 16, borderRadius: 12, border: 'none', fontSize: 16, fontWeight: 600, fontFamily: font, background: (busted || won) ? '#333' : running ? '#dc2626' : '#22c55e', color: (busted || won) ? '#666' : '#fff', cursor: (busted || won) ? 'default' : 'pointer' }}
+              >
+                {busted ? 'Busted' : won ? 'Won!' : running ? 'Stop' : 'Start'}
+              </button>
+              <button onClick={reset} style={{ padding: 16, borderRadius: 12, border: '1px solid #333', background: 'transparent', color: '#666', fontFamily: font, fontSize: 16, cursor: 'pointer' }}>↺</button>
+            </div>
+
+            <div style={{ background: '#1a1a1a', borderRadius: 12, overflow: 'hidden' }}>
+              <button onClick={() => setShowTrades(!showTrades)} style={{ width: '100%', padding: 12, background: 'transparent', border: 'none', display: 'flex', justifyContent: 'space-between', fontFamily: font, fontSize: 13, color: '#888', cursor: 'pointer' }}>
+                <span>trades ({exits.length})</span>
+                <span>{showTrades ? '−' : '+'}</span>
+              </button>
+              {showTrades && (
+                <div style={{ padding: '0 12px 12px', maxHeight: 120, overflow: 'auto' }}>
+                  {trades.length === 0 ? (
+                    <div style={{ color: '#444', fontSize: 12, textAlign: 'center', padding: 8 }}>waiting...</div>
+                  ) : (
+                    [...trades].reverse().slice(0, 15).map((tr, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '4px 0', borderBottom: '1px solid #222' }}>
+                        <span style={{ color: tr.type === 'BUY' ? '#60a5fa' : parseFloat(tr.pnl) >= 0 ? '#4ade80' : '#f87171' }}>
+                          {tr.type} {tr.sym}
+                        </span>
+                        {tr.pnl && <span style={{ color: parseFloat(tr.pnl) >= 0 ? '#4ade80' : '#f87171' }}>{parseFloat(tr.pnl) >= 0 ? '+' : ''}{tr.pnl}</span>}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+
         {/* POLYMARKET SECTION */}
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -322,7 +514,7 @@ export default function App() {
                 onMouseMove={handleMouseMove}
                 onMouseLeave={() => setHoveredMarket(null)}
               >
-                <Card dark={dark} t={t} style={{ padding: 12, cursor: 'pointer', transition: 'transform 0.1s', ':hover': { transform: 'scale(1.01)' } }}>
+                <Card dark={dark} t={t} style={{ padding: 12, cursor: 'pointer' }}>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     {m.image && <img src={m.image} alt="" style={{ width: 36, height: 36, borderRadius: 6, objectFit: 'cover' }} />}
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -345,7 +537,6 @@ export default function App() {
             ))}
           </div>
 
-          {/* Cursor-following tooltip (desktop hover) or centered tooltip (mobile tap) */}
           {(hoveredMarket || tappedMarket) && (() => {
             const market = tappedMarket || hoveredMarket;
             const isMobile = !!tappedMarket;
@@ -376,13 +567,8 @@ export default function App() {
                 <div style={{ display: 'flex', gap: 12, fontSize: 10, color: t.textTertiary }}>
                   <span>24h Vol: ${((market.volume24h || 0) / 1000).toFixed(0)}K</span>
                   <span>Liquidity: ${((market.liquidity || 0) / 1000).toFixed(0)}K</span>
-                  {market.change24h !== null && (
-                    <span style={{ color: market.change24h >= 0 ? t.green : t.red }}>
-                      {market.change24h >= 0 ? '+' : ''}{(market.change24h * 100).toFixed(1)}% 24h
-                    </span>
-                  )}
                 </div>
-                {isMobile ? (
+                {isMobile && (
                   <a
                     href={`https://polymarket.com/event/${market.slug}`}
                     target="_blank"
@@ -391,8 +577,6 @@ export default function App() {
                   >
                     Open on Polymarket →
                   </a>
-                ) : (
-                  <div style={{ fontSize: 9, color: t.cyan, marginTop: 8 }}>Click to open on Polymarket</div>
                 )}
               </div>
             );
@@ -416,27 +600,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Scrolling Asset Ticker */}
-          <div style={{ overflow: 'hidden', marginBottom: 12, marginLeft: -16, marginRight: -16, borderTop: `0.5px solid ${t.border}`, borderBottom: `0.5px solid ${t.border}`, background: t.surface }}>
-            <div style={{ display: 'flex', gap: 24, padding: '10px 0', animation: 'scroll 40s linear infinite', whiteSpace: 'nowrap' }}>
-              {[...Object.entries(liveAssets), ...Object.entries(liveAssets)].map(([k, v], i) => (
-                <span key={i} onClick={() => setAsset(k)} style={{
-                  display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, cursor: 'pointer',
-                  padding: '4px 12px', borderRadius: 8,
-                  background: asset === k ? `${t.accent}20` : 'transparent',
-                  border: asset === k ? `1px solid ${t.accent}` : '1px solid transparent',
-                }}>
-                  <span style={{ fontWeight: 600, color: asset === k ? t.accent : t.text }}>{v.name}</span>
-                  <span style={{ color: t.textSecondary }}>${v.spot.toLocaleString()}</span>
-                  <span style={{ color: v.chgPct >= 0 ? t.green : t.red, fontWeight: 500 }}>
-                    {v.chgPct >= 0 ? '▲' : '▼'}{Math.abs(v.chgPct).toFixed(2)}%
-                  </span>
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Compact Quote + MC Probabilities */}
           {a && (
             <Card dark={dark} t={t} style={{ padding: 16, marginBottom: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
@@ -453,7 +616,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* MC Target Probabilities - sorted high to low */}
               <div style={{ display: 'flex', gap: 8 }}>
                 {[...res.probs].sort((a, b) => b.mc - a.mc).map((p, i) => (
                   <div key={i} style={{ flex: 1, padding: 10, background: t.surface, borderRadius: 10, textAlign: 'center' }}>
@@ -465,7 +627,6 @@ export default function App() {
             </Card>
           )}
 
-          {/* MC Chart */}
           <Card dark={dark} t={t} style={{ padding: 12, marginBottom: 12 }}>
             <div style={{ fontSize: 10, color: t.textTertiary, marginBottom: 8 }}>MONTE CARLO PROJECTION</div>
             <ResponsiveContainer width="100%" height={140}>
@@ -489,7 +650,6 @@ export default function App() {
             </ResponsiveContainer>
           </Card>
 
-          {/* Historical Price Chart - 1 Year */}
           <Card dark={dark} t={t} style={{ padding: 12 }}>
             <div style={{ fontSize: 10, color: t.textTertiary, marginBottom: 8 }}>1 YEAR HISTORICAL</div>
             {historyLoading ? (
@@ -517,7 +677,7 @@ export default function App() {
 
         {/* Footer */}
         <div style={{ textAlign: 'center', padding: '16px 0', fontSize: 10, color: t.textTertiary }}>
-          {new Date().getFullYear()} • Educational only • Not financial advice • <a href="https://github.com/nulljosh/stonks" target="_blank" rel="noopener noreferrer" style={{ color: t.textTertiary }}>GitHub</a>
+          {new Date().getFullYear()} • Educational only • Not financial advice
         </div>
       </div>
     </div>
