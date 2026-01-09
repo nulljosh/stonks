@@ -2,6 +2,8 @@
 
 > Low-latency prediction markets + trading simulator + quantitative analysis. Built for speed, optimized for efficiency.
 
+⚠️ **KNOWN ISSUE**: Simulator may crash after 5-10 seconds on older hardware. Use the ⚡ performance mode toggle in header. Fix in progress - see TODO.md.
+
 **Live Demo**: `npm run dev` → http://localhost:5173
 
 ---

@@ -197,7 +197,7 @@ export default function App() {
     if (pnlPct > 0.02) {
       setPosition(pos => ({ ...pos, stop: Math.max(pos.stop, current * 0.97) }));
     }
-  }, [tick, position, running, prices]);
+  }, [tick]);
 
   useEffect(() => {
     if (!running || position || balance <= 10 || balance >= 10000) return;
