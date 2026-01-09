@@ -25,6 +25,15 @@ const ASSETS = {
 };
 const SYMS = Object.keys(ASSETS);
 
+// Keyword mappings for category filters
+const categoryKeywords = {
+  politics: ['trump', 'biden', 'election', 'president', 'congress', 'senate', 'republican', 'democrat', 'vote', 'governor', 'political', 'white house', 'supreme court', 'legislation', 'poll'],
+  crypto: ['bitcoin', 'btc', 'ethereum', 'eth', 'crypto', 'token', 'blockchain', 'solana', 'xrp', 'dogecoin', 'altcoin', 'defi', 'nft'],
+  sports: ['nfl', 'nba', 'mlb', 'nhl', 'soccer', 'football', 'basketball', 'baseball', 'hockey', 'super bowl', 'championship', 'playoffs', 'world cup', 'olympics', 'ufc', 'boxing', 'tennis', 'golf'],
+  finance: ['stock', 'market', 'fed', 'interest rate', 'inflation', 'gdp', 'recession', 'earnings', 's&p', 'nasdaq', 'dow', 'treasury', 'bond', 'ipo', 'merger'],
+  culture: ['oscar', 'grammy', 'emmy', 'movie', 'film', 'music', 'celebrity', 'award', 'netflix', 'spotify', 'tiktok', 'twitter', 'elon', 'kanye', 'taylor swift'],
+};
+
 // Bloomberg-style blinking indicators
 const BlinkingDot = ({ color, delay = 0, speed = 2 }) => (
   <span style={{
@@ -213,7 +222,7 @@ export default function App() {
       setLastTraded(best.sym);
       setTrades(t => [...t, { type: 'BUY', sym: best.sym, price: best.price.toFixed(2) }]);
     }
-  }, [tick]);
+  }, [tick, running, position, balance, lastTraded, prices]);
 
   const reset = () => {
     setBalance(100);
@@ -270,14 +279,6 @@ export default function App() {
       return () => document.removeEventListener('click', handleOutsideClick);
     }
   }, [tappedMarket]);
-
-  const categoryKeywords = {
-    politics: ['trump', 'biden', 'election', 'president', 'congress', 'senate', 'republican', 'democrat', 'vote', 'governor', 'political', 'white house', 'supreme court', 'legislation', 'poll'],
-    crypto: ['bitcoin', 'btc', 'ethereum', 'eth', 'crypto', 'token', 'blockchain', 'solana', 'xrp', 'dogecoin', 'altcoin', 'defi', 'nft'],
-    sports: ['nfl', 'nba', 'mlb', 'nhl', 'soccer', 'football', 'basketball', 'baseball', 'hockey', 'super bowl', 'championship', 'playoffs', 'world cup', 'olympics', 'ufc', 'boxing', 'tennis', 'golf'],
-    finance: ['stock', 'market', 'fed', 'interest rate', 'inflation', 'gdp', 'recession', 'earnings', 's&p', 'nasdaq', 'dow', 'treasury', 'bond', 'ipo', 'merger'],
-    culture: ['oscar', 'grammy', 'emmy', 'movie', 'film', 'music', 'celebrity', 'award', 'netflix', 'spotify', 'tiktok', 'twitter', 'elon', 'kanye', 'taylor swift'],
-  };
 
   const filteredMarkets = useMemo(() => {
     let filtered = markets;
