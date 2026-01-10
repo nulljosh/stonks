@@ -159,24 +159,39 @@ export default function App() {
     if (!running || balance <= 0.5 || balance >= 1000000000) return;
 
     const iv = setInterval(() => {
-      setPrices(prev => {
-        const next = {};
-        SYMS.forEach(sym => {
-          if (Math.random() < 0.05) trends.current[sym] = (Math.random() - 0.45) * 0.008;
-          const drift = 0.0001;
-          const move = drift + trends.current[sym] + (Math.random() - 0.5) * 0.012;
-          const last = prev[sym][prev[sym].length - 1];
-          const base = ASSETS[sym].price;
-          const newPrice = Math.max(base * 0.7, Math.min(base * 1.5, last * (1 + move)));
-          // Keep only last 50 prices to reduce memory
-          const priceHistory = prev[sym].length >= 50 ? prev[sym].slice(-49) : prev[sym];
-          next[sym] = [...priceHistory, newPrice];
-        });
-        return next;
-      });
+      try {
+        setPrices(prev => {
+          const next = {};
+          SYMS.forEach(sym => {
+            try {
+              if (Math.random() < 0.05) trends.current[sym] = (Math.random() - 0.45) * 0.008;
+              const drift = 0.0001;
+              const move = drift + trends.current[sym] + (Math.random() - 0.5) * 0.012;
+              const last = prev[sym][prev[sym].length - 1];
+              const base = ASSETS[sym].price;
 
-      setTick(t => t + 1);
-    }, perfMode ? 250 : 100); // 250ms for old hardware, 100ms normal
+              if (typeof last !== 'number' || isNaN(last)) {
+                console.error('Invalid last price for', sym, last);
+                next[sym] = [base];
+                return;
+              }
+
+              const newPrice = Math.max(base * 0.7, Math.min(base * 1.5, last * (1 + move)));
+              const priceHistory = prev[sym].length >= 50 ? prev[sym].slice(-49) : prev[sym];
+              next[sym] = [...priceHistory, newPrice];
+            } catch (err) {
+              console.error('Price update error for', sym, err);
+              next[sym] = prev[sym] || [ASSETS[sym].price];
+            }
+          });
+          return next;
+        });
+
+        setTick(t => t + 1);
+      } catch (err) {
+        console.error('Simulator tick error:', err);
+      }
+    }, perfMode ? 250 : 100);
 
     return () => clearInterval(iv);
   }, [running, balance, perfMode]);
@@ -231,16 +246,24 @@ export default function App() {
     if (best) {
       // Aggressive early, conservative later
       const sizePercent = balance < 10 ? 0.20 : balance < 100 ? 0.15 : 0.08;
-      const size = Math.floor(balance * sizePercent);
-      setPosition({
-        sym: best.sym,
-        entry: best.price,
-        size,
-        stop: best.price * 0.965,
-        target: best.price * 1.07,
-      });
-      setLastTraded(best.sym);
-      setTrades(t => [...t, { type: 'BUY', sym: best.sym, price: best.price.toFixed(2) }]);
+      const size = balance < 100 ? (balance * sizePercent) : Math.floor(balance * sizePercent);
+
+      // Don't trade if size is too small
+      if (size < 0.01) return;
+
+      try {
+        setPosition({
+          sym: best.sym,
+          entry: best.price,
+          size,
+          stop: best.price * 0.965,
+          target: best.price * 1.07,
+        });
+        setLastTraded(best.sym);
+        setTrades(t => [...t, { type: 'BUY', sym: best.sym, price: best.price.toFixed(2) }]);
+      } catch (err) {
+        console.error('Position creation failed:', err);
+      }
     }
   }, [tick, running, position, balance, lastTraded, prices]);
 
@@ -456,15 +479,20 @@ export default function App() {
             {!busted && !won && (
               <div style={{ background: '#1a1a1a', borderRadius: 14, padding: 16, marginBottom: 14 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <span style={{ fontSize: 36, fontWeight: 700 }}>${equity.toFixed(0)}</span>
+                  <span style={{ fontSize: 36, fontWeight: 700 }}>${equity >= 100 ? equity.toFixed(0) : equity.toFixed(2)}</span>
                   <span style={{ fontSize: 16, color: pnl >= 0 ? '#4ade80' : '#f87171' }}>
-                    {pnl >= 0 ? '+' : ''}{pnl.toFixed(0)}
+                    {pnl >= 0 ? '+' : ''}{pnl >= 10 ? pnl.toFixed(0) : pnl.toFixed(2)}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#666', marginTop: 8 }}>
                   <span>#{tick} {running && <span style={{ color: '#4ade80' }}>● live</span>}</span>
                   <span>{winRate.toFixed(0)}% wins • {exits.length} trades</span>
                 </div>
+                {position && (
+                  <div style={{ fontSize: 10, color: '#888', marginTop: 4 }}>
+                    Position: {position.size.toFixed(4)} × {position.sym} @ ${position.entry.toFixed(2)}
+                  </div>
+                )}
               </div>
             )}
 
