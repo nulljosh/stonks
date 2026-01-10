@@ -6,7 +6,15 @@
 - [ ] Add error logging/test cases to catch crashes
 
 ## Features Not Implemented
-- [ ] Integrate newt news feed at bottom (code at ~/Documents/Code/newt)
+- [ ] Integrate NEWT news feed (separate project at ~/Documents/Code/newt)
+  - NEWT provides real-time financial news aggregation
+  - Integration plan:
+    1. Add NEWT as npm package or git submodule
+    2. Create NewsWidget component in Autopilot
+    3. Connect to NEWT's WebSocket or REST API
+    4. Display filtered news feed at bottom of dashboard
+    5. Use sentiment analysis to auto-parameterize Monte Carlo drift/volatility
+  - Benefits: Real-time news → automated μ/σ → zero-input simulations
 - [ ] Add SHOO stock ticker
 - [ ] Add S&P 500 full coverage (500 stocks)
 - [ ] Add Kalshi prediction market integration
