@@ -228,7 +228,7 @@ export default function App() {
               }
 
               const newPrice = Math.max(base * 0.7, Math.min(base * 1.5, last * (1 + move)));
-              const priceHistory = prev[sym].length >= 50 ? prev[sym].slice(-49) : prev[sym];
+              const priceHistory = prev[sym].length >= 30 ? prev[sym].slice(-29) : prev[sym];
               next[sym] = [...priceHistory, newPrice];
             } catch (err) {
               console.error('Price update error for', sym, err);
@@ -259,7 +259,10 @@ export default function App() {
 
     if (current <= position.stop) {
       setBalance(b => Math.max(0.5, b + pnl));
-      setTrades(t => [...t, { type: 'STOP', sym: position.sym, pnl: pnl.toFixed(2) }]);
+      setTrades(t => {
+        const updated = [...t, { type: 'STOP', sym: position.sym, pnl: pnl.toFixed(2) }];
+        return updated.length > 100 ? updated.slice(-100) : updated;
+      });
       setTradeStats(s => ({ ...s, losses: { ...s.losses, [position.sym]: (s.losses[position.sym] || 0) + pnl } }));
       setPosition(null);
       return;
@@ -267,7 +270,10 @@ export default function App() {
 
     if (current >= position.target) {
       setBalance(b => b + pnl);
-      setTrades(t => [...t, { type: 'WIN', sym: position.sym, pnl: pnl.toFixed(2) }]);
+      setTrades(t => {
+        const updated = [...t, { type: 'WIN', sym: position.sym, pnl: pnl.toFixed(2) }];
+        return updated.length > 100 ? updated.slice(-100) : updated;
+      });
       setTradeStats(s => ({ ...s, wins: { ...s.wins, [position.sym]: (s.wins[position.sym] || 0) + pnl } }));
       setPosition(null);
       return;
@@ -331,7 +337,10 @@ export default function App() {
           target: best.price * 1.08, // Slightly higher target (8% vs 7%)
         });
         setLastTraded(best.sym);
-        setTrades(t => [...t, { type: 'BUY', sym: best.sym, price: best.price.toFixed(2) }]);
+        setTrades(t => {
+          const updated = [...t, { type: 'BUY', sym: best.sym, price: best.price.toFixed(2) }];
+          return updated.length > 100 ? updated.slice(-100) : updated;
+        });
       } catch (err) {
         console.error('Position creation failed:', err);
       }
