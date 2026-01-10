@@ -540,7 +540,7 @@ export default function App() {
       <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `0.5px solid ${t.border}` }}>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, color: t.textSecondary }}>
-            <a href="https://joshdev.ca" style={{ color: t.textSecondary, textDecoration: 'none', opacity: 0.6 }}>joshdev.ca</a>
+            <a href="https://heyitsmejosh.com" style={{ color: t.textSecondary, textDecoration: 'none', opacity: 0.6 }}>home</a>
             <span style={{ opacity: 0.4 }}>/</span>
             <span style={{ fontSize: 15, fontWeight: 700, color: t.text }}>autopilot</span>
           </div>
