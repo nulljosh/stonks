@@ -304,17 +304,19 @@ export default function App() {
       const sizePercent = balance < 2 ? 0.70 : balance < 5 ? 0.50 : balance < 10 ? 0.30 : 0.15;
       const positionSize = balance * sizePercent;
 
-      // Skip if stock price > 50% of position size (prevents expensive stock disasters)
-      if (current > positionSize * 0.5) return;
+      // Ultra-lenient at very low balance to escape $1 prison, stricter as balance grows
+      const maxPriceRatio = balance < 2 ? 5.0 : balance < 10 ? 2.0 : balance < 100 ? 1.0 : 0.5;
+      if (current > positionSize * maxPriceRatio) return;
 
-      // Skip if we can't afford meaningful position (at least 0.01 shares)
-      if (positionSize / current < 0.01) return;
+      // Skip if we can't afford at least 0.001 shares (very low threshold)
+      const shares = positionSize / current;
+      if (shares < 0.001) return;
 
       const avg = p.slice(-10).reduce((a, b) => a + b, 0) / 10;
       const strength = (current - avg) / avg;
 
-      // Ultra-strict thresholds for 60%+ win rate (only VERY strong momentum)
-      const minStrength = balance < 2 ? 0.015 : balance < 10 ? 0.018 : 0.022;
+      // Very lenient at $1 to escape, stricter as balance grows
+      const minStrength = balance < 2 ? 0.008 : balance < 10 ? 0.012 : balance < 100 ? 0.018 : 0.022;
 
       if (strength > minStrength && (!best || strength > best.strength)) {
         best = { sym, price: current, strength };
@@ -333,13 +335,19 @@ export default function App() {
       }
 
       try {
-        console.log('Opening position:', { sym: best.sym, size, entry: best.price, balance, shares: (size/best.price).toFixed(2) });
+        const shares = size / best.price;
+        console.log('Opening position:', { sym: best.sym, size: size.toFixed(4), entry: best.price, balance: balance.toFixed(2), shares: shares.toFixed(4) });
+
+        // Tighter stops at low balance, wider as we scale up
+        const stopLossPct = balance < 2 ? 0.980 : balance < 10 ? 0.985 : 0.988; // 2%, 1.5%, 1.2%
+        const takeProfitPct = balance < 2 ? 1.055 : balance < 10 ? 1.050 : 1.045; // 5.5%, 5%, 4.5%
+
         setPosition({
           sym: best.sym,
           entry: best.price,
           size,
-          stop: best.price * 0.985, // 1.5% stop loss (tight)
-          target: best.price * 1.045, // 4.5% take profit (3:1 R/R, achievable)
+          stop: best.price * stopLossPct,
+          target: best.price * takeProfitPct,
         });
         setLastTraded(best.sym);
         setTrades(t => {
