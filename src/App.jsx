@@ -90,6 +90,10 @@ styleSheet.textContent = `
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 `;
 if (!document.head.querySelector('#bloomberg-animations')) {
   styleSheet.id = 'bloomberg-animations';
@@ -195,7 +199,7 @@ export default function App() {
       } catch (err) {
         console.error('Simulator tick error:', err);
       }
-    }, perfMode ? 250 : 100);
+    }, perfMode ? 300 : 150); // Slower ticks for smoother animation (was 100ms)
 
     return () => clearInterval(iv);
   }, [running, balance, perfMode]);
@@ -304,7 +308,7 @@ export default function App() {
     if (!running || !startTime) return;
     const timer = setInterval(() => {
       setElapsedTime(Date.now() - startTime);
-    }, 100);
+    }, 500); // Update timer less frequently (was 100ms)
     return () => clearInterval(timer);
   }, [running, startTime]);
 
