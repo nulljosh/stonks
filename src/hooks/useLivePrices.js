@@ -163,7 +163,13 @@ export function useLivePrices(initialAssets) {
 export function formatLastUpdated(date) {
   if (!date) return 'Never';
   const seconds = Math.floor((new Date() - date) / 1000);
-  if (seconds < 60) return 'Just now';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  return `${Math.floor(seconds / 3600)}h ago`;
+
+  // If recent, show actual time
+  if (seconds < 3600) {
+    return `at ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+  }
+
+  // For older updates, show relative time
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  return `${Math.floor(seconds / 86400)}d ago`;
 }

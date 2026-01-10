@@ -7,7 +7,7 @@ import { runMonteCarlo, formatPrice, calcFibTargets } from './utils/math';
 import { getTheme, getProbColor } from './utils/theme';
 import { defaultAssets, scenarios, horizons, horizonLabels } from './utils/assets';
 
-// Trading Simulator Assets
+// Trading Simulator Assets (20 total)
 const ASSETS = {
   NAS100: { name: 'Nasdaq 100', price: 21500, color: '#00d4ff' },
   SP500: { name: 'S&P 500', price: 6000, color: '#ff6b6b' },
@@ -23,6 +23,12 @@ const ASSETS = {
   COIN: { name: 'Coinbase', price: 265, color: '#0052FF' },
   PLTR: { name: 'Palantir', price: 71, color: '#9d4edd' },
   HOOD: { name: 'Robinhood', price: 38, color: '#00C805' },
+  FARTCOIN: { name: 'FartCoin', price: 0.85, color: '#8B4513' },
+  WIF: { name: 'dogwifhat', price: 1.92, color: '#FF69B4' },
+  BONK: { name: 'Bonk', price: 0.00002, color: '#FFA500' },
+  PEPE: { name: 'Pepe', price: 0.000012, color: '#00FF00' },
+  DOGE: { name: 'Dogecoin', price: 0.31, color: '#C2A633' },
+  SHIB: { name: 'Shiba Inu', price: 0.000021, color: '#FFA500' },
 };
 const SYMS = Object.keys(ASSETS);
 
@@ -365,6 +371,13 @@ export default function App() {
         </div>
       </div>
 
+      {/* Nothing Ever Happens Banner */}
+      <div style={{ padding: 12, background: `linear-gradient(135deg, ${t.textTertiary}10, ${t.textTertiary}05)`, borderBottom: `0.5px solid ${t.border}`, textAlign: 'center' }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: t.textSecondary, letterSpacing: '0.5px' }}>
+          NOTHING EVER HAPPENS
+        </div>
+      </div>
+
       {/* Macro Banner */}
       {showMacro && (
         <div style={{ padding: 16, background: `linear-gradient(135deg, ${t.red}20, ${t.orange}20)`, borderBottom: `0.5px solid ${t.border}` }}>
@@ -408,8 +421,7 @@ export default function App() {
         <div style={{ marginBottom: 24 }}>
           <Card dark={dark} t={t} style={{ padding: 16 }}>
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-1px', marginBottom: 4 }}>Trading Simulator</div>
-              <div style={{ fontSize: 12, color: '#666' }}>$100 → $10K • 13 assets</div>
+              <div style={{ fontSize: 12, color: '#666' }}>$100 → $10K • 20 assets</div>
             </div>
 
             {busted && (
