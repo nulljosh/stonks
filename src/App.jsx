@@ -6,6 +6,7 @@ import { useStocks, useStockHistory } from './hooks/useStocks';
 import { runMonteCarlo, formatPrice, calcFibTargets } from './utils/math';
 import { getTheme, getProbColor } from './utils/theme';
 import { defaultAssets, scenarios, horizons, horizonLabels } from './utils/assets';
+import NewsWidget from './components/NewsWidget';
 
 // Trading Simulator Assets (US50 + Indices + Crypto)
 const ASSETS = {
@@ -283,21 +284,26 @@ export default function App() {
 
     let best = null;
     SYMS.forEach(sym => {
-      if (sym === lastTraded) return;
+      // Only skip lastTraded if balance > $5 (allow repeat trades when desperate)
+      if (balance > 5 && sym === lastTraded) return;
+
       const p = prices[sym];
       if (p.length < 10) return;
 
       const current = p[p.length - 1];
 
-      // Skip stocks too expensive for current balance
-      const maxAffordable = balance * 0.50; // Max position size
-      if (current > maxAffordable * 0.5) return; // Need at least 2 shares worth
+      // More aggressive filtering at low balance
+      const sizePercent = balance < 2 ? 0.70 : balance < 5 ? 0.50 : balance < 10 ? 0.30 : 0.15;
+      const positionSize = balance * sizePercent;
+
+      // Skip if we can't afford meaningful position (at least 0.01 shares)
+      if (positionSize / current < 0.01) return;
 
       const avg = p.slice(-10).reduce((a, b) => a + b, 0) / 10;
       const strength = (current - avg) / avg;
 
-      // Lower threshold for small balances (easier to find trades)
-      const minStrength = balance < 10 ? 0.0005 : 0.001;
+      // Much lower threshold at very low balances to ensure we can trade
+      const minStrength = balance < 2 ? 0.0001 : balance < 10 ? 0.0005 : 0.001;
 
       if (strength > minStrength && (!best || strength > best.strength)) {
         best = { sym, price: current, strength };
@@ -307,22 +313,16 @@ export default function App() {
     if (best) {
       // Ultra aggressive at $1 to escape quickly
       const sizePercent = balance < 2 ? 0.70 : balance < 5 ? 0.50 : balance < 10 ? 0.30 : balance < 100 ? 0.15 : balance < 1000 ? 0.10 : 0.08;
-      const size = balance * sizePercent; // No floor - allow fractional positions
+      const size = balance * sizePercent;
 
-      // Don't trade if size is too small
-      if (size < 0.01) {
+      // Minimum position check (reduced to $0.001 minimum)
+      if (size < 0.001) {
         console.warn('Position too small:', size, 'balance:', balance);
         return;
       }
 
-      // Verify we can afford at least 0.1 shares
-      if (size / best.price < 0.1) {
-        console.warn('Cannot afford meaningful position:', { size, price: best.price });
-        return;
-      }
-
       try {
-        console.log('Opening position:', { sym: best.sym, size, entry: best.price, balance });
+        console.log('Opening position:', { sym: best.sym, size, entry: best.price, balance, shares: (size/best.price).toFixed(2) });
         setPosition({
           sym: best.sym,
           entry: best.price,
@@ -335,6 +335,9 @@ export default function App() {
       } catch (err) {
         console.error('Position creation failed:', err);
       }
+    } else if (balance < 5) {
+      // Log why we couldn't find a trade at low balance
+      console.warn('No suitable trades found at low balance:', balance, 'lastTraded:', lastTraded);
     }
   }, [tick, running, position, balance, lastTraded, prices]);
 
@@ -832,6 +835,13 @@ export default function App() {
           })()}
         </div>
 
+        {/* NEWS SECTION */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: t.cyan }}>FINANCIAL NEWS</span>
+          </div>
+          <NewsWidget dark={dark} t={t} />
+        </div>
 
         {/* Footer */}
         <div style={{ textAlign: 'center', padding: '16px 0', fontSize: 10, color: t.textTertiary }}>
