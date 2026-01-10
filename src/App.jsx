@@ -137,6 +137,7 @@ export default function App() {
   const [perfMode, setPerfMode] = useState(false);
   const [startTime, setStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [targetTrillion, setTargetTrillion] = useState(false);
   const trends = useRef(Object.fromEntries(SYMS.map(s => [s, 0])));
   const [tradeStats, setTradeStats] = useState({ wins: {}, losses: {} });
 
@@ -158,7 +159,8 @@ export default function App() {
 
   // Trading Simulator Logic
   useEffect(() => {
-    if (!running || balance <= 0.5 || balance >= 1000000000) return;
+    const target = targetTrillion ? 1000000000000 : 1000000000;
+    if (!running || balance <= 0.5 || balance >= target) return;
 
     const iv = setInterval(() => {
       try {
@@ -230,7 +232,8 @@ export default function App() {
   }, [tick]);
 
   useEffect(() => {
-    if (!running || position || balance <= 0.5 || balance >= 1000000000) return;
+    const target = targetTrillion ? 1000000000000 : 1000000000;
+    if (!running || position || balance <= 0.5 || balance >= target) return;
 
     let best = null;
     SYMS.forEach(sym => {
@@ -310,7 +313,8 @@ export default function App() {
   const unrealized = position ? (currentPrice - position.entry) * position.size : 0;
   const equity = balance + unrealized;
   const busted = balance <= 0.5;
-  const won = balance >= 1000000000;
+  const target = targetTrillion ? 1000000000000 : 1000000000;
+  const won = balance >= target;
 
   // Calculate biggest winner/loser
   const biggestWinner = Object.entries(tradeStats.wins).sort((a, b) => b[1] - a[1])[0];
@@ -491,8 +495,18 @@ export default function App() {
         {/* TRADING SIMULATOR - MAIN UI */}
         <div style={{ marginBottom: 24 }}>
           <Card dark={dark} t={t} style={{ padding: 16 }}>
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 12, color: '#666' }}>$1 → $1B • 20 assets • Fib levels</div>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontSize: 12, color: '#666' }}>$1 → ${targetTrillion ? '1T' : '1B'} • 20 assets • Fib levels</div>
+              <label style={{ fontSize: 11, color: '#666', display: 'flex', alignItems: 'center', gap: 6, cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.5 : 1 }}>
+                <input
+                  type="checkbox"
+                  checked={targetTrillion}
+                  onChange={(e) => setTargetTrillion(e.target.checked)}
+                  disabled={running}
+                  style={{ cursor: running ? 'not-allowed' : 'pointer' }}
+                />
+                $1T target
+              </label>
             </div>
 
             {busted && (
@@ -504,8 +518,8 @@ export default function App() {
             {won && (
               <div style={{ background: '#14532d', borderRadius: 12, padding: 16, marginBottom: 16, textAlign: 'center' }}>
                 <div style={{ fontSize: 20 }}>🏆</div>
-                <div style={{ fontWeight: 600 }}>$1B REACHED!</div>
-                <div style={{ fontSize: 12, color: '#86efac' }}>{exits.length} trades • {winRate.toFixed(0)}% wins</div>
+                <div style={{ fontWeight: 600 }}>${targetTrillion ? '1T' : '1B'} REACHED!</div>
+                <div style={{ fontSize: 12, color: '#86efac' }}>{exits.length} trades • {winRate.toFixed(0)}% wins • {formatTime(elapsedTime)}</div>
                 {biggestWinner && <div style={{ fontSize: 11, color: '#4ade80', marginTop: 4 }}>MVP: {biggestWinner[0]} (+${biggestWinner[1].toFixed(0)})</div>}
                 {biggestLoser && <div style={{ fontSize: 11, color: '#f87171', marginTop: 2 }}>Worst: {biggestLoser[0]} (${biggestLoser[1].toFixed(0)})</div>}
               </div>
