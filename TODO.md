@@ -3,23 +3,23 @@
 ## Critical Bugs (Fix First)
 - [ ] Fix simulator crash after 5-10s (React render loop issue)
 - [ ] Fix horizontal ticker not rendering (data loading issue)
-- [ ] Add error logging/test cases to catch crashes
+- [x] Add error logging/test cases to catch crashes
 - [ ] Frankly it's not even profitable and probably won't even work for a while
-- [ ] It was winning for a day or two but now is getting stuck out at $1. 
-- [ ] Trying to place orders for $0.00 BONK etc lol.
-- [ ] I don't think it's even placing orders honestly
+- [x] It was winning for a day or two but now is getting stuck out at $1.
+- [x] Trying to place orders for $0.00 BONK etc lol.
+- [x] I don't think it's even placing orders honestly
 - [ ] The problem with Opus etc is it writes huge amount of code at once then runs out of tokens before you can bug fix. Prepare for this more and more.
 - [ ] Basically error handle and make more and more use cases and be more proactive before you max out usage.
 
 ## Features Not Implemented
-- [ ] Integrate NEWT news feed (separate project at ~/Documents/Code/newt)
+- [x] Integrate NEWT news feed (separate project at ~/Documents/Code/newt)
   - NEWT provides real-time financial news aggregation
   - Integration plan:
-    1. Add NEWT as npm package or git submodule
-    2. Create NewsWidget component in Autopilot
-    3. Connect to NEWT's WebSocket or REST API
-    4. Display filtered news feed at bottom of dashboard
-    5. Use sentiment analysis to auto-parameterize Monte Carlo drift/volatility
+    1. ~~Add NEWT as npm package or git submodule~~
+    2. ~~Create NewsWidget component in Autopilot~~
+    3. ~~Connect to NEWT's WebSocket or REST API~~
+    4. ~~Display filtered news feed at bottom of dashboard~~
+    5. Use sentiment analysis to auto-parameterize Monte Carlo drift/volatility (future)
   - Benefits: Real-time news → automated μ/σ → zero-input simulations
 - [ ] Add SHOO stock ticker
 - [ ] Add S&P 500 full coverage (500 stocks)
