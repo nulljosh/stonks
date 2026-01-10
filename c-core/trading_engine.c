@@ -65,7 +65,8 @@ float calculate_momentum(const Asset* asset) {
 // Find best asset to trade
 int8_t find_best_trade(const TradingEngine* engine, float balance) {
     int8_t best_idx = -1;
-    float best_strength = balance < 2.0f ? 0.0001f : (balance < 10.0f ? 0.0005f : 0.001f);
+    // Balanced thresholds (50-60% target)
+    float best_strength = balance < 2.0f ? 0.004f : (balance < 10.0f ? 0.005f : 0.007f);
 
     for (uint8_t i = 0; i < engine->asset_count; i++) {
         // Skip last traded if balance > $5
@@ -80,6 +81,8 @@ int8_t find_best_trade(const TradingEngine* engine, float balance) {
         if (position_size / asset->current_price < 0.01f) continue;
 
         float strength = calculate_momentum(asset);
+
+        // Only trade if momentum is STRONG (quality over quantity)
         if (strength > best_strength) {
             best_strength = strength;
             best_idx = i;
@@ -103,8 +106,8 @@ void open_position(TradingEngine* engine, int8_t asset_idx) {
     engine->position.asset_idx = asset_idx;
     engine->position.entry_price = asset->current_price;
     engine->position.size = size;
-    engine->position.stop_loss = asset->current_price * 0.96f;
-    engine->position.take_profit = asset->current_price * 1.08f;
+    engine->position.stop_loss = asset->current_price * 0.97f;  // 3% SL
+    engine->position.take_profit = asset->current_price * 1.12f; // 12% TP (4:1 R/R)
 
     engine->last_traded_idx = asset_idx;
 
