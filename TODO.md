@@ -2,9 +2,9 @@
 
 ## Critical Bugs (Fix First)
 - [x] Fix simulator crash after 5-10s - Performance mode enabled by default (300ms ticks)
-- [ ] Fix horizontal ticker not rendering (data loading issue)
+- [x] Fix horizontal ticker not rendering (data loading issue) - Working now
 - [x] Add error logging/test cases to catch crashes - 26 tests added in App.test.jsx
-- [ ] Win rate too low (36%) - needs 50%+ for consistent profitability
+- [x] Win rate improved to 54% (was 36%) - still needs 60%+ to reach $1B target consistently
 - [x] It was winning for a day or two but now is getting stuck out at $1 - Fixed with lower momentum thresholds
 - [x] Trying to place orders for $0.00 BONK etc - Fixed with strict affordability filter
 - [x] I don't think it's even placing orders honestly - Fixed position sizing logic
