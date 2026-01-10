@@ -135,6 +135,8 @@ export default function App() {
   const [showTrades, setShowTrades] = useState(false);
   const [lastTraded, setLastTraded] = useState(null);
   const [perfMode, setPerfMode] = useState(false);
+  const [startTime, setStartTime] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const trends = useRef(Object.fromEntries(SYMS.map(s => [s, 0])));
   const [tradeStats, setTradeStats] = useState({ wins: {}, losses: {} });
 
@@ -244,14 +246,18 @@ export default function App() {
     });
 
     if (best) {
-      // Aggressive early, conservative later
-      const sizePercent = balance < 10 ? 0.20 : balance < 100 ? 0.15 : 0.08;
+      // Super aggressive early to escape $1
+      const sizePercent = balance < 5 ? 0.50 : balance < 10 ? 0.30 : balance < 100 ? 0.15 : 0.08;
       const size = balance < 100 ? (balance * sizePercent) : Math.floor(balance * sizePercent);
 
       // Don't trade if size is too small
-      if (size < 0.01) return;
+      if (size < 0.01) {
+        console.warn('Position too small:', size, 'balance:', balance);
+        return;
+      }
 
       try {
+        console.log('Opening position:', { sym: best.sym, size, entry: best.price, balance });
         setPosition({
           sym: best.sym,
           entry: best.price,
@@ -276,8 +282,28 @@ export default function App() {
     setTick(0);
     setLastTraded(null);
     setTradeStats({ wins: {}, losses: {} });
+    setStartTime(null);
+    setElapsedTime(0);
     trends.current = Object.fromEntries(SYMS.map(s => [s, 0]));
   }, []);
+
+  // Timer logic
+  useEffect(() => {
+    if (running && !startTime) {
+      setStartTime(Date.now());
+    }
+    if (!running && startTime) {
+      setElapsedTime(Date.now() - startTime);
+    }
+  }, [running, startTime]);
+
+  useEffect(() => {
+    if (!running || !startTime) return;
+    const timer = setInterval(() => {
+      setElapsedTime(Date.now() - startTime);
+    }, 100);
+    return () => clearInterval(timer);
+  }, [running, startTime]);
 
   const pnl = balance - 1;
   const currentPrice = position ? prices[position.sym][prices[position.sym].length - 1] : 0;
@@ -292,6 +318,15 @@ export default function App() {
   const exits = trades.filter(t => t.pnl);
   const wins = exits.filter(t => parseFloat(t.pnl) > 0);
   const winRate = exits.length ? (wins.length / exits.length * 100) : 0;
+
+  const formatTime = (ms) => {
+    const secs = Math.floor(ms / 1000);
+    const mins = Math.floor(secs / 60);
+    const hours = Math.floor(mins / 60);
+    if (hours > 0) return `${hours}h ${mins % 60}m`;
+    if (mins > 0) return `${mins}m ${secs % 60}s`;
+    return `${secs}s`;
+  };
 
   // Chart
   const W = 320, H = 120;
@@ -488,11 +523,9 @@ export default function App() {
                   <span>#{tick} {running && <span style={{ color: '#4ade80' }}>● live</span>}</span>
                   <span>{winRate.toFixed(0)}% wins • {exits.length} trades</span>
                 </div>
-                {position && (
-                  <div style={{ fontSize: 10, color: '#888', marginTop: 4 }}>
-                    Position: {position.size.toFixed(4)} × {position.sym} @ ${position.entry.toFixed(2)}
-                  </div>
-                )}
+                <div style={{ fontSize: 11, color: '#888', marginTop: 4 }}>
+                  Time: {formatTime(elapsedTime)} {position && `• Position: ${position.size.toFixed(4)} × ${position.sym} @ $${position.entry.toFixed(2)}`}
+                </div>
               </div>
             )}
 
