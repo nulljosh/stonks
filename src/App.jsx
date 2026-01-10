@@ -7,6 +7,7 @@ import { runMonteCarlo, formatPrice, calcFibTargets } from './utils/math';
 import { getTheme, getProbColor } from './utils/theme';
 import { defaultAssets, scenarios, horizons, horizonLabels } from './utils/assets';
 import NewsWidget from './components/NewsWidget';
+import WeatherWidget from './components/WeatherWidget';
 
 // Trading Simulator Assets (US50 + Indices + Crypto)
 const ASSETS = {
@@ -538,7 +539,8 @@ export default function App() {
           <span style={{ fontSize: 15, fontWeight: 700 }}>autopilot</span>
           <StatusBar t={t} />
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+          <WeatherWidget t={t} />
           <span style={{ fontSize: 10, color: t.textTertiary }}>Updated {formatLastUpdated(lastUpdated)}</span>
           <button onClick={() => setPerfMode(!perfMode)} style={{ background: perfMode ? t.green : 'transparent', border: `1px solid ${t.border}`, borderRadius: 8, padding: '4px 10px', color: perfMode ? '#fff' : t.textSecondary, fontSize: 11, cursor: 'pointer' }} title="Slow mode for older hardware">⚡{perfMode && ' SLOW'}</button>
           <button onClick={() => setShowMacro(!showMacro)} style={{ background: showMacro ? t.accent : 'transparent', border: `1px solid ${t.border}`, borderRadius: 8, padding: '4px 10px', color: showMacro ? '#fff' : t.textSecondary, fontSize: 11, cursor: 'pointer' }}>MACRO</button>
