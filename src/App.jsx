@@ -332,6 +332,23 @@ export default function App() {
     return `${secs}s`;
   };
 
+  // Calculate real-world time (each tick = 5min real trading)
+  const realWorldTime = (ticks) => {
+    const tradingMinutes = ticks * 5; // 5min per tick
+    const tradingHours = tradingMinutes / 60;
+    const tradingDays = tradingHours / 6.5; // 6.5hr trading day
+    const tradingWeeks = tradingDays / 5; // 5 trading days per week
+    const tradingMonths = tradingDays / 21; // ~21 trading days per month
+    const tradingYears = tradingDays / 252; // 252 trading days per year
+
+    if (tradingYears >= 1) return `${tradingYears.toFixed(1)} years`;
+    if (tradingMonths >= 1) return `${tradingMonths.toFixed(1)} months`;
+    if (tradingWeeks >= 1) return `${tradingWeeks.toFixed(1)} weeks`;
+    if (tradingDays >= 1) return `${tradingDays.toFixed(1)} days`;
+    if (tradingHours >= 1) return `${tradingHours.toFixed(1)} hours`;
+    return `${tradingMinutes} minutes`;
+  };
+
   // Chart
   const W = 320, H = 120;
   const allNorm = SYMS.flatMap(s => prices[s].map(p => (p - ASSETS[s].price) / ASSETS[s].price));
@@ -513,6 +530,7 @@ export default function App() {
               <div style={{ background: '#7f1d1d', borderRadius: 12, padding: 16, marginBottom: 16, textAlign: 'center' }}>
                 <div style={{ fontSize: 20 }}>💀</div>
                 <div style={{ fontWeight: 600 }}>Busted at ${balance.toFixed(0)}</div>
+                <div style={{ fontSize: 11, color: '#fca5a5', marginTop: 4 }}>Real-world: {realWorldTime(tick)}</div>
               </div>
             )}
             {won && (
@@ -520,6 +538,7 @@ export default function App() {
                 <div style={{ fontSize: 20 }}>🏆</div>
                 <div style={{ fontWeight: 600 }}>${targetTrillion ? '1T' : '1B'} REACHED!</div>
                 <div style={{ fontSize: 12, color: '#86efac' }}>{exits.length} trades • {winRate.toFixed(0)}% wins • {formatTime(elapsedTime)}</div>
+                <div style={{ fontSize: 11, color: '#86efac', marginTop: 4 }}>Real-world: {realWorldTime(tick)} of trading</div>
                 {biggestWinner && <div style={{ fontSize: 11, color: '#4ade80', marginTop: 4 }}>MVP: {biggestWinner[0]} (+${biggestWinner[1].toFixed(0)})</div>}
                 {biggestLoser && <div style={{ fontSize: 11, color: '#f87171', marginTop: 2 }}>Worst: {biggestLoser[0]} (${biggestLoser[1].toFixed(0)})</div>}
               </div>
