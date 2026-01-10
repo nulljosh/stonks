@@ -75,9 +75,14 @@ int8_t find_best_trade(const TradingEngine* engine, float balance) {
         const Asset* asset = &engine->assets[i];
         if (asset->history.count < 10) continue;
 
-        // Check affordability
+        // Check affordability - STRICT filtering
         float size_percent = balance < 2.0f ? 0.70f : (balance < 5.0f ? 0.50f : 0.30f);
         float position_size = balance * size_percent;
+
+        // Skip if stock price > 50% of position size (prevents expensive stock disasters)
+        if (asset->current_price > position_size * 0.5f) continue;
+
+        // Skip if we can't afford meaningful position
         if (position_size / asset->current_price < 0.01f) continue;
 
         float strength = calculate_momentum(asset);

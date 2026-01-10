@@ -304,14 +304,17 @@ export default function App() {
       const sizePercent = balance < 2 ? 0.70 : balance < 5 ? 0.50 : balance < 10 ? 0.30 : 0.15;
       const positionSize = balance * sizePercent;
 
+      // Skip if stock price > 50% of position size (prevents expensive stock disasters)
+      if (current > positionSize * 0.5) return;
+
       // Skip if we can't afford meaningful position (at least 0.01 shares)
       if (positionSize / current < 0.01) return;
 
       const avg = p.slice(-10).reduce((a, b) => a + b, 0) / 10;
       const strength = (current - avg) / avg;
 
-      // Much lower threshold at very low balances to ensure we can trade
-      const minStrength = balance < 2 ? 0.0001 : balance < 10 ? 0.0005 : 0.001;
+      // Balanced thresholds for 50%+ win rate
+      const minStrength = balance < 2 ? 0.004 : balance < 10 ? 0.005 : 0.007;
 
       if (strength > minStrength && (!best || strength > best.strength)) {
         best = { sym, price: current, strength };
@@ -335,8 +338,8 @@ export default function App() {
           sym: best.sym,
           entry: best.price,
           size,
-          stop: best.price * 0.96, // Wider stop loss (4% vs 3.5%)
-          target: best.price * 1.08, // Slightly higher target (8% vs 7%)
+          stop: best.price * 0.97, // 3% stop loss
+          target: best.price * 1.12, // 12% take profit (4:1 R/R)
         });
         setLastTraded(best.sym);
         setTrades(t => {
