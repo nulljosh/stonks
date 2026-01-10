@@ -4,6 +4,9 @@
 - [ ] Fix simulator crash after 5-10s (React render loop issue)
 - [ ] Fix horizontal ticker not rendering (data loading issue)
 - [ ] Add error logging/test cases to catch crashes
+- [ ] Frankly it's not even profitable and probably won't even work for a while
+- [ ] It was winning for a day or two but now is getting stuck out at $1. 
+- [ ] Trying to place orders for $0.00 BONK etc lol.
 
 ## Features Not Implemented
 - [ ] Integrate NEWT news feed (separate project at ~/Documents/Code/newt)
