@@ -300,6 +300,9 @@ export default function App() {
 
       const current = p[p.length - 1];
 
+      // Skip micro-cap coins (< $0.01) - price movements too small to matter
+      if (current < 0.01) return;
+
       // More aggressive filtering at low balance
       const sizePercent = balance < 2 ? 0.70 : balance < 5 ? 0.50 : balance < 10 ? 0.30 : 0.15;
       const positionSize = balance * sizePercent;
