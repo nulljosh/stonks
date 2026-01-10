@@ -249,9 +249,9 @@ export default function App() {
     });
 
     if (best) {
-      // Super aggressive early to escape $1
-      const sizePercent = balance < 5 ? 0.50 : balance < 10 ? 0.30 : balance < 100 ? 0.15 : 0.08;
-      const size = balance < 100 ? (balance * sizePercent) : Math.floor(balance * sizePercent);
+      // Super aggressive early to escape $1, then scale down
+      const sizePercent = balance < 5 ? 0.50 : balance < 10 ? 0.30 : balance < 100 ? 0.15 : balance < 1000 ? 0.10 : 0.08;
+      const size = balance * sizePercent; // No floor - allow fractional positions
 
       // Don't trade if size is too small
       if (size < 0.01) {
@@ -265,8 +265,8 @@ export default function App() {
           sym: best.sym,
           entry: best.price,
           size,
-          stop: best.price * 0.965,
-          target: best.price * 1.07,
+          stop: best.price * 0.96, // Wider stop loss (4% vs 3.5%)
+          target: best.price * 1.08, // Slightly higher target (8% vs 7%)
         });
         setLastTraded(best.sym);
         setTrades(t => [...t, { type: 'BUY', sym: best.sym, price: best.price.toFixed(2) }]);
@@ -322,6 +322,14 @@ export default function App() {
   const exits = trades.filter(t => t.pnl);
   const wins = exits.filter(t => parseFloat(t.pnl) > 0);
   const winRate = exits.length ? (wins.length / exits.length * 100) : 0;
+
+  const formatNumber = (num) => {
+    if (num >= 1e12) return `$${(num / 1e12).toFixed(2)}T`;
+    if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`;
+    if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`;
+    if (num >= 1e3) return `$${(num / 1e3).toFixed(2)}K`;
+    return `$${num.toFixed(2)}`;
+  };
 
   const formatTime = (ms) => {
     const secs = Math.floor(ms / 1000);
@@ -529,7 +537,7 @@ export default function App() {
             {busted && (
               <div style={{ background: '#7f1d1d', borderRadius: 12, padding: 16, marginBottom: 16, textAlign: 'center' }}>
                 <div style={{ fontSize: 20 }}>💀</div>
-                <div style={{ fontWeight: 600 }}>Busted at ${balance.toFixed(0)}</div>
+                <div style={{ fontWeight: 600 }}>Busted at {formatNumber(balance)}</div>
                 <div style={{ fontSize: 11, color: '#fca5a5', marginTop: 4 }}>Real-world: {realWorldTime(tick)}</div>
               </div>
             )}
@@ -539,17 +547,17 @@ export default function App() {
                 <div style={{ fontWeight: 600 }}>${targetTrillion ? '1T' : '1B'} REACHED!</div>
                 <div style={{ fontSize: 12, color: '#86efac' }}>{exits.length} trades • {winRate.toFixed(0)}% wins • {formatTime(elapsedTime)}</div>
                 <div style={{ fontSize: 11, color: '#86efac', marginTop: 4 }}>Real-world: {realWorldTime(tick)} of trading</div>
-                {biggestWinner && <div style={{ fontSize: 11, color: '#4ade80', marginTop: 4 }}>MVP: {biggestWinner[0]} (+${biggestWinner[1].toFixed(0)})</div>}
-                {biggestLoser && <div style={{ fontSize: 11, color: '#f87171', marginTop: 2 }}>Worst: {biggestLoser[0]} (${biggestLoser[1].toFixed(0)})</div>}
+                {biggestWinner && <div style={{ fontSize: 11, color: '#4ade80', marginTop: 4 }}>MVP: {biggestWinner[0]} (+{formatNumber(biggestWinner[1]).replace('$', '')})</div>}
+                {biggestLoser && <div style={{ fontSize: 11, color: '#f87171', marginTop: 2 }}>Worst: {biggestLoser[0]} ({formatNumber(biggestLoser[1]).replace('$', '')})</div>}
               </div>
             )}
 
             {!busted && !won && (
               <div style={{ background: '#1a1a1a', borderRadius: 14, padding: 16, marginBottom: 14 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <span style={{ fontSize: 36, fontWeight: 700 }}>${equity >= 100 ? equity.toFixed(0) : equity.toFixed(2)}</span>
+                  <span style={{ fontSize: 36, fontWeight: 700 }}>{formatNumber(equity)}</span>
                   <span style={{ fontSize: 16, color: pnl >= 0 ? '#4ade80' : '#f87171' }}>
-                    {pnl >= 0 ? '+' : ''}{pnl >= 10 ? pnl.toFixed(0) : pnl.toFixed(2)}
+                    {pnl >= 0 ? '+' : ''}{formatNumber(Math.abs(pnl)).replace('$', '')}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#666', marginTop: 8 }}>
@@ -557,7 +565,7 @@ export default function App() {
                   <span>{winRate.toFixed(0)}% wins • {exits.length} trades</span>
                 </div>
                 <div style={{ fontSize: 11, color: '#888', marginTop: 4 }}>
-                  Time: {formatTime(elapsedTime)} {position && `• Position: ${position.size.toFixed(4)} × ${position.sym} @ $${position.entry.toFixed(2)}`}
+                  Time: {formatTime(elapsedTime)} {position && `• Position: ${formatNumber(position.size * position.entry).replace('$', '')} in ${position.sym}`}
                 </div>
               </div>
             )}
