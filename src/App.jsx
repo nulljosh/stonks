@@ -7,22 +7,64 @@ import { runMonteCarlo, formatPrice, calcFibTargets } from './utils/math';
 import { getTheme, getProbColor } from './utils/theme';
 import { defaultAssets, scenarios, horizons, horizonLabels } from './utils/assets';
 
-// Trading Simulator Assets (20 total)
+// Trading Simulator Assets (US50 + Indices + Crypto)
 const ASSETS = {
+  // Indices
   NAS100: { name: 'Nasdaq 100', price: 21500, color: '#00d4ff' },
   SP500: { name: 'S&P 500', price: 6000, color: '#ff6b6b' },
   US30: { name: 'Dow Jones', price: 43800, color: '#4ecdc4' },
   XAU: { name: 'Gold', price: 2650, color: '#FFD700' },
   XAG: { name: 'Silver', price: 31, color: '#A0A0A0' },
+  // US50 - Top 50 by market cap
   AAPL: { name: 'Apple', price: 243, color: '#555' },
   MSFT: { name: 'Microsoft', price: 418, color: '#00A2ED' },
   GOOGL: { name: 'Google', price: 192, color: '#4285F4' },
+  AMZN: { name: 'Amazon', price: 220, color: '#FF9900' },
   NVDA: { name: 'Nvidia', price: 140, color: '#76B900' },
-  TSLA: { name: 'Tesla', price: 380, color: '#CC0000' },
   META: { name: 'Meta', price: 595, color: '#0668E1' },
+  TSLA: { name: 'Tesla', price: 380, color: '#CC0000' },
+  BRK: { name: 'Berkshire', price: 465, color: '#004080' },
+  LLY: { name: 'Eli Lilly', price: 785, color: '#DC143C' },
+  V: { name: 'Visa', price: 305, color: '#1A1F71' },
+  UNH: { name: 'UnitedHealth', price: 520, color: '#002677' },
+  XOM: { name: 'Exxon', price: 115, color: '#FF0000' },
+  JPM: { name: 'JPMorgan', price: 245, color: '#117ACA' },
+  WMT: { name: 'Walmart', price: 95, color: '#0071CE' },
+  JNJ: { name: 'J&J', price: 155, color: '#D32F2F' },
+  MA: { name: 'Mastercard', price: 535, color: '#EB001B' },
+  PG: { name: 'P&G', price: 170, color: '#003DA5' },
+  AVGO: { name: 'Broadcom', price: 230, color: '#E60000' },
+  HD: { name: 'Home Depot', price: 420, color: '#F96302' },
+  CVX: { name: 'Chevron', price: 165, color: '#0033A0' },
+  MRK: { name: 'Merck', price: 98, color: '#0033A0' },
+  COST: { name: 'Costco', price: 1020, color: '#0066B2' },
+  ABBV: { name: 'AbbVie', price: 195, color: '#071D49' },
+  KO: { name: 'Coca-Cola', price: 63, color: '#F40009' },
+  PEP: { name: 'PepsiCo', price: 155, color: '#004B93' },
+  AMD: { name: 'AMD', price: 135, color: '#ED1C24' },
+  ADBE: { name: 'Adobe', price: 465, color: '#FF0000' },
+  CRM: { name: 'Salesforce', price: 340, color: '#00A1E0' },
+  NFLX: { name: 'Netflix', price: 895, color: '#E50914' },
+  CSCO: { name: 'Cisco', price: 58, color: '#049FD9' },
+  TMO: { name: 'Thermo Fisher', price: 520, color: '#00457C' },
+  ORCL: { name: 'Oracle', price: 185, color: '#C74634' },
+  ACN: { name: 'Accenture', price: 385, color: '#A100FF' },
+  INTC: { name: 'Intel', price: 20, color: '#0071C5' },
+  NKE: { name: 'Nike', price: 72, color: '#000000' },
+  TXN: { name: 'Texas Instruments', price: 205, color: '#8B0000' },
+  QCOM: { name: 'Qualcomm', price: 155, color: '#3253DC' },
+  PM: { name: 'Philip Morris', price: 140, color: '#003DA5' },
+  DHR: { name: 'Danaher', price: 245, color: '#005EB8' },
+  INTU: { name: 'Intuit', price: 695, color: '#393A56' },
+  UNP: { name: 'Union Pacific', price: 235, color: '#004098' },
+  RTX: { name: 'Raytheon', price: 115, color: '#00205B' },
+  HON: { name: 'Honeywell', price: 225, color: '#DC1E35' },
+  SPGI: { name: 'S&P Global', price: 520, color: '#FF8200' },
+  // Popular stocks
   COIN: { name: 'Coinbase', price: 265, color: '#0052FF' },
   PLTR: { name: 'Palantir', price: 71, color: '#9d4edd' },
   HOOD: { name: 'Robinhood', price: 38, color: '#00C805' },
+  // Meme coins
   FARTCOIN: { name: 'FartCoin', price: 0.85, color: '#8B4513' },
   WIF: { name: 'dogwifhat', price: 1.92, color: '#FF69B4' },
   BONK: { name: 'Bonk', price: 0.00002, color: '#FFA500' },
@@ -525,7 +567,7 @@ export default function App() {
         <div style={{ marginBottom: 24 }}>
           <Card dark={dark} t={t} style={{ padding: 16 }}>
             <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: 12, color: '#666' }}>$1 → ${targetTrillion ? '1T' : '1B'} • 20 assets • Fib levels</div>
+              <div style={{ fontSize: 12, color: '#666' }}>$1 → ${targetTrillion ? '1T' : '1B'} • 61 assets • Fib levels</div>
               <label style={{ fontSize: 11, color: '#666', display: 'flex', alignItems: 'center', gap: 6, cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.5 : 1 }}>
                 <input
                   type="checkbox"
