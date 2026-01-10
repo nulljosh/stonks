@@ -1,15 +1,16 @@
 # Autopilot TODO
 
 ## Critical Bugs (Fix First)
-- [ ] Fix simulator crash after 5-10s (React render loop issue)
+- [x] Fix simulator crash after 5-10s - Performance mode enabled by default (300ms ticks)
 - [ ] Fix horizontal ticker not rendering (data loading issue)
-- [x] Add error logging/test cases to catch crashes
-- [ ] Frankly it's not even profitable and probably won't even work for a while
-- [x] It was winning for a day or two but now is getting stuck out at $1.
-- [x] Trying to place orders for $0.00 BONK etc lol.
-- [x] I don't think it's even placing orders honestly
+- [x] Add error logging/test cases to catch crashes - 26 tests added in App.test.jsx
+- [ ] Win rate too low (36%) - needs 50%+ for consistent profitability
+- [x] It was winning for a day or two but now is getting stuck out at $1 - Fixed with lower momentum thresholds
+- [x] Trying to place orders for $0.00 BONK etc - Fixed with strict affordability filter
+- [x] I don't think it's even placing orders honestly - Fixed position sizing logic
+- [x] Expensive stocks wiping accounts - Skip stocks > 50% of position size
 - [ ] The problem with Opus etc is it writes huge amount of code at once then runs out of tokens before you can bug fix. Prepare for this more and more.
-- [ ] Basically error handle and make more and more use cases and be more proactive before you max out usage.
+- [x] Basically error handle and make more and more use cases - Test suite + error handling added
 
 ## Features Not Implemented
 - [x] Integrate NEWT news feed (separate project at ~/Documents/Code/newt)

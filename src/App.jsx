@@ -539,7 +539,11 @@ export default function App() {
       {/* Header */}
       <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `0.5px solid ${t.border}` }}>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>autopilot</span>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, color: t.textSecondary }}>
+            <a href="https://joshdev.ca" style={{ color: t.textSecondary, textDecoration: 'none', opacity: 0.6 }}>joshdev.ca</a>
+            <span style={{ opacity: 0.4 }}>/</span>
+            <span style={{ fontSize: 15, fontWeight: 700, color: t.text }}>autopilot</span>
+          </div>
           <StatusBar t={t} />
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -860,7 +864,10 @@ export default function App() {
 
         {/* Footer */}
         <div style={{ textAlign: 'center', padding: '16px 0', fontSize: 10, color: t.textTertiary }}>
-          &copy; 2026
+          &copy; 2026 &middot;{' '}
+          <a href="https://github.com/nulljosh/autopilot" target="_blank" rel="noopener noreferrer" style={{ color: t.textSecondary, textDecoration: 'none' }}>
+            GitHub
+          </a>
         </div>
       </div>
     </div>
