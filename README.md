@@ -77,6 +77,7 @@ Autopilot is a high-performance financial terminal that combines:
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
+- NewsAPI key (free at https://newsapi.org)
 
 ### Quick Start
 
@@ -98,6 +99,24 @@ npm run build
 # Preview production build
 npm run preview
 ```
+
+### Environment Setup
+
+The news widget requires a NewsAPI key:
+
+1. **Get API Key**: Sign up at https://newsapi.org (free tier: 100 requests/day)
+2. **Create `.env` file** in project root:
+   ```bash
+   cp .env.example .env
+   ```
+3. **Add your key**:
+   ```
+   NEWS_API_KEY=your_actual_key_here
+   ```
+4. **For Vercel deployment**, add env var:
+   ```bash
+   vercel env add NEWS_API_KEY
+   ```
 
 ### Run Tests
 
