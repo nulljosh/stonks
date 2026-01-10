@@ -183,7 +183,7 @@ export default function App() {
   const [tick, setTick] = useState(0);
   const [showTrades, setShowTrades] = useState(false);
   const [lastTraded, setLastTraded] = useState(null);
-  const [perfMode, setPerfMode] = useState(true);
+  const [perfMode, setPerfMode] = useState(false);
   const [startTime, setStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [targetTrillion, setTargetTrillion] = useState(false);
@@ -244,7 +244,7 @@ export default function App() {
       } catch (err) {
         console.error('Simulator tick error:', err);
       }
-    }, perfMode ? 300 : 150); // Slower ticks for smoother animation (was 100ms)
+    }, perfMode ? 200 : 100); // Fast ticks for quick trading
 
     return () => clearInterval(iv);
   }, [running, balance, perfMode]);
@@ -296,7 +296,8 @@ export default function App() {
       if (balance > 5 && sym === lastTraded) return;
 
       const p = prices[sym];
-      if (p.length < 10) return;
+      // Reduce history requirement to 5 (was 10) for faster trading
+      if (p.length < 5) return;
 
       const current = p[p.length - 1];
 
@@ -315,11 +316,13 @@ export default function App() {
       const shares = positionSize / current;
       if (shares < 0.001) return;
 
-      const avg = p.slice(-10).reduce((a, b) => a + b, 0) / 10;
+      // Use available history (min 5 points)
+      const historyLen = Math.min(p.length, 10);
+      const avg = p.slice(-historyLen).reduce((a, b) => a + b, 0) / historyLen;
       const strength = (current - avg) / avg;
 
-      // Very lenient at $1 to escape, stricter as balance grows
-      const minStrength = balance < 2 ? 0.008 : balance < 10 ? 0.012 : balance < 100 ? 0.018 : 0.022;
+      // VERY lenient at $1 to escape quickly, stricter as balance grows
+      const minStrength = balance < 2 ? 0.005 : balance < 10 ? 0.010 : balance < 100 ? 0.018 : 0.022;
 
       if (strength > minStrength && (!best || strength > best.strength)) {
         best = { sym, price: current, strength };
