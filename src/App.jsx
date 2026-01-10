@@ -22,6 +22,7 @@ const ASSETS = {
   META: { name: 'Meta', price: 595, color: '#0668E1' },
   COIN: { name: 'Coinbase', price: 265, color: '#0052FF' },
   PLTR: { name: 'Palantir', price: 71, color: '#9d4edd' },
+  HOOD: { name: 'Robinhood', price: 38, color: '#00C805' },
 };
 const SYMS = Object.keys(ASSETS);
 
@@ -380,7 +381,7 @@ export default function App() {
 
       {/* Scrolling Ticker Tape */}
       <div style={{ overflow: 'hidden', borderBottom: `0.5px solid ${t.border}`, background: t.surface }}>
-        <div style={{ display: 'flex', gap: 24, padding: '8px 0', animation: 'scroll 30s linear infinite', whiteSpace: 'nowrap' }}>
+        <div style={{ display: 'flex', gap: 24, padding: '8px 0', animation: 'scroll 15s linear infinite', whiteSpace: 'nowrap' }}>
           {[...Object.keys(liveAssets), ...Object.keys(liveAssets)].map((k, i) => (
             <span key={i} style={{ display: 'flex', gap: 6, fontSize: 12, cursor: 'pointer', opacity: 0.7 }}>
               <span style={{ fontWeight: 600 }}>{liveAssets[k]?.name}</span>
@@ -734,7 +735,7 @@ export default function App() {
 
         {/* Footer */}
         <div style={{ textAlign: 'center', padding: '16px 0', fontSize: 10, color: t.textTertiary }}>
-          {new Date().getFullYear()} • Educational only • Not financial advice
+          Copyright 2026 • Educational only • Not financial advice
         </div>
       </div>
     </div>
