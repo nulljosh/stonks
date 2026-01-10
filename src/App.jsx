@@ -313,8 +313,8 @@ export default function App() {
       const avg = p.slice(-10).reduce((a, b) => a + b, 0) / 10;
       const strength = (current - avg) / avg;
 
-      // Balanced thresholds for 50%+ win rate
-      const minStrength = balance < 2 ? 0.004 : balance < 10 ? 0.005 : 0.007;
+      // Ultra-strict thresholds for 60%+ win rate (only VERY strong momentum)
+      const minStrength = balance < 2 ? 0.015 : balance < 10 ? 0.018 : 0.022;
 
       if (strength > minStrength && (!best || strength > best.strength)) {
         best = { sym, price: current, strength };
@@ -338,8 +338,8 @@ export default function App() {
           sym: best.sym,
           entry: best.price,
           size,
-          stop: best.price * 0.97, // 3% stop loss
-          target: best.price * 1.12, // 12% take profit (4:1 R/R)
+          stop: best.price * 0.985, // 1.5% stop loss (tight)
+          target: best.price * 1.045, // 4.5% take profit (3:1 R/R, achievable)
         });
         setLastTraded(best.sym);
         setTrades(t => {
