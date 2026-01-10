@@ -158,6 +158,22 @@ export const defaultAssets = {
     targets: [175, 225, 300],
     notes: 'AI chip monopoly. H100/H200 demand. Blackwell ramp.'
   },
+  pltr: {
+    name: 'PLTR', full: 'Palantir', spot: 71, chg: 3.5, chgPct: 5.2,
+    vol: 0.52, hi52: 75, lo52: 15,
+    support: [65, 60, 55],
+    resistance: [75, 85, 100],
+    targets: [85, 120, 200],
+    notes: 'AI platform. Government contracts. AIP growth.'
+  },
+  hood: {
+    name: 'HOOD', full: 'Robinhood', spot: 38, chg: 1.2, chgPct: 3.3,
+    vol: 0.45, hi52: 42, lo52: 9,
+    support: [35, 30, 25],
+    resistance: [42, 50, 65],
+    targets: [50, 75, 100],
+    notes: 'Crypto trading. Options growth. New users.'
+  },
   // MACRO
   dxy: {
     name: 'DXY', full: 'US Dollar Index', spot: 104.5, chg: -0.25, chgPct: -0.24,
