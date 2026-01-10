@@ -122,11 +122,11 @@ export default function App() {
   const t = getTheme(dark);
   const font = '-apple-system, BlinkMacSystemFont, system-ui, sans-serif';
 
-  // Fibonacci levels from $100 to $1B
-  const FIB_LEVELS = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 50000000, 100000000, 200000000, 500000000, 1000000000];
+  // Fibonacci levels from $1 to $1B
+  const FIB_LEVELS = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 50000000, 100000000, 200000000, 500000000, 1000000000];
 
   // Trading Simulator State
-  const [balance, setBalance] = useState(100);
+  const [balance, setBalance] = useState(1);
   const [position, setPosition] = useState(null);
   const [prices, setPrices] = useState(() => Object.fromEntries(SYMS.map(s => [s, [ASSETS[s].price]])));
   const [trades, setTrades] = useState([]);
@@ -156,7 +156,7 @@ export default function App() {
 
   // Trading Simulator Logic
   useEffect(() => {
-    if (!running || balance <= 50 || balance >= 1000000000) return;
+    if (!running || balance <= 0.5 || balance >= 1000000000) return;
 
     const iv = setInterval(() => {
       setPrices(prev => {
@@ -192,7 +192,7 @@ export default function App() {
     const pnlPct = (current - position.entry) / position.entry;
 
     if (current <= position.stop) {
-      setBalance(b => Math.max(50, b + pnl));
+      setBalance(b => Math.max(0.5, b + pnl));
       setTrades(t => [...t, { type: 'STOP', sym: position.sym, pnl: pnl.toFixed(2) }]);
       setTradeStats(s => ({ ...s, losses: { ...s.losses, [position.sym]: (s.losses[position.sym] || 0) + pnl } }));
       setPosition(null);
@@ -213,7 +213,7 @@ export default function App() {
   }, [tick]);
 
   useEffect(() => {
-    if (!running || position || balance <= 50 || balance >= 1000000000) return;
+    if (!running || position || balance <= 0.5 || balance >= 1000000000) return;
 
     let best = null;
     SYMS.forEach(sym => {
@@ -229,7 +229,9 @@ export default function App() {
     });
 
     if (best) {
-      const size = Math.floor(balance * 0.08);
+      // Aggressive early, conservative later
+      const sizePercent = balance < 10 ? 0.20 : balance < 100 ? 0.15 : 0.08;
+      const size = Math.floor(balance * sizePercent);
       setPosition({
         sym: best.sym,
         entry: best.price,
@@ -243,7 +245,7 @@ export default function App() {
   }, [tick, running, position, balance, lastTraded, prices]);
 
   const reset = useCallback(() => {
-    setBalance(100);
+    setBalance(1);
     setPosition(null);
     setPrices(Object.fromEntries(SYMS.map(s => [s, [ASSETS[s].price]])));
     setTrades([]);
@@ -254,11 +256,11 @@ export default function App() {
     trends.current = Object.fromEntries(SYMS.map(s => [s, 0]));
   }, []);
 
-  const pnl = balance - 100;
+  const pnl = balance - 1;
   const currentPrice = position ? prices[position.sym][prices[position.sym].length - 1] : 0;
   const unrealized = position ? (currentPrice - position.entry) * position.size : 0;
   const equity = balance + unrealized;
-  const busted = balance <= 50;
+  const busted = balance <= 0.5;
   const won = balance >= 1000000000;
 
   // Calculate biggest winner/loser
@@ -432,7 +434,7 @@ export default function App() {
         <div style={{ marginBottom: 24 }}>
           <Card dark={dark} t={t} style={{ padding: 16 }}>
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 12, color: '#666' }}>$100 → $1B • 20 assets • Fib levels</div>
+              <div style={{ fontSize: 12, color: '#666' }}>$1 → $1B • 20 assets • Fib levels</div>
             </div>
 
             {busted && (
