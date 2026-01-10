@@ -3,17 +3,28 @@ import { useState, useEffect } from 'react';
 export default function NewsWidget({ dark, t }) {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Fetch from api/news endpoint
     const fetchNews = async () => {
       try {
-        const res = await fetch('/api/news');
+        const res = await fetch('/api/news?category=business');
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
         const data = await res.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
         setArticles(data.articles || []);
+        setError(null);
         setLoading(false);
       } catch (err) {
         console.error('News fetch error:', err);
+        setError(err.message);
         setLoading(false);
       }
     };
@@ -28,6 +39,23 @@ export default function NewsWidget({ dark, t }) {
     return (
       <div style={{ textAlign: 'center', padding: 20 }}>
         <div style={{ color: t.textTertiary, fontSize: 12 }}>Loading news...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ textAlign: 'center', padding: 20 }}>
+        <div style={{ color: t.red, fontSize: 11 }}>News unavailable: {error}</div>
+        <div style={{ color: t.textTertiary, fontSize: 10, marginTop: 4 }}>NewsAPI key may need configuration</div>
+      </div>
+    );
+  }
+
+  if (articles.length === 0) {
+    return (
+      <div style={{ textAlign: 'center', padding: 20 }}>
+        <div style={{ color: t.textTertiary, fontSize: 12 }}>No news articles available</div>
       </div>
     );
   }

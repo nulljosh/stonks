@@ -845,7 +845,7 @@ export default function App() {
 
         {/* Footer */}
         <div style={{ textAlign: 'center', padding: '16px 0', fontSize: 10, color: t.textTertiary }}>
-          Copyright 2026 • Educational only • Not financial advice
+          &copy; 2026
         </div>
       </div>
     </div>
