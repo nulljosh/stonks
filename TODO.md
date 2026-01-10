@@ -7,6 +7,9 @@
 - [ ] Frankly it's not even profitable and probably won't even work for a while
 - [ ] It was winning for a day or two but now is getting stuck out at $1. 
 - [ ] Trying to place orders for $0.00 BONK etc lol.
+- [ ] I don't think it's even placing orders honestly
+- [ ] The problem with Opus etc is it writes huge amount of code at once then runs out of tokens before you can bug fix. Prepare for this more and more.
+- [ ] Basically error handle and make more and more use cases and be more proactive before you max out usage.
 
 ## Features Not Implemented
 - [ ] Integrate NEWT news feed (separate project at ~/Documents/Code/newt)
