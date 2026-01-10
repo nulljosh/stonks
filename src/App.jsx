@@ -183,7 +183,7 @@ export default function App() {
   const [tick, setTick] = useState(0);
   const [showTrades, setShowTrades] = useState(false);
   const [lastTraded, setLastTraded] = useState(null);
-  const [perfMode, setPerfMode] = useState(false);
+  const [perfMode, setPerfMode] = useState(true);
   const [startTime, setStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [targetTrillion, setTargetTrillion] = useState(false);
@@ -542,7 +542,6 @@ export default function App() {
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           <WeatherWidget t={t} />
           <span style={{ fontSize: 10, color: t.textTertiary }}>Updated {formatLastUpdated(lastUpdated)}</span>
-          <button onClick={() => setPerfMode(!perfMode)} style={{ background: perfMode ? t.green : 'transparent', border: `1px solid ${t.border}`, borderRadius: 8, padding: '4px 10px', color: perfMode ? '#fff' : t.textSecondary, fontSize: 11, cursor: 'pointer' }} title="Slow mode for older hardware">⚡{perfMode && ' SLOW'}</button>
           <button onClick={() => setShowMacro(!showMacro)} style={{ background: showMacro ? t.accent : 'transparent', border: `1px solid ${t.border}`, borderRadius: 8, padding: '4px 10px', color: showMacro ? '#fff' : t.textSecondary, fontSize: 11, cursor: 'pointer' }}>MACRO</button>
           <button onClick={() => setDark(!dark)} style={{ background: 'transparent', border: 'none', fontSize: 16, cursor: 'pointer' }}>{dark ? '☀️' : '🌙'}</button>
         </div>
