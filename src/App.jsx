@@ -286,22 +286,38 @@ export default function App() {
       if (sym === lastTraded) return;
       const p = prices[sym];
       if (p.length < 10) return;
-      const avg = p.slice(-10).reduce((a, b) => a + b, 0) / 10;
+
       const current = p[p.length - 1];
+
+      // Skip stocks too expensive for current balance
+      const maxAffordable = balance * 0.50; // Max position size
+      if (current > maxAffordable * 0.5) return; // Need at least 2 shares worth
+
+      const avg = p.slice(-10).reduce((a, b) => a + b, 0) / 10;
       const strength = (current - avg) / avg;
-      if (strength > 0.001 && (!best || strength > best.strength)) {
+
+      // Lower threshold for small balances (easier to find trades)
+      const minStrength = balance < 10 ? 0.0005 : 0.001;
+
+      if (strength > minStrength && (!best || strength > best.strength)) {
         best = { sym, price: current, strength };
       }
     });
 
     if (best) {
-      // Super aggressive early to escape $1, then scale down
-      const sizePercent = balance < 5 ? 0.50 : balance < 10 ? 0.30 : balance < 100 ? 0.15 : balance < 1000 ? 0.10 : 0.08;
+      // Ultra aggressive at $1 to escape quickly
+      const sizePercent = balance < 2 ? 0.70 : balance < 5 ? 0.50 : balance < 10 ? 0.30 : balance < 100 ? 0.15 : balance < 1000 ? 0.10 : 0.08;
       const size = balance * sizePercent; // No floor - allow fractional positions
 
       // Don't trade if size is too small
       if (size < 0.01) {
         console.warn('Position too small:', size, 'balance:', balance);
+        return;
+      }
+
+      // Verify we can afford at least 0.1 shares
+      if (size / best.price < 0.1) {
+        console.warn('Cannot afford meaningful position:', { size, price: best.price });
         return;
       }
 
