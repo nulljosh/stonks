@@ -160,6 +160,7 @@ const Card = ({ children, style, onClick, dark, t }) => (
     boxShadow: dark ? '0 8px 32px rgba(0,0,0,0.4)' : '0 8px 32px rgba(0,0,0,0.08)',
     cursor: onClick ? 'pointer' : 'default',
     overflow: 'hidden',
+    transition: 'all 0.2s ease',
     ...style
   }}>{children}</div>
 );
@@ -590,9 +591,10 @@ export default function App() {
         </div>
       </div>
 
-      <div style={{ padding: 16 }}>
+      <div style={{ padding: 16, maxWidth: 1400, margin: '0 auto' }}>
         {/* TRADING SIMULATOR - MAIN UI */}
         <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: t.green }}>TRADING SIMULATOR</div>
           <Card dark={dark} t={t} style={{ padding: 16 }}>
             <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ fontSize: 12, color: '#666' }}>$1 → ${targetTrillion ? '1T' : '1B'} • 61 assets • Fib levels</div>
