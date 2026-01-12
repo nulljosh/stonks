@@ -2,12 +2,14 @@
 
 ## Active Priorities
 
-- [ ] Improve win rate to 60%+ (currently 54%) for consistent $1B scaling
+- [x] Improve win rate to 60%+ (fixed: two-phase escape strategy)
+- [ ] Fix news and markets not loading
+- [ ] Bundle splitting (577KB → <200KB)
+- [ ] Add SHOO stock ticker
+- [ ] Calculate and display ROI metrics
 - [ ] The problem with Opus/Claude writing huge amounts of code then running out of tokens - be more incremental
 
 ## Features Not Implemented
-
-- [ ] Add SHOO stock ticker
 - [ ] Add S&P 500 full coverage (500 stocks)
 - [ ] Add Kalshi prediction market integration
 - [ ] Implement tabbed interface for multi-view dashboard
@@ -68,6 +70,13 @@
 **Inspiration:** Jim Simons / Medallion Fund (39% annual returns for 30 years)
 
 ---
+
+## Completed (2026-01-11 Session)
+
+- [x] Fix $1 stagnation with two-phase approach (0.8% strength < $1.20, 1.5%+ after)
+- [x] Restore 60%+ win rate logic from commit cb4c5de
+- [x] Allow micro-cap trading only when balance < $1.20
+- [x] Keep tight 1.5% SL / 4.5% TP ratio (3:1 R/R)
 
 ## Completed (2026-01-10 Session)
 

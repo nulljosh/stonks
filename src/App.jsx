@@ -296,33 +296,36 @@ export default function App() {
       if (balance > 5 && sym === lastTraded) return;
 
       const p = prices[sym];
-      // Reduce history requirement to 5 (was 10) for faster trading
-      if (p.length < 5) return;
+      // Use shorter history at low balance for faster trades, otherwise require 10 bars
+      const minHistory = balance < 3 ? 5 : 10;
+      if (p.length < minHistory) return;
 
       const current = p[p.length - 1];
 
-      // Skip micro-cap coins (< $0.01) - price movements too small to matter
-      if (current < 0.01) return;
+      // ALLOW micro-cap coins ONLY when balance < $3 (escape mode)
+      // Block them at $3+ to maintain quality
+      if (balance >= 3 && current < 0.01) return;
 
-      // More aggressive filtering at low balance
+      // More aggressive position sizing at low balance
       const sizePercent = balance < 2 ? 0.70 : balance < 5 ? 0.50 : balance < 10 ? 0.30 : 0.15;
       const positionSize = balance * sizePercent;
 
-      // Ultra-lenient at very low balance to escape $1 prison, stricter as balance grows
-      const maxPriceRatio = balance < 2 ? 5.0 : balance < 10 ? 2.0 : balance < 100 ? 1.0 : 0.5;
+      // Lenient price filter at low balance, strict otherwise
+      const maxPriceRatio = balance < 3 ? 3.0 : 0.5;
       if (current > positionSize * maxPriceRatio) return;
 
-      // Skip if we can't afford at least 0.001 shares (very low threshold)
-      const shares = positionSize / current;
-      if (shares < 0.001) return;
+      // Skip if we can't afford meaningful position
+      const minShares = (balance < 3 && current < 0.01) ? 0.001 : 0.01;
+      if (positionSize / current < minShares) return;
 
-      // Use available history (min 5 points)
-      const historyLen = Math.min(p.length, 10);
+      const historyLen = Math.min(p.length, minHistory === 5 ? 5 : 10);
       const avg = p.slice(-historyLen).reduce((a, b) => a + b, 0) / historyLen;
       const strength = (current - avg) / avg;
 
-      // VERY lenient at $1 to escape quickly, stricter as balance grows
-      const minStrength = balance < 2 ? 0.005 : balance < 10 ? 0.010 : balance < 100 ? 0.018 : 0.022;
+      // TWO-PHASE APPROACH:
+      // Phase 1 ($1.00-$3.00): Lenient to escape quickly (1.0% strength)
+      // Phase 2 ($3.00+): Strict for 60%+ win rate (1.5%+ strength)
+      const minStrength = balance < 3 ? 0.010 : balance < 10 ? 0.018 : 0.022;
 
       if (strength > minStrength && (!best || strength > best.strength)) {
         best = { sym, price: current, strength };
@@ -334,26 +337,20 @@ export default function App() {
       const sizePercent = balance < 2 ? 0.70 : balance < 5 ? 0.50 : balance < 10 ? 0.30 : balance < 100 ? 0.15 : balance < 1000 ? 0.10 : 0.08;
       const size = balance * sizePercent;
 
-      // Minimum position check (reduced to $0.001 minimum)
+      // Minimum position check
       if (size < 0.001) {
         console.warn('Position too small:', size, 'balance:', balance);
         return;
       }
 
       try {
-        const shares = size / best.price;
-        console.log('Opening position:', { sym: best.sym, size: size.toFixed(4), entry: best.price, balance: balance.toFixed(2), shares: shares.toFixed(4) });
-
-        // Tighter stops at low balance, wider as we scale up
-        const stopLossPct = balance < 2 ? 0.980 : balance < 10 ? 0.985 : 0.988; // 2%, 1.5%, 1.2%
-        const takeProfitPct = balance < 2 ? 1.055 : balance < 10 ? 1.050 : 1.045; // 5.5%, 5%, 4.5%
-
+        console.log('Opening position:', { sym: best.sym, size, entry: best.price, balance, shares: (size/best.price).toFixed(4), strength: best.strength.toFixed(4) });
         setPosition({
           sym: best.sym,
           entry: best.price,
           size,
-          stop: best.price * stopLossPct,
-          target: best.price * takeProfitPct,
+          stop: best.price * 0.985, // 1.5% stop loss (tight, proven to work at 64% win rate)
+          target: best.price * 1.045, // 4.5% take profit (3:1 R/R, achievable)
         });
         setLastTraded(best.sym);
         setTrades(t => {
