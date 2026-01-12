@@ -593,15 +593,19 @@ export default function App() {
           {[...Array(2)].map((_, idx) => (
             <div key={idx} style={{ display: 'flex', gap: 24 }}>
               {/* MAG7 first */}
-              {['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA'].map(sym => stocks[sym] && (
-                <span key={`mag7-${sym}-${idx}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.9 }}>
-                  <span style={{ fontWeight: 700 }}>{sym}</span>
-                  <span>${stocks[sym].price?.toFixed(2)}</span>
-                  <span style={{ color: (stocks[sym].changePercent || 0) >= 0 ? t.green : t.red }}>
-                    {(stocks[sym].changePercent || 0) >= 0 ? '▲' : '▼'}{Math.abs(stocks[sym].changePercent || 0).toFixed(2)}%
+              {['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA'].map(sym => {
+                const stock = stocks[sym];
+                if (!stock) return null;
+                return (
+                  <span key={`mag7-${sym}-${idx}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.9 }}>
+                    <span style={{ fontWeight: 700 }}>{sym}</span>
+                    <span>${stock.price?.toFixed(2)}</span>
+                    <span style={{ color: (stock.changePercent || 0) >= 0 ? t.green : t.red }}>
+                      {(stock.changePercent || 0) >= 0 ? '▲' : '▼'}{Math.abs(stock.changePercent || 0).toFixed(2)}%
+                    </span>
                   </span>
-                </span>
-              ))}
+                );
+              })}
               {/* Crypto & Commodities */}
               {Object.keys(liveAssets).map(k => (
                 <span key={`asset-${k}-${idx}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.7 }}>
