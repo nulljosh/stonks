@@ -588,24 +588,41 @@ export default function App() {
 
       {/* Scrolling Ticker Tape */}
       <div style={{ overflow: 'hidden', borderBottom: `0.5px solid ${t.border}`, background: t.surface }}>
-        <div style={{ display: 'flex', gap: 24, padding: '8px 0', animation: 'scroll 15s linear infinite', whiteSpace: 'nowrap' }}>
-          {[...Object.keys(liveAssets), ...Object.keys(liveAssets)].map((k, i) => (
-            <span key={i} style={{ display: 'flex', gap: 6, fontSize: 12, cursor: 'pointer', opacity: 0.7 }}>
-              <span style={{ fontWeight: 600 }}>{liveAssets[k]?.name}</span>
-              <span>${formatPrice(liveAssets[k]?.spot || 0)}</span>
-              <span style={{ color: (liveAssets[k]?.chgPct || 0) >= 0 ? t.green : t.red }}>
-                {(liveAssets[k]?.chgPct || 0) >= 0 ? '▲' : '▼'}{Math.abs(liveAssets[k]?.chgPct || 0).toFixed(2)}%
-              </span>
-            </span>
-          ))}
-          {Object.values(stocks).map((stk, i) => (
-            <span key={`stk-${i}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.7 }}>
-              <span style={{ fontWeight: 600 }}>{stk.symbol}</span>
-              <span>${stk.price?.toFixed(2)}</span>
-              <span style={{ color: (stk.changePercent || 0) >= 0 ? t.green : t.red }}>
-                {(stk.changePercent || 0) >= 0 ? '▲' : '▼'}{Math.abs(stk.changePercent || 0).toFixed(2)}%
-              </span>
-            </span>
+        <div style={{ display: 'flex', gap: 24, padding: '8px 0', animation: 'scroll 30s linear infinite', whiteSpace: 'nowrap' }}>
+          {/* Duplicate for seamless scroll */}
+          {[...Array(2)].map((_, idx) => (
+            <div key={idx} style={{ display: 'flex', gap: 24 }}>
+              {/* MAG7 first */}
+              {['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA'].map(sym => stocks[sym] && (
+                <span key={`mag7-${sym}-${idx}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.9 }}>
+                  <span style={{ fontWeight: 700 }}>{sym}</span>
+                  <span>${stocks[sym].price?.toFixed(2)}</span>
+                  <span style={{ color: (stocks[sym].changePercent || 0) >= 0 ? t.green : t.red }}>
+                    {(stocks[sym].changePercent || 0) >= 0 ? '▲' : '▼'}{Math.abs(stocks[sym].changePercent || 0).toFixed(2)}%
+                  </span>
+                </span>
+              ))}
+              {/* Crypto & Commodities */}
+              {Object.keys(liveAssets).map(k => (
+                <span key={`asset-${k}-${idx}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.7 }}>
+                  <span style={{ fontWeight: 600 }}>{liveAssets[k]?.name}</span>
+                  <span>${formatPrice(liveAssets[k]?.spot || 0)}</span>
+                  <span style={{ color: (liveAssets[k]?.chgPct || 0) >= 0 ? t.green : t.red }}>
+                    {(liveAssets[k]?.chgPct || 0) >= 0 ? '▲' : '▼'}{Math.abs(liveAssets[k]?.chgPct || 0).toFixed(2)}%
+                  </span>
+                </span>
+              ))}
+              {/* Other stocks */}
+              {Object.values(stocks).filter(s => !['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA'].includes(s.symbol)).map(stk => (
+                <span key={`stk-${stk.symbol}-${idx}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.6 }}>
+                  <span style={{ fontWeight: 600 }}>{stk.symbol}</span>
+                  <span>${stk.price?.toFixed(2)}</span>
+                  <span style={{ color: (stk.changePercent || 0) >= 0 ? t.green : t.red }}>
+                    {(stk.changePercent || 0) >= 0 ? '▲' : '▼'}{Math.abs(stk.changePercent || 0).toFixed(2)}%
+                  </span>
+                </span>
+              ))}
+            </div>
           ))}
         </div>
       </div>
