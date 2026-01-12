@@ -611,8 +611,8 @@ export default function App() {
       </div>
 
       <div style={{ padding: 16, maxWidth: 1400, margin: '0 auto' }}>
-        {/* TRADING SIMULATOR - MAIN UI */}
-        <div style={{ marginBottom: 24 }}>
+        {/* TRADING SIMULATOR - TEMPORARILY DISABLED WHILE FIXING */}
+        {/* <div style={{ marginBottom: 24 }}>
           <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: t.green }}>TRADING SIMULATOR</div>
           <Card dark={dark} t={t} style={{ padding: 16 }}>
             <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -741,7 +741,7 @@ export default function App() {
               )}
             </div>
           </Card>
-        </div>
+        </div> */}
 
         {/* POLYMARKET SECTION */}
         <div style={{ marginBottom: 24 }}>
