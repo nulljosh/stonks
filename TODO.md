@@ -2,7 +2,10 @@
 
 ## Active Priorities
 
-- [x] Improve win rate to 60%+ (fixed: two-phase escape strategy)
+- [ ] **CRITICAL: Trading algorithm fundamentally broken** (was working yesterday, regressed)
+  - Stuck at $1, not escaping properly
+  - Need to restore working logic from commit history
+  - Phase 1/2 approach not effective yet
 - [ ] Fix news and markets not loading
 - [ ] Bundle splitting (577KB → <200KB)
 - [ ] Add SHOO stock ticker
