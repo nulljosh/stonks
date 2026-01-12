@@ -553,7 +553,7 @@ export default function App() {
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, color: t.textSecondary }}>
             <a href="https://heyitsmejosh.com" style={{ color: t.textSecondary, textDecoration: 'none', opacity: 0.6 }}>home</a>
             <span style={{ opacity: 0.4 }}>/</span>
-            <span style={{ fontSize: 15, fontWeight: 700, color: t.text }}>autopilot</span>
+            <span style={{ fontSize: 15, fontWeight: 700, color: t.text }}>bread</span>
           </div>
           <StatusBar t={t} />
         </div>
