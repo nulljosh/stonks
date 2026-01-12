@@ -2,9 +2,7 @@
 
 > Low-latency prediction markets + trading simulator + quantitative analysis. Built for speed, optimized for efficiency.
 
-⚠️ **KNOWN ISSUE**: Simulator may crash after 5-10 seconds on older hardware. Use the ⚡ performance mode toggle in header. Fix in progress - see TODO.md.
-
-**Live Demo**: `npm run dev` → http://localhost:5173
+**Live Demo**: https://autopilot-alpha.vercel.app | **Local**: `npm run dev` → http://localhost:5173
 
 ---
 
@@ -278,22 +276,6 @@ No API keys required currently. All data sources are public:
 | Bundle Load | ~577KB | <200KB | Code splitting |
 | Memory Usage | ~177KB gzip | <10MB runtime | "10MB Dashboard" goal |
 | Initial Load | ~1.5s | <500ms | Edge CDN + preload |
-
----
-
-## Known Issues & Limitations
-
-### Current Limitations
-1. **No Real Broker Integration**: Simulation only (planned)
-2. **API Rate Limits**: Yahoo Finance ~2K req/hour, Polymarket ~10 req/sec
-3. **Bundle Size**: 577KB (needs code splitting)
-4. **Polling-Based Updates**: WebSocket feeds planned
-
-### Error Handling
-- **API Failures**: Graceful degradation - cached data shown
-- **Network Issues**: Auto-retry with exponential backoff
-- **Invalid Tickers**: Input validation + error messages
-- **Browser Support**: Chrome/Edge/Safari/Firefox latest
 
 ---
 

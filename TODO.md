@@ -12,6 +12,22 @@
 - [ ] Calculate and display ROI metrics
 - [ ] The problem with Opus/Claude writing huge amounts of code then running out of tokens - be more incremental
 
+## Known Issues & Limitations
+
+### Current Limitations
+- [ ] Simulator crashes after 5-10 seconds on older hardware (performance mode helps)
+- [ ] No real broker integration (simulation only)
+- [ ] API rate limits: Yahoo Finance ~2K req/hour, Polymarket ~10 req/sec
+- [ ] Bundle size: 237KB (target <200KB)
+- [ ] Polling-based updates (WebSocket feeds planned)
+- [ ] Financial news widget not loading on Vercel (works locally)
+
+### Error Handling Status
+- ✓ API failures: Graceful degradation with cached data
+- ✓ Network issues: Auto-retry with exponential backoff
+- ✓ Invalid tickers: Input validation + error messages
+- ✓ Browser support: Chrome/Edge/Safari/Firefox latest
+
 ## Features Not Implemented
 - [ ] Add S&P 500 full coverage (500 stocks)
 - [ ] Add Kalshi prediction market integration
