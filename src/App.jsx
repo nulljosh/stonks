@@ -746,7 +746,7 @@ export default function App() {
         {/* POLYMARKET SECTION */}
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: t.purple }}>PREDICTION MARKETS</span>
+            <div style={{ flex: 1 }} />
             <button onClick={refetchPm} style={{ padding: '4px 8px', borderRadius: 8, border: `1px solid ${t.border}`, background: 'transparent', color: t.textSecondary, fontSize: 10, cursor: 'pointer' }}>↻ Refresh</button>
           </div>
 
@@ -867,9 +867,6 @@ export default function App() {
 
         {/* NEWS SECTION */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: t.cyan }}>FINANCIAL NEWS</span>
-          </div>
           <NewsWidget dark={dark} t={t} />
         </div>
 
