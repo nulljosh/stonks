@@ -584,13 +584,24 @@ export default function App() {
 
       {/* Scrolling Ticker Tape */}
       <div style={{ overflow: 'hidden', borderBottom: `0.5px solid ${t.border}`, background: t.surface }}>
-        <div style={{ display: 'flex', gap: 24, padding: '8px 0', animation: 'scroll 20s linear infinite', whiteSpace: 'nowrap' }}>
-          {/* Duplicate for seamless scroll */}
+        <div style={{ display: 'flex', gap: 24, padding: '8px 0', animation: 'scroll 25s linear infinite', whiteSpace: 'nowrap' }}>
           {[...Array(2)].map((_, idx) => (
             <div key={idx} style={{ display: 'flex', gap: 24 }}>
-              {/* Crypto & Commodities only */}
+              {['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA'].map(sym => {
+                const stock = stocks[sym];
+                if (!stock) return null;
+                return (
+                  <span key={`mag7-${sym}-${idx}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.9 }}>
+                    <span style={{ fontWeight: 700 }}>{sym}</span>
+                    <span>${stock.price?.toFixed(2)}</span>
+                    <span style={{ color: (stock.changePercent || 0) >= 0 ? t.green : t.red }}>
+                      {(stock.changePercent || 0) >= 0 ? '▲' : '▼'}{Math.abs(stock.changePercent || 0).toFixed(2)}%
+                    </span>
+                  </span>
+                );
+              })}
               {Object.keys(liveAssets).map(k => (
-                <span key={`asset-${k}-${idx}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.8 }}>
+                <span key={`asset-${k}-${idx}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.7 }}>
                   <span style={{ fontWeight: 600 }}>{liveAssets[k]?.name}</span>
                   <span>${formatPrice(liveAssets[k]?.spot || 0)}</span>
                   <span style={{ color: (liveAssets[k]?.chgPct || 0) >= 0 ? t.green : t.red }}>
