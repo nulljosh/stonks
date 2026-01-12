@@ -41,8 +41,19 @@ const fetchWithRetry = async (url, maxRetries = 3, baseDelay = 1000) => {
   throw lastError;
 };
 
+// Fallback static data for when API fails
+const FALLBACK_DATA = {
+  AAPL: { symbol: 'AAPL', price: 243, changePercent: 0 },
+  MSFT: { symbol: 'MSFT', price: 418, changePercent: 0 },
+  GOOGL: { symbol: 'GOOGL', price: 192, changePercent: 0 },
+  AMZN: { symbol: 'AMZN', price: 220, changePercent: 0 },
+  NVDA: { symbol: 'NVDA', price: 140, changePercent: 0 },
+  META: { symbol: 'META', price: 595, changePercent: 0 },
+  TSLA: { symbol: 'TSLA', price: 380, changePercent: 0 },
+};
+
 export function useStocks(symbols = DEFAULT_SYMBOLS) {
-  const [stocks, setStocks] = useState({});
+  const [stocks, setStocks] = useState(FALLBACK_DATA);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const retryCountRef = useRef(0);
@@ -90,8 +101,11 @@ export function useStocks(symbols = DEFAULT_SYMBOLS) {
       console.error('Stock fetch error:', err);
       retryCountRef.current += 1;
 
-      // Keep old data on error (don't clear stocks)
-      // This prevents UI from breaking if there's a temporary failure
+      // Use fallback data on error if we don't have any stocks loaded
+      if (Object.keys(stocks).length === 0) {
+        console.warn('Using fallback stock data');
+        setStocks(FALLBACK_DATA);
+      }
     } finally {
       setLoading(false);
     }
