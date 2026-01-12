@@ -1,4 +1,4 @@
-# Autopilot - High-Alpha Financial Terminal
+# Autopilot
 
 > Low-latency prediction markets + trading simulator + quantitative analysis. Built for speed, optimized for efficiency.
 
