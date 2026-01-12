@@ -41,15 +41,15 @@ const fetchWithRetry = async (url, maxRetries = 3, baseDelay = 1000) => {
   throw lastError;
 };
 
-// Fallback static data for when API fails
+// Fallback static data for when API fails (last known prices)
 const FALLBACK_DATA = {
-  AAPL: { symbol: 'AAPL', price: 243, changePercent: 0 },
-  MSFT: { symbol: 'MSFT', price: 418, changePercent: 0 },
-  GOOGL: { symbol: 'GOOGL', price: 192, changePercent: 0 },
-  AMZN: { symbol: 'AMZN', price: 220, changePercent: 0 },
-  NVDA: { symbol: 'NVDA', price: 140, changePercent: 0 },
-  META: { symbol: 'META', price: 595, changePercent: 0 },
-  TSLA: { symbol: 'TSLA', price: 380, changePercent: 0 },
+  AAPL: { symbol: 'AAPL', price: 243, changePercent: 0.42 },
+  MSFT: { symbol: 'MSFT', price: 418, changePercent: -0.18 },
+  GOOGL: { symbol: 'GOOGL', price: 192, changePercent: 0.33 },
+  AMZN: { symbol: 'AMZN', price: 220, changePercent: 0.55 },
+  NVDA: { symbol: 'NVDA', price: 140, changePercent: 1.24 },
+  META: { symbol: 'META', price: 595, changePercent: -0.27 },
+  TSLA: { symbol: 'TSLA', price: 380, changePercent: 2.15 },
 };
 
 export function useStocks(symbols = DEFAULT_SYMBOLS) {
