@@ -556,6 +556,7 @@ export default function App() {
             <span style={{ fontSize: 15, fontWeight: 700, color: t.text }}>bread</span>
           </div>
           <StatusBar t={t} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: t.textTertiary, letterSpacing: '0.5px', opacity: 0.5 }}>NOTHING EVER HAPPENS</span>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           <WeatherWidget t={t} />
@@ -564,13 +565,6 @@ export default function App() {
           {pmError && <span style={{ fontSize: 9, color: t.red, opacity: 0.7 }}>⚠ Markets API down</span>}
           <button onClick={() => setShowMacro(!showMacro)} style={{ background: showMacro ? t.accent : 'transparent', border: `1px solid ${t.border}`, borderRadius: 8, padding: '4px 10px', color: showMacro ? '#fff' : t.textSecondary, fontSize: 11, cursor: 'pointer' }}>MACRO</button>
           <button onClick={() => setDark(!dark)} style={{ background: 'transparent', border: 'none', fontSize: 16, cursor: 'pointer' }}>{dark ? '☀️' : '🌙'}</button>
-        </div>
-      </div>
-
-      {/* Nothing Ever Happens Banner */}
-      <div style={{ padding: 12, background: `linear-gradient(135deg, ${t.textTertiary}10, ${t.textTertiary}05)`, borderBottom: `0.5px solid ${t.border}`, textAlign: 'center' }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: t.textSecondary, letterSpacing: '0.5px' }}>
-          NOTHING EVER HAPPENS
         </div>
       </div>
 
