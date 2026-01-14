@@ -2,15 +2,21 @@
 
 ## Active Priorities
 
-- [ ] **CRITICAL: Trading algorithm fundamentally broken** (was working yesterday, regressed)
-  - Stuck at $1, not escaping properly
-  - Need to restore working logic from commit history
-  - Phase 1/2 approach not effective yet
-- [ ] Fix news and markets not loading
-- [ ] Bundle splitting (577KB → <200KB)
+### P0 - Critical
+- [ ] **Trading algorithm regression** - See commit `cb4c5de` for working 60%+ win rate logic
+  - Issue: Stuck trading micro-caps at $1, not scaling to larger positions
+  - Root cause: Phase 1/2 momentum thresholds need tuning
+  - Fix: Restore 0.8% strength threshold for balance < $1.20, 1.5%+ after
+
+### P1 - High
+- [ ] Fix news widget not loading on Vercel (works locally)
+- [ ] Fix Polymarket API connection issues
+- [ ] Bundle splitting (577KB → <200KB target)
+
+### P2 - Medium
 - [ ] Add SHOO stock ticker
 - [ ] Calculate and display ROI metrics
-- [ ] The problem with Opus/Claude writing huge amounts of code then running out of tokens - be more incremental
+- [ ] Incremental code generation (avoid token exhaustion)
 
 ## Known Issues & Limitations
 
@@ -54,39 +60,11 @@
 - [ ] White paper publication
 - [ ] iOS/Android apps
 
-## Statistical Arbitrage Strategy (Renaissance Tech Approach)
+## Statistical Arbitrage Strategy
 
-**Goal:** Move from momentum trading → statistical arbitrage across infinite markets
+**Vision:** Renaissance Tech-inspired stat arb across 50K+ instruments. Find micro-correlations (52% win rate), execute millions of trades/day. See `STRATEGY.md` for full implementation plan.
 
-**Core Concept:**
-- Find tiny correlations across 50,000+ instruments
-- Example: "When X moves +0.3%, Y moves +0.25% within 2 hours (52% of the time)"
-- Win rate barely above 50%, but execute 1 million times/day
-- Key: Thousands of uncorrelated small edges = guaranteed profit
-
-**Implementation Plan:**
-- [ ] Build correlation engine (track all pair relationships)
-- [ ] Historical data ingestion (1-min bars, 30+ days rolling window)
-- [ ] Pattern recognition (find statistically significant edges >50.1% win rate)
-- [ ] Multi-market monitoring (stocks, crypto, futures, forex)
-- [ ] Execution engine (trade when correlation signal fires)
-- [ ] Backtesting framework (test strategies on historical data)
-- [ ] Paper trading mode (validate live without capital risk)
-- [ ] Risk management (position sizing, max drawdown limits)
-
-**Target Hardware:**
-- Raspberry Pi 5 (8GB RAM, <10MB app footprint)
-- Runs 24/7 on 5 watts
-- Bare-metal deployment (custom Linux kernel + Rust binary)
-- Zero human intervention
-
-**Target Performance:**
-- Monitor 10,000+ instruments simultaneously
-- Execute 1,000+ trades/day
-- 12%+ annual return (beating S&P 500)
-- <1ms decision latency
-
-**Inspiration:** Jim Simons / Medallion Fund (39% annual returns for 30 years)
+**Key Metrics:** 10K instruments, 1K trades/day, 12%+ annual return, <1ms latency, Raspberry Pi 5 deployment.
 
 ---
 

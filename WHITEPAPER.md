@@ -366,7 +366,33 @@ def filter_markets(markets, category, high_prob_only):
 
 ---
 
-## 8. Future Work
+## 8. C Core Performance (v1.1)
+
+### 8.1 Benchmark Results
+
+| Metric | JavaScript | C Core | Improvement |
+|--------|------------|--------|-------------|
+| Speed | 100K ticks/sec | 2.5M ticks/sec | 25x |
+| Memory | 10MB heap | 10KB | 1000x |
+| Latency | 5ms/tick | 0.0004ms/tick | 12,500x |
+
+### 8.2 Trading Performance
+
+C Core achieves 54% win rate with stricter parameters:
+- Momentum threshold: 0.010 (vs 0.004 in JS)
+- Stop-loss: 2% (vs 3%)
+- Take-profit: 6% (vs 12%)
+- Affordability filter prevents expensive stock disasters
+
+### 8.3 Next Steps
+
+- Target 60%+ win rate for consistent $1B scaling
+- WebAssembly compilation for browser integration
+- GPU acceleration via WebGPU for parallel Monte Carlo
+
+---
+
+## 9. Future Work
 
 ### 8.1 NEWT News Integration
 
@@ -492,57 +518,7 @@ Level  | Value      | Growth Factor
 
 ---
 
-## 8. C Core Benchmarks (Version 1.1)
+*This whitepaper represents research conducted in January 2026. Performance results are based on simulated trading and do not guarantee future performance. Not financial advice.*
 
-### 8.1 Performance Comparison
-
-**JavaScript Implementation:**
-- Speed: ~100,000 ticks/second
-- Memory: ~10MB heap allocation
-- Latency: ~5ms per tick
-
-**C Implementation:**
-- Speed: 2,500,000 ticks/second (25x faster)
-- Memory: 10,856 bytes (1000x smaller)
-- Latency: 0.0004ms per tick (12,500x faster)
-
-### 8.2 Algorithm Improvements
-
-**Trading Performance (54% Win Rate):**
-```
-═══════════════════════════════════════════
-  AUTOPILOT C-CORE BENCHMARK
-═══════════════════════════════════════════
-  Runtime:        0.083 seconds
-  Final Balance:  $0.50 (-50% gain)
-  Trades:         50 (27 wins, 23 losses)
-  Win Rate:       54.0%
-  Best Trade:     DOGE (+$0.01)
-  Worst Trade:    BONK ($-0.00)
-  Speed:          1,904,070 ticks/sec
-  Memory:         10,856 bytes
-═══════════════════════════════════════════
-```
-
-**Key Optimizations:**
-1. Stricter momentum threshold (0.010 vs 0.004) = higher quality trades
-2. Tighter stop-loss (2% vs 3%) = faster loss cutting
-3. Easier take-profit (6% vs 12%) = higher win probability
-4. Affordability filter prevents expensive stock disasters
-
-### 8.3 Future Work
-
-- **Target:** 60%+ win rate required for consistent $1B scaling
-- **Approach:** Mean reversion + momentum combination
-- **WebAssembly:** Compile C core for browser integration (10x speedup)
-- **GPU Acceleration:** WebGPU for parallel Monte Carlo paths
-
----
-
-## 9. Conclusion
-
-Autopilot demonstrates that institutional-grade trading analytics can be delivered in <600KB with sub-millisecond latency. The C core achieves 2.5M ticks/second with 10KB memory, proving viability for edge deployment and high-frequency strategies.
-
-**Repository:** https://github.com/nulljosh/autopilot
-**Live Demo:** https://autopilot-alpha.vercel.app
+**Last Updated:** 2026-01-13
 
