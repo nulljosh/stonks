@@ -18,6 +18,12 @@
 - [ ] Calculate and display ROI metrics
 - [ ] Incremental code generation (avoid token exhaustion)
 
+### P3 - Docs (Deferred)
+- [ ] Add ToC to CLAUDE.md, mark skills as [Implemented]/[Planned]
+- [ ] Add priorities to IDEA.md
+- [ ] Update README.md dates and fix stonks→bread path
+- [ ] Verify STATE_MACHINES.md matches current code
+
 ## Known Issues & Limitations
 
 ### Current Limitations
