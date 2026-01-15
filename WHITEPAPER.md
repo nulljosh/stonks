@@ -9,9 +9,14 @@
 
 ## Abstract
 
-This paper presents **Autopilot**, a high-performance financial terminal designed for low-latency market analysis and algorithmic trading simulation. The system combines real-time prediction market integration (Polymarket, Kalshi), Monte Carlo simulation with auto-parameterized drift and volatility, and a memory-optimized architecture targeting sub-10MB runtime footprint. We introduce the **Delta-Threshold Update Algorithm** for bandwidth conservation and demonstrate a novel **Fibonacci-based position sizing strategy** that scales from $1 to $1B with adaptive risk management. Empirical testing shows the system achieves sub-100ms data refresh rates while maintaining <577KB bundle size, making it suitable for deployment on resource-constrained devices. The architecture is designed for progressive enhancement from React web application → C++ core modules → custom RTOS for bare-metal execution.
+This paper presents **Autopilot**, a high-performance financial terminal designed to operationalize the **debasement trade**—the systematic exploitation of fiat currency depreciation through scarce asset accumulation. As central banks expand monetary supply (M2 +40% since 2020), nominal asset prices must rise to maintain purchasing power equilibrium. Autopilot combines real-time prediction market integration (Polymarket, Kalshi), Monte Carlo simulation with auto-parameterized drift and volatility, and a memory-optimized architecture targeting sub-10MB runtime footprint. We introduce the **Delta-Threshold Update Algorithm** for bandwidth conservation and demonstrate a novel **Fibonacci-based position sizing strategy** that scales from $1 to $1B with adaptive risk management. The system prioritizes high-volatility, scarce-supply assets (Bitcoin, silver, NVDA) that benefit from monetary expansion. Empirical testing shows the system achieves sub-100ms data refresh rates while maintaining <577KB bundle size, making it suitable for deployment on resource-constrained devices. The architecture is designed for progressive enhancement from React web application → C++ core modules → custom RTOS for bare-metal execution.
 
 ## Executive Summary (TLDR)
+
+**Investment Thesis:**
+- **The Debasement Trade**: Fiat currency loses value as M2 expands → scarce assets (Bitcoin, silver, equities) appreciate in nominal terms
+- **Silver Focus**: Currently $90/oz, targets $300 (gold/silver ratio normalization) to $3,000 (monetary reset)
+- **Asymmetric Upside**: $10K → $333K if silver hits $3,000 = "never work again" scenario
 
 **Core Innovation:**
 - **Delta-Threshold Algorithm**: Only updates UI when price moves >0.5% → 70% bandwidth reduction
@@ -49,7 +54,134 @@ Modern financial terminals (Bloomberg Terminal, TradingView, Thinkorswim) priori
 
 Autopilot addresses these challenges through aggressive optimization while maintaining institutional-grade analytical capabilities.
 
-### 1.2 Design Goals
+### 1.2 The Debasement Trade: Core Investment Thesis
+
+**The Trade:**
+
+The debasement trade is the foundational investment philosophy driving Autopilot. It operates on a simple premise: as central banks expand monetary supply (M2 growth, quantitative easing, deficit spending), fiat currency loses purchasing power. Assets with fixed or scarce supply—equities, Bitcoin, real estate, commodities—appreciate in nominal terms not because they're necessarily more productive, but because the measuring stick (fiat) is shrinking.
+
+**Mathematical Framework:**
+
+```
+Real Return = Nominal Return - Inflation Rate
+Asset Value (nominal) = Asset Value (real) × (M2_t / M2_0)
+
+Where M2_t = money supply at time t
+```
+
+As M2 increases faster than economic output (GDP), nominal asset prices must rise to maintain equilibrium purchasing power. This creates systematic, predictable alpha.
+
+**Historical Evidence:**
+
+| Period | M2 Growth | S&P 500 Nominal | Gold | Bitcoin |
+|--------|-----------|-----------------|------|---------|
+| 2008-2020 | +186% | +189% | +58% | N/A |
+| 2020-2023 | +40% | +52% | +29% | +312% |
+
+**Why Now?**
+
+1. **Structural Deficits:** U.S. debt-to-GDP >120%, requires perpetual monetary expansion
+2. **Political Incentives:** Inflating away debt is politically easier than austerity
+3. **Demographic Trends:** Aging populations increase entitlement spending → more printing
+4. **Rate Suppression:** Central banks trapped at zero-bound, QE is the only tool
+
+**Implementation in Autopilot:**
+
+Autopilot operationalizes the debasement trade through:
+
+1. **Asset Selection:** Prioritizes scarce assets (NVDA chips, Bitcoin, TSLA innovation) over commoditized goods
+2. **Leverage Timing:** Fibonacci position sizing front-loads risk when inflation is accelerating
+3. **Macro Indicators:** Polymarket prediction markets track election outcomes that signal monetary policy shifts (e.g., Trump → fiscal expansion → higher inflation)
+4. **Volatility Exploitation:** Debasement creates volatility as markets reprice—our Delta-Threshold algorithm captures these moves efficiently
+
+**Anti-Fragility:**
+
+Unlike fixed-income investments that get destroyed by inflation, the debasement trade becomes *stronger* as monetary instability increases:
+
+- **High inflation:** Asset prices spike, momentum strategies profit
+- **Deflation scare:** Central banks print more, restarting the cycle
+- **Currency crisis:** Flight to hard assets accelerates
+
+**The Silver Trade: Asymmetric Upside**
+
+Silver represents the purest expression of the debasement trade's asymmetric risk/reward profile:
+
+**Current Thesis (2026):**
+- **Current Price:** ~$90/oz
+- **Near-term Target:** $100/oz (historical resistance)
+- **Medium-term Target:** $300/oz (gold/silver ratio normalization)
+- **Long-term Target:** $3,000/oz (monetary reset scenario)
+
+**Why Silver?**
+
+1. **Industrial + Monetary Dual Demand:**
+   - 50% of supply goes to industrial (solar, EVs, AI chips)
+   - 50% to investment/jewelry
+   - Cannot be substituted in most applications
+
+2. **Supply Deficit:**
+   - Mining supply peaked in 2015
+   - Takes 7-10 years to bring new mines online
+   - Recycling rate <20% (vs >90% for gold)
+
+3. **Historic Undervaluation:**
+   - Gold/Silver Ratio currently 90:1 (gold $8,100 / silver $90)
+   - Historical average: 50:1
+   - During monetary crises: drops to 15:1 (1980, 2011)
+   - Normalization to 30:1 → $270/oz silver
+
+4. **Poor Man's Gold:**
+   - Accessible to retail investors (<$100/oz)
+   - Higher beta than gold (moves 2-3x as fast)
+   - Perfect for small-account compounding
+
+**Path to $3,000:**
+
+This isn't a prediction—it's a scenario map:
+
+- **$90 → $100:** Inflation breaks 3%, Fed pauses rate hikes (6-12 months)
+- **$100 → $300:** Industrial shortage + investment demand convergence (2-5 years)
+- **$300 → $3,000:** Monetary reset, gold revalued to $100K+, silver follows (10-20 years)
+
+The $3,000 scenario requires a systemic loss of confidence in fiat currencies—possible but low-probability. Even the conservative $300 target represents 3.3× return from current levels.
+
+**The "Never Work Again" Calculation:**
+
+Assume starting capital $10,000 invested in silver at $90:
+- 111 ounces purchased
+- At $300: $33,300 (3.3× return)
+- At $3,000: $333,000 (33× return)
+
+For larger positions ($100K → $3M at $300), this represents genuine financial independence for small investors. **This is the power of the debasement trade**: asymmetric upside with physical asset backing. Worst case, you own a monetary metal that's held value for 5,000 years. Best case, you ride a historic re-rating.
+
+**Autopilot Integration:**
+
+Currently tracking gold (GC=F) and considering silver (SI=F) addition. The high volatility (2-3× gold's daily moves) makes silver ideal for momentum algorithms and Fibonacci sizing.
+
+**Trade-Offs:**
+
+- **Timing Risk:** Can be early by years (see gold 2011-2019)
+- **Nominal vs Real:** May win in dollars but lose in purchasing power if inflation >gains
+- **Policy Reversal:** Volcker-style rate hikes can temporarily break the trade (1980s)
+- **Silver Specific:** Industrial demand collapse in recession could temporarily depress prices
+- **Liquidity Risk:** Physical silver has wider bid-ask spreads than gold/stocks
+
+**The Autopilot Edge:**
+
+Traditional investors execute the debasement trade passively (buy & hold gold/Bitcoin). Autopilot adds active alpha through:
+
+1. **Monte Carlo Drift:** Auto-adjusts for inflationary macro environment
+2. **Prediction Markets:** Front-runs policy changes (Fed meetings, elections)
+3. **High-Frequency Execution:** Captures intraday volatility caused by liquidity injections
+4. **Risk Scaling:** Fibonacci sizing ensures survival through multi-year drawdowns
+
+**Conclusion:**
+
+The debasement trade is not a prediction—it's a mathematical inevitability given current fiscal trajectories. Autopilot doesn't bet *if* it will happen, but optimizes *how* to exploit it with maximum efficiency and minimum latency.
+
+---
+
+### 1.3 Design Goals
 
 - **Memory efficiency**: Target <10MB total runtime footprint
 - **Latency optimization**: Sub-100ms market data updates
