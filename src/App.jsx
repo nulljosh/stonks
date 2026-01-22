@@ -10,21 +10,22 @@ import NewsWidget from './components/NewsWidget';
 import WeatherWidget from './components/WeatherWidget';
 
 // Trading Simulator Assets (US50 + Indices + Crypto)
+// Prices updated: Jan 22, 2026
 const ASSETS = {
   // Indices
-  NAS100: { name: 'Nasdaq 100', price: 21500, color: '#00d4ff' },
-  SP500: { name: 'S&P 500', price: 6000, color: '#ff6b6b' },
-  US30: { name: 'Dow Jones', price: 43800, color: '#4ecdc4' },
-  XAU: { name: 'Gold', price: 2650, color: '#FFD700' },
-  XAG: { name: 'Silver', price: 31, color: '#A0A0A0' },
+  NAS100: { name: 'Nasdaq 100', price: 22950, color: '#00d4ff' },
+  SP500: { name: 'S&P 500', price: 6920, color: '#ff6b6b' },
+  US30: { name: 'Dow Jones', price: 48780, color: '#4ecdc4' },
+  XAU: { name: 'Gold', price: 4890, color: '#FFD700' },
+  XAG: { name: 'Silver', price: 94, color: '#A0A0A0' },
   // US50 - Top 50 by market cap
-  AAPL: { name: 'Apple', price: 243, color: '#555' },
-  MSFT: { name: 'Microsoft', price: 418, color: '#00A2ED' },
-  GOOGL: { name: 'Google', price: 192, color: '#4285F4' },
+  AAPL: { name: 'Apple', price: 247, color: '#555' },
+  MSFT: { name: 'Microsoft', price: 454, color: '#00A2ED' },
+  GOOGL: { name: 'Google', price: 323, color: '#4285F4' },
   AMZN: { name: 'Amazon', price: 220, color: '#FF9900' },
-  NVDA: { name: 'Nvidia', price: 140, color: '#76B900' },
+  NVDA: { name: 'Nvidia', price: 185, color: '#76B900' },
   META: { name: 'Meta', price: 595, color: '#0668E1' },
-  TSLA: { name: 'Tesla', price: 380, color: '#CC0000' },
+  TSLA: { name: 'Tesla', price: 421, color: '#CC0000' },
   BRK: { name: 'Berkshire', price: 465, color: '#004080' },
   LLY: { name: 'Eli Lilly', price: 785, color: '#DC143C' },
   V: { name: 'Visa', price: 305, color: '#1A1F71' },
