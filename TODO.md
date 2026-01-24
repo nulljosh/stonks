@@ -1,4 +1,4 @@
-# Bread (Autopilot) TODO - Prioritized
+# Bread TODO - Prioritized
 
 **Last Updated:** 2026-01-24
 
@@ -95,7 +95,7 @@
 - [ ] Add ToC to CLAUDE.md
 - [ ] Mark skills as [Implemented] or [Planned]
 - [ ] Add priorities to IDEA.md
-- [ ] Update README.md dates (stonks → bread references)
+- [x] Update README.md dates (stonks → bread references) - DONE 2026-01-24
 - [ ] Verify STATE_MACHINES.md matches current code
 
 ---
@@ -157,6 +157,14 @@ See `STRATEGY.md` for full plan (not started yet)
 ---
 
 ## Completed (Recent Sessions)
+
+### 2026-01-24
+- [x] Fixed $1 trading trap - removed price filter blocking normal stocks
+- [x] Validated $1 → $100 working (10,000% gain in 300 trades)
+- [x] Added MAG7 + stocks to scrolling ticker (merged liveAssets + stocks)
+- [x] Renamed project: Autopilot → Bread (README, docs, git remote)
+- [x] Updated Vercel URL to production deployment
+- [x] Cleaned up stale git branches
 
 ### 2026-01-11
 - [x] Two-phase trading approach (0.8% → 1.5% thresholds)
