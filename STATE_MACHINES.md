@@ -1,4 +1,4 @@
-# Autopilot State Machine Diagrams
+# Bread State Machine Diagrams
 
 This document maps out all component state transitions to verify correctness at a systems level.
 

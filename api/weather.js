@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Autopilot/1.0',
+        'User-Agent': 'Bread/1.0',
       },
     });
 

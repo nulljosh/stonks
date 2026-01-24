@@ -1,4 +1,4 @@
-// Autopilot Trading Engine - C Core
+// Bread Trading Engine - C Core
 // Ultra-low latency implementation for WebAssembly compilation
 #ifndef TRADING_ENGINE_H
 #define TRADING_ENGINE_H

@@ -1,4 +1,4 @@
-# Autopilot: A Low-Latency, Memory-Efficient Financial Terminal for High-Alpha Trading Strategies
+# Bread: A Low-Latency, Memory-Efficient Financial Terminal for High-Alpha Trading Strategies
 
 **Author:** Joshua
 **Affiliation:** Independent Research
@@ -9,7 +9,7 @@
 
 ## Abstract
 
-This paper presents **Autopilot**, a high-performance financial terminal designed to operationalize the **debasement trade**—the systematic exploitation of fiat currency depreciation through scarce asset accumulation. As central banks expand monetary supply (M2 +40% since 2020), nominal asset prices must rise to maintain purchasing power equilibrium. Autopilot combines real-time prediction market integration (Polymarket, Kalshi), Monte Carlo simulation with auto-parameterized drift and volatility, and a memory-optimized architecture targeting sub-10MB runtime footprint. We introduce the **Delta-Threshold Update Algorithm** for bandwidth conservation and demonstrate a novel **Fibonacci-based position sizing strategy** that scales from $1 to $1B with adaptive risk management. The system prioritizes high-volatility, scarce-supply assets (Bitcoin, silver, NVDA) that benefit from monetary expansion. Empirical testing shows the system achieves sub-100ms data refresh rates while maintaining <577KB bundle size, making it suitable for deployment on resource-constrained devices. The architecture is designed for progressive enhancement from React web application → C++ core modules → custom RTOS for bare-metal execution.
+This paper presents **Bread**, a high-performance financial terminal designed to operationalize the **debasement trade**—the systematic exploitation of fiat currency depreciation through scarce asset accumulation. As central banks expand monetary supply (M2 +40% since 2020), nominal asset prices must rise to maintain purchasing power equilibrium. Bread combines real-time prediction market integration (Polymarket, Kalshi), Monte Carlo simulation with auto-parameterized drift and volatility, and a memory-optimized architecture targeting sub-10MB runtime footprint. We introduce the **Delta-Threshold Update Algorithm** for bandwidth conservation and demonstrate a novel **Fibonacci-based position sizing strategy** that scales from $1 to $1B with adaptive risk management. The system prioritizes high-volatility, scarce-supply assets (Bitcoin, silver, NVDA) that benefit from monetary expansion. Empirical testing shows the system achieves sub-100ms data refresh rates while maintaining <577KB bundle size, making it suitable for deployment on resource-constrained devices. The architecture is designed for progressive enhancement from React web application → C++ core modules → custom RTOS for bare-metal execution.
 
 ## Executive Summary (TLDR)
 
@@ -52,13 +52,13 @@ Modern financial terminals (Bloomberg Terminal, TradingView, Thinkorswim) priori
 3. **Cost optimization**: Minimizing cloud compute and bandwidth expenses
 4. **Latency reduction**: Eliminating unnecessary data transfer
 
-Autopilot addresses these challenges through aggressive optimization while maintaining institutional-grade analytical capabilities.
+Bread addresses these challenges through aggressive optimization while maintaining institutional-grade analytical capabilities.
 
 ### 1.2 The Debasement Trade: Core Investment Thesis
 
 **The Trade:**
 
-The debasement trade is the foundational investment philosophy driving Autopilot. It operates on a simple premise: as central banks expand monetary supply (M2 growth, quantitative easing, deficit spending), fiat currency loses purchasing power. Assets with fixed or scarce supply—equities, Bitcoin, real estate, commodities—appreciate in nominal terms not because they're necessarily more productive, but because the measuring stick (fiat) is shrinking.
+The debasement trade is the foundational investment philosophy driving Bread. It operates on a simple premise: as central banks expand monetary supply (M2 growth, quantitative easing, deficit spending), fiat currency loses purchasing power. Assets with fixed or scarce supply—equities, Bitcoin, real estate, commodities—appreciate in nominal terms not because they're necessarily more productive, but because the measuring stick (fiat) is shrinking.
 
 **Mathematical Framework:**
 
@@ -85,9 +85,9 @@ As M2 increases faster than economic output (GDP), nominal asset prices must ris
 3. **Demographic Trends:** Aging populations increase entitlement spending → more printing
 4. **Rate Suppression:** Central banks trapped at zero-bound, QE is the only tool
 
-**Implementation in Autopilot:**
+**Implementation in Bread:**
 
-Autopilot operationalizes the debasement trade through:
+Bread operationalizes the debasement trade through:
 
 1. **Asset Selection:** Prioritizes scarce assets (NVDA chips, Bitcoin, TSLA innovation) over commoditized goods
 2. **Leverage Timing:** Fibonacci position sizing front-loads risk when inflation is accelerating
@@ -154,7 +154,7 @@ Assume starting capital $10,000 invested in silver at $90:
 
 For larger positions ($100K → $3M at $300), this represents genuine financial independence for small investors. **This is the power of the debasement trade**: asymmetric upside with physical asset backing. Worst case, you own a monetary metal that's held value for 5,000 years. Best case, you ride a historic re-rating.
 
-**Autopilot Integration:**
+**Bread Integration:**
 
 Currently tracking gold (GC=F) and considering silver (SI=F) addition. The high volatility (2-3× gold's daily moves) makes silver ideal for momentum algorithms and Fibonacci sizing.
 
@@ -166,9 +166,9 @@ Currently tracking gold (GC=F) and considering silver (SI=F) addition. The high 
 - **Silver Specific:** Industrial demand collapse in recession could temporarily depress prices
 - **Liquidity Risk:** Physical silver has wider bid-ask spreads than gold/stocks
 
-**The Autopilot Edge:**
+**The Bread Edge:**
 
-Traditional investors execute the debasement trade passively (buy & hold gold/Bitcoin). Autopilot adds active alpha through:
+Traditional investors execute the debasement trade passively (buy & hold gold/Bitcoin). Bread adds active alpha through:
 
 1. **Monte Carlo Drift:** Auto-adjusts for inflationary macro environment
 2. **Prediction Markets:** Front-runs policy changes (Fed meetings, elections)
@@ -177,7 +177,7 @@ Traditional investors execute the debasement trade passively (buy & hold gold/Bi
 
 **Conclusion:**
 
-The debasement trade is not a prediction—it's a mathematical inevitability given current fiscal trajectories. Autopilot doesn't bet *if* it will happen, but optimizes *how* to exploit it with maximum efficiency and minimum latency.
+The debasement trade is not a prediction—it's a mathematical inevitability given current fiscal trajectories. Bread doesn't bet *if* it will happen, but optimizes *how* to exploit it with maximum efficiency and minimum latency.
 
 ---
 
@@ -573,8 +573,8 @@ d₂ = d₁ - σ√T
 ### 9.1 Local Development
 
 ```bash
-git clone https://github.com/nulljosh/autopilot
-cd autopilot
+git clone https://github.com/nulljosh/bread
+cd bread
 npm install
 npm run dev
 ```
@@ -598,7 +598,7 @@ vercel --prod
 
 ## 10. Conclusion
 
-Autopilot demonstrates that institutional-grade financial analytics can be delivered in a sub-1MB package with sub-100ms latency. The Delta-Threshold algorithm reduces bandwidth by 70%, auto-parameterized Monte Carlo eliminates manual bias, and Fibonacci position sizing provides natural risk scaling from $1 to $1B.
+Bread demonstrates that institutional-grade financial analytics can be delivered in a sub-1MB package with sub-100ms latency. The Delta-Threshold algorithm reduces bandwidth by 70%, auto-parameterized Monte Carlo eliminates manual bias, and Fibonacci position sizing provides natural risk scaling from $1 to $1B.
 
 The system serves as a proof-of-concept for the broader thesis: **efficiency is alpha**. In high-frequency trading, every millisecond and megabyte matters. By architecting for extreme constraints, we unlock deployment scenarios impossible for traditional platforms—mobile trading, satellite connections, embedded devices.
 
@@ -619,7 +619,7 @@ Future work will focus on C++ migration for compute-intensive modules and eventu
 ## Appendix A: Code Availability
 
 Full source code available at:
-**GitHub:** https://github.com/nulljosh/autopilot
+**GitHub:** https://github.com/nulljosh/bread
 
 **License:** MIT (open source)
 

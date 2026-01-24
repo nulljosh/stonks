@@ -1,4 +1,4 @@
-// Autopilot C Core - Benchmark
+// Bread C Core - Benchmark
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -107,7 +107,7 @@ int main() {
     // Results
     printf("\n");
     printf("═══════════════════════════════════════════\n");
-    printf("  AUTOPILOT C-CORE BENCHMARK\n");
+    printf("  BREAD C-CORE BENCHMARK\n");
     printf("═══════════════════════════════════════════\n");
     printf("  Runtime:        %.3f seconds\n", elapsed);
     printf("  Final Balance:  %s (%.0f%% gain)\n", balance_str, (engine.balance - 1.0f) / 1.0f * 100.0f);

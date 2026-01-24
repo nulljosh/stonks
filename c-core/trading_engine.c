@@ -1,4 +1,4 @@
-// Autopilot Trading Engine - C Core Implementation
+// Bread Trading Engine - C Core Implementation
 #include "trading_engine.h"
 #include <string.h>
 #include <math.h>

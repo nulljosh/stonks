@@ -1,7 +1,7 @@
-# Autopilot - Claude Development Guide
+# Bread - Claude Development Guide
 
 ## Project Vision
-Autopilot is a high-alpha, low-latency financial terminal designed for extreme efficiency. It combines prediction markets (Polymarket, Kalshi) with quantitative simulations and live market data into a unified dashboard optimized for minimal memory footprint and bandwidth usage.
+Bread is a high-alpha, low-latency financial terminal designed for extreme efficiency. It combines prediction markets (Polymarket, Kalshi) with quantitative simulations and live market data into a unified dashboard optimized for minimal memory footprint and bandwidth usage.
 
 ## Architecture Goals
 - **Memory**: Target <10MB runtime footprint ("The 10MB Dashboard")
@@ -294,7 +294,7 @@ git push
 ## Broker Integration Roadmap
 
 ### TradingView Integration
-- **Approach**: TradingView Webhooks → Autopilot API → Broker
+- **Approach**: TradingView Webhooks → Bread API → Broker
 - **Flow**: Alert trigger → REST endpoint → Order execution
 - **Latency**: ~500ms end-to-end
 
