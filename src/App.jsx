@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, ComposedChart, ReferenceLine, BarChart, Bar, Cell } from 'recharts';
 import { usePolymarket, MARKET_CATEGORIES } from './hooks/usePolymarket';
 import { useLivePrices, formatLastUpdated } from './hooks/useLivePrices';
-import { useStocks, useStockHistory } from './hooks/useStocks';
-import { runMonteCarlo, formatPrice, calcFibTargets } from './utils/math';
-import { getTheme, getProbColor } from './utils/theme';
-import { defaultAssets, scenarios, horizons, horizonLabels } from './utils/assets';
-import NewsWidget from './components/NewsWidget';
+import { useStocks } from './hooks/useStocks';
+import { formatPrice } from './utils/math';
+import { getTheme } from './utils/theme';
+import { defaultAssets } from './utils/assets';
 import WeatherWidget from './components/WeatherWidget';
 
 // Trading Simulator Assets (US50 + Indices + Crypto)
@@ -168,9 +166,13 @@ const Card = ({ children, style, onClick, dark, t }) => (
 );
 
 export default function App() {
+  console.log('App component rendering');
+
   const [dark, setDark] = useState(true);
   const t = getTheme(dark);
   const font = '-apple-system, BlinkMacSystemFont, system-ui, sans-serif';
+
+  console.log('Theme:', t);
 
   // Fibonacci levels from $1 to $1B
   const FIB_LEVELS = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 50000000, 100000000, 200000000, 500000000, 1000000000];
@@ -521,30 +523,31 @@ export default function App() {
     return filtered;
   }, [markets, pmCategory, showHighProb]);
 
-  const assetToSymbol = {
-    btc: 'BTC-USD', eth: 'ETH-USD', gold: 'GC=F', silver: 'SI=F', oil: 'CL=F', nas100: 'NQ=F', us500: 'ES=F',
-    aapl: 'AAPL', msft: 'MSFT', googl: 'GOOGL', amzn: 'AMZN', meta: 'META', tsla: 'TSLA', nvda: 'NVDA'
-  };
-  const { history: priceHistory, loading: historyLoading } = useStockHistory(assetToSymbol[asset] || 'GC=F', '1y');
-
-  const runSim = useCallback((key, sc) => {
-    const a = liveAssets[key];
-    if (!a) return { pctData: [], probs: [], finals: [] };
-    const { drift, volMult } = scenarios[sc];
-    return runMonteCarlo(a.spot, a.vol, drift, volMult, a.targets, horizons, simSeed);
-  }, [liveAssets, simSeed]);
-
-  const res = useMemo(() => runSim(asset, scenario), [asset, scenario, runSim]);
-
-  const a = liveAssets[asset];
-  const fmt = formatPrice;
-  const pCol = (p) => getProbColor(p, t);
-
-  const scenarioColors = {
-    bull: t.green,
-    base: t.accent,
-    bear: t.red
-  };
+  // SIMULATIONS DISABLED - NOT NEEDED FOR POLYMARKET VIEW
+  // const assetToSymbol = {
+  //   btc: 'BTC-USD', eth: 'ETH-USD', gold: 'GC=F', silver: 'SI=F', oil: 'CL=F', nas100: 'NQ=F', us500: 'ES=F',
+  //   aapl: 'AAPL', msft: 'MSFT', googl: 'GOOGL', amzn: 'AMZN', meta: 'META', tsla: 'TSLA', nvda: 'NVDA'
+  //  };
+  // const { history: priceHistory, loading: historyLoading } = useStockHistory(assetToSymbol[asset] || 'GC=F', '1y');
+  //
+  // const runSim = useCallback((key, sc) => {
+  //   const a = liveAssets[key];
+  //   if (!a) return { pctData: [], probs: [], finals: [] };
+  //   const { drift, volMult } = scenarios[sc];
+  //   return runMonteCarlo(a.spot, a.vol, drift, volMult, a.targets, horizons, simSeed);
+  // }, [liveAssets, simSeed]);
+  //
+  // const res = useMemo(() => runSim(asset, scenario), [asset, scenario, runSim]);
+  //
+  // const a = liveAssets[asset];
+  // const fmt = formatPrice;
+  // const pCol = (p) => getProbColor(p, t);
+  //
+  // const scenarioColors = {
+  //   bull: t.green,
+  //   base: t.accent,
+  //   bear: t.red
+  // };
 
   return (
     <div style={{ minHeight: '100vh', background: t.bg, color: t.text, fontFamily: font }}>
