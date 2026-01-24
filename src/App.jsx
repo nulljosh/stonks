@@ -244,7 +244,7 @@ export default function App() {
       } catch (err) {
         console.error('Simulator tick error:', err);
       }
-    }, perfMode ? 300 : 150); // Slower ticks for stable trading
+    }, perfMode ? 100 : 50); // Fast ticks for quick simulation
 
     return () => clearInterval(iv);
   }, [running, balance, perfMode]);
@@ -322,8 +322,8 @@ export default function App() {
       const avg = p.slice(-10).reduce((a, b) => a + b, 0) / 10;
       const strength = (current - avg) / avg;
 
-      // Ultra-strict thresholds for 60%+ win rate
-      const minStrength = balance < 2 ? 0.015 : balance < 10 ? 0.018 : 0.022;
+      // Balanced thresholds for speed + win rate
+      const minStrength = balance < 2 ? 0.012 : balance < 10 ? 0.014 : balance < 100 ? 0.016 : 0.018;
 
       if (strength > minStrength && (!best || strength > best.strength)) {
         best = { sym, price: current, strength };
@@ -331,16 +331,16 @@ export default function App() {
     });
 
     if (best) {
-      // Progressive risk reduction: more aggressive at low balance, conservative at high balance
-      const sizePercent = balance < 2 ? 0.70 :
-                         balance < 5 ? 0.50 :
-                         balance < 10 ? 0.30 :
-                         balance < 100 ? 0.15 :
-                         balance < 1000 ? 0.10 :
-                         balance < 10000 ? 0.08 :
-                         balance < 100000 ? 0.05 :
-                         balance < 1000000 ? 0.03 :
-                         balance < 10000000 ? 0.02 : 0.01; // 1% at $10M+
+      // Progressive risk reduction: aggressive throughout for speed
+      const sizePercent = balance < 2 ? 0.75 :
+                         balance < 5 ? 0.55 :
+                         balance < 10 ? 0.35 :
+                         balance < 100 ? 0.20 :
+                         balance < 1000 ? 0.15 :
+                         balance < 10000 ? 0.12 :
+                         balance < 100000 ? 0.08 :
+                         balance < 1000000 ? 0.05 :
+                         balance < 10000000 ? 0.03 : 0.02; // 2% at $10M+
       const size = balance * sizePercent;
 
       // Safety check: don't open position if win would exceed target
@@ -360,8 +360,8 @@ export default function App() {
           sym: best.sym,
           entry: best.price,
           size,
-          stop: best.price * 0.985, // 1.5% stop loss (tight, proven to work at 64% win rate)
-          target: best.price * 1.045, // 4.5% take profit (3:1 R/R, achievable)
+          stop: best.price * 0.982, // 1.8% stop loss (slightly wider for speed)
+          target: best.price * 1.042, // 4.2% take profit (faster exits)
         });
         setLastTraded(best.sym);
         setTrades(t => {
