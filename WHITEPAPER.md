@@ -586,7 +586,7 @@ npm run build
 vercel --prod
 ```
 
-**Live Demo:** https://autopilot-alpha.vercel.app
+**Live Demo:** https://bread-m0zrli7pf-nulljosh-9577s-projects.vercel.app
 
 ### 9.3 API Keys Required
 
