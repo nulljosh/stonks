@@ -6,12 +6,23 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      // Proxy API requests to production Vercel deployment in dev mode
-      // This allows Polymarket API to work locally
-      '/api': {
-        target: 'https://autopilot-alpha.vercel.app',
+      '/api/markets': {
+        target: 'https://gamma-api.polymarket.com',
         changeOrigin: true,
         secure: true,
+        rewrite: (path) => '/markets?closed=false&limit=50&order=volume24hr&ascending=false'
+      },
+      '/api/commodities': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+      '/api/stocks': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+      '/api/weather': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
       }
     }
   }

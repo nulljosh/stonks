@@ -274,13 +274,25 @@ export default function App() {
     }
 
     if (current >= position.target) {
-      setBalance(b => b + pnl);
+      const target = targetTrillion ? 1000000000000 : 1000000000;
+      const newBalance = balance + pnl;
+
+      // Cap balance at target to prevent overshooting
+      const cappedBalance = Math.min(newBalance, target);
+      const cappedPnl = cappedBalance - balance;
+
+      setBalance(cappedBalance);
       setTrades(t => {
-        const updated = [...t, { type: 'WIN', sym: position.sym, pnl: pnl.toFixed(2) }];
+        const updated = [...t, { type: 'WIN', sym: position.sym, pnl: cappedPnl.toFixed(2) }];
         return updated.length > 100 ? updated.slice(-100) : updated;
       });
-      setTradeStats(s => ({ ...s, wins: { ...s.wins, [position.sym]: (s.wins[position.sym] || 0) + pnl } }));
+      setTradeStats(s => ({ ...s, wins: { ...s.wins, [position.sym]: (s.wins[position.sym] || 0) + cappedPnl } }));
       setPosition(null);
+
+      // Stop immediately if we hit target
+      if (cappedBalance >= target) {
+        setRunning(false);
+      }
       return;
     }
 
@@ -291,6 +303,7 @@ export default function App() {
 
   useEffect(() => {
     const target = targetTrillion ? 1000000000000 : 1000000000;
+    // Stop opening new positions if we've already won
     if (!running || position || balance <= 0.5 || balance >= target) return;
 
     let best = null;
@@ -321,9 +334,29 @@ export default function App() {
     });
 
     if (best) {
-      // Ultra aggressive at $1 to escape quickly
-      const sizePercent = balance < 2 ? 0.70 : balance < 5 ? 0.50 : balance < 10 ? 0.30 : balance < 100 ? 0.15 : balance < 1000 ? 0.10 : 0.08;
+      // Progressive risk reduction: more aggressive at low balance, conservative at high balance
+      const sizePercent = balance < 2 ? 0.70 :
+                         balance < 5 ? 0.50 :
+                         balance < 10 ? 0.30 :
+                         balance < 100 ? 0.15 :
+                         balance < 1000 ? 0.10 :
+                         balance < 10000 ? 0.08 :
+                         balance < 100000 ? 0.05 :
+                         balance < 1000000 ? 0.03 :
+                         balance < 10000000 ? 0.02 : 0.01; // 1% at $10M+
       const size = balance * sizePercent;
+
+      // Safety check: don't open position if win would exceed target
+      const target = targetTrillion ? 1000000000000 : 1000000000;
+      const maxWin = size * 0.045; // 4.5% max gain
+      if (balance + maxWin > target * 1.1) {
+        // Would overshoot target by >10%, reduce position size
+        const safeSize = (target - balance) / 0.045 * 0.8; // 80% of max safe size
+        if (safeSize < size * 0.5) {
+          console.log('Position too large for target, skipping:', { balance, target, safeSize, size });
+          return; // Skip if we'd need to reduce by >50%
+        }
+      }
 
       // Minimum position check
       if (size < 0.001) {
