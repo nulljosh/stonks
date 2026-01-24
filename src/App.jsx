@@ -130,8 +130,8 @@ styleSheet.textContent = `
     100% { transform: rotate(360deg); }
   }
   @keyframes scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-50%, 0, 0); }
   }
   * {
     -webkit-font-smoothing: antialiased;
@@ -528,6 +528,16 @@ export default function App() {
     return merged;
   }, [liveAssets, stocks]);
 
+  // Memoize ticker items to prevent re-renders
+  const tickerItems = useMemo(() => {
+    return Object.keys(tickerAssets).map(k => ({
+      key: k,
+      name: tickerAssets[k]?.name,
+      price: tickerAssets[k]?.spot,
+      change: tickerAssets[k]?.chgPct,
+    }));
+  }, [tickerAssets]);
+
   const filteredMarkets = useMemo(() => {
     let filtered = markets;
     if (pmCategory !== 'all') {
@@ -608,15 +618,22 @@ export default function App() {
 
       {/* Scrolling Ticker Tape */}
       <div style={{ overflow: 'hidden', borderBottom: `0.5px solid ${t.border}`, background: t.surface }}>
-        <div style={{ display: 'flex', gap: 24, padding: '8px 0', animation: 'scroll 20s linear infinite', whiteSpace: 'nowrap' }}>
+        <div style={{
+          display: 'flex',
+          gap: 24,
+          padding: '8px 0',
+          animation: 'scroll 20s linear infinite',
+          whiteSpace: 'nowrap',
+          willChange: 'transform'
+        }}>
           {[...Array(2)].map((_, idx) => (
             <div key={idx} style={{ display: 'flex', gap: 24 }}>
-              {Object.keys(tickerAssets).map(k => (
-                <span key={`asset-${k}-${idx}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.8 }}>
-                  <span style={{ fontWeight: 600 }}>{tickerAssets[k]?.name}</span>
-                  <span>${formatPrice(tickerAssets[k]?.spot || 0)}</span>
-                  <span style={{ color: (tickerAssets[k]?.chgPct || 0) >= 0 ? t.green : t.red }}>
-                    {(tickerAssets[k]?.chgPct || 0) >= 0 ? '▲' : '▼'}{Math.abs(tickerAssets[k]?.chgPct || 0).toFixed(2)}%
+              {tickerItems.map(item => (
+                <span key={`${item.key}-${idx}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.8 }}>
+                  <span style={{ fontWeight: 600 }}>{item.name}</span>
+                  <span>${formatPrice(item.price || 0)}</span>
+                  <span style={{ color: (item.change || 0) >= 0 ? t.green : t.red }}>
+                    {(item.change || 0) >= 0 ? '▲' : '▼'}{Math.abs(item.change || 0).toFixed(2)}%
                   </span>
                 </span>
               ))}
