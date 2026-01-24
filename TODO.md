@@ -7,7 +7,14 @@
    - Effort: Medium (integrate useLivePrices into simulator logic)
 
 ## P1 - High Value
-2. **Run automated speed test** 🧪
+2. **Record every simulation run** 📊
+   - Why: Track performance over time, identify patterns
+   - Data: Win rate, biggest winner/loser, time to $1B, asset performance
+   - Storage: JSON files (1-5KB each) → eventually database
+   - Impact: Historical analytics, strategy optimization
+   - Effort: Medium (add save function on win/bust)
+
+3. **Run automated speed test** 🧪
    - Why: Verify sub-60s target programmatically
    - Impact: Confidence in performance claims
    - Effort: 1 command (`npm run test:speed`)
