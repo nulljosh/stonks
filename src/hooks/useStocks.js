@@ -41,15 +41,32 @@ const fetchWithRetry = async (url, maxRetries = 3, baseDelay = 1000) => {
   throw lastError;
 };
 
-// Fallback static data for when API fails (last known prices)
+// Fallback static data for when API fails (last known prices - Jan 24, 2026)
 const FALLBACK_DATA = {
-  AAPL: { symbol: 'AAPL', price: 243, changePercent: 0.42 },
-  MSFT: { symbol: 'MSFT', price: 418, changePercent: -0.18 },
-  GOOGL: { symbol: 'GOOGL', price: 192, changePercent: 0.33 },
+  AAPL: { symbol: 'AAPL', price: 247, changePercent: 0.42 },
+  MSFT: { symbol: 'MSFT', price: 454, changePercent: -0.18 },
+  GOOGL: { symbol: 'GOOGL', price: 323, changePercent: 0.33 },
   AMZN: { symbol: 'AMZN', price: 220, changePercent: 0.55 },
-  NVDA: { symbol: 'NVDA', price: 140, changePercent: 1.24 },
+  NVDA: { symbol: 'NVDA', price: 185, changePercent: 1.24 },
   META: { symbol: 'META', price: 595, changePercent: -0.27 },
-  TSLA: { symbol: 'TSLA', price: 380, changePercent: 2.15 },
+  TSLA: { symbol: 'TSLA', price: 421, changePercent: 2.15 },
+  PLTR: { symbol: 'PLTR', price: 71, changePercent: 1.82 },
+  HOOD: { symbol: 'HOOD', price: 38, changePercent: -0.55 },
+  COST: { symbol: 'COST', price: 1020, changePercent: 0.31 },
+  JPM: { symbol: 'JPM', price: 245, changePercent: 0.12 },
+  WMT: { symbol: 'WMT', price: 95, changePercent: -0.08 },
+  TGT: { symbol: 'TGT', price: 142, changePercent: 0.65 },
+  PG: { symbol: 'PG', price: 170, changePercent: 0.22 },
+  HIMS: { symbol: 'HIMS', price: 28, changePercent: 3.45 },
+  COIN: { symbol: 'COIN', price: 265, changePercent: 2.87 },
+  SQ: { symbol: 'SQ', price: 82, changePercent: 1.12 },
+  SHOP: { symbol: 'SHOP', price: 115, changePercent: 0.88 },
+  RKLB: { symbol: 'RKLB', price: 24, changePercent: 4.22 },
+  SOFI: { symbol: 'SOFI', price: 16, changePercent: 1.55 },
+  T: { symbol: 'T', price: 22, changePercent: -0.33 },
+  IBM: { symbol: 'IBM', price: 235, changePercent: 0.18 },
+  DIS: { symbol: 'DIS', price: 105, changePercent: -0.42 },
+  IWM: { symbol: 'IWM', price: 228, changePercent: 0.55 },
 };
 
 export function useStocks(symbols = DEFAULT_SYMBOLS) {
