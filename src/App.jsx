@@ -6,6 +6,7 @@ import { formatPrice } from './utils/math';
 import { getTheme } from './utils/theme';
 import { defaultAssets } from './utils/assets';
 import WeatherWidget from './components/WeatherWidget';
+import Ticker from './components/Ticker';
 
 // Trading Simulator Assets (US50 + Indices + Crypto)
 // Prices updated: Jan 22, 2026
@@ -617,30 +618,7 @@ export default function App() {
       )}
 
       {/* Scrolling Ticker Tape */}
-      <div style={{ overflow: 'hidden', borderBottom: `0.5px solid ${t.border}`, background: t.surface }}>
-        <div style={{
-          display: 'flex',
-          gap: 24,
-          padding: '8px 0',
-          animation: 'scroll 20s linear infinite',
-          whiteSpace: 'nowrap',
-          willChange: 'transform'
-        }}>
-          {[...Array(2)].map((_, idx) => (
-            <div key={idx} style={{ display: 'flex', gap: 24 }}>
-              {tickerItems.map(item => (
-                <span key={`${item.key}-${idx}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.8 }}>
-                  <span style={{ fontWeight: 600 }}>{item.name}</span>
-                  <span>${formatPrice(item.price || 0)}</span>
-                  <span style={{ color: (item.change || 0) >= 0 ? t.green : t.red }}>
-                    {(item.change || 0) >= 0 ? '▲' : '▼'}{Math.abs(item.change || 0).toFixed(2)}%
-                  </span>
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+      <Ticker items={tickerItems} theme={t} />
 
       <div style={{ padding: 16, maxWidth: 1400, margin: '0 auto' }}>
         {/* TRADING SIMULATOR */}
