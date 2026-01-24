@@ -166,13 +166,9 @@ const Card = ({ children, style, onClick, dark, t }) => (
 );
 
 export default function App() {
-  console.log('App component rendering');
-
   const [dark, setDark] = useState(true);
   const t = getTheme(dark);
   const font = '-apple-system, BlinkMacSystemFont, system-ui, sans-serif';
-
-  console.log('Theme:', t);
 
   // Fibonacci levels from $1 to $1B
   const FIB_LEVELS = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 50000000, 100000000, 200000000, 500000000, 1000000000];
@@ -352,20 +348,13 @@ export default function App() {
       if (balance + maxWin > target * 1.1) {
         // Would overshoot target by >10%, reduce position size
         const safeSize = (target - balance) / 0.045 * 0.8; // 80% of max safe size
-        if (safeSize < size * 0.5) {
-          console.log('Position too large for target, skipping:', { balance, target, safeSize, size });
-          return; // Skip if we'd need to reduce by >50%
-        }
+        if (safeSize < size * 0.5) return; // Skip if we'd need to reduce by >50%
       }
 
       // Minimum position check
-      if (size < 0.001) {
-        console.warn('Position too small:', size, 'balance:', balance);
-        return;
-      }
+      if (size < 0.001) return;
 
       try {
-        console.log('Opening position:', { sym: best.sym, size, entry: best.price, balance, shares: (size/best.price).toFixed(4), strength: best.strength.toFixed(4) });
         setPosition({
           sym: best.sym,
           entry: best.price,
@@ -381,9 +370,6 @@ export default function App() {
       } catch (err) {
         console.error('Position creation failed:', err);
       }
-    } else if (balance < 5) {
-      // Log why we couldn't find a trade at low balance
-      console.warn('No suitable trades found at low balance:', balance, 'lastTraded:', lastTraded);
     }
   }, [tick, running, position, balance, lastTraded, prices]);
 
