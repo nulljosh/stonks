@@ -513,31 +513,24 @@ export default function App() {
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [busted, won, reset]);
 
-  // Merge commodities + stocks for ticker display
-  const tickerAssets = useMemo(() => {
-    const merged = { ...liveAssets };
-
-    // Add stocks with consistent format
-    Object.entries(stocks).forEach(([symbol, data]) => {
-      merged[symbol.toLowerCase()] = {
-        name: symbol,
-        spot: data.price,
-        chgPct: data.changePercent || 0,
-      };
-    });
-
-    return merged;
-  }, [liveAssets, stocks]);
-
-  // Memoize ticker items to prevent re-renders
+  // Memoize ticker items - use simulator ASSETS, filter meme coins
   const tickerItems = useMemo(() => {
-    return Object.keys(tickerAssets).map(k => ({
-      key: k,
-      name: tickerAssets[k]?.name,
-      price: tickerAssets[k]?.spot,
-      change: tickerAssets[k]?.chgPct,
-    }));
-  }, [tickerAssets]);
+    const memeCoins = ['FARTCOIN', 'WIF', 'BONK', 'PEPE', 'DOGE', 'SHIB'];
+
+    return Object.entries(ASSETS)
+      .filter(([symbol]) => !memeCoins.includes(symbol))
+      .map(([symbol, data]) => {
+        const currentPrice = prices[symbol]?.[prices[symbol].length - 1] || data.price;
+        const change = ((currentPrice - data.price) / data.price) * 100;
+
+        return {
+          key: symbol,
+          name: data.name,
+          price: currentPrice,
+          change: change,
+        };
+      });
+  }, [prices]);
 
   const filteredMarkets = useMemo(() => {
     let filtered = markets;
