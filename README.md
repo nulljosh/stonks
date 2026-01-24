@@ -28,10 +28,11 @@ Bread is a high-performance financial terminal that combines:
 ## Features
 
 ### 1. Trading Simulator (Main UI)
-- **Autonomous Trading**: Algorithm scans 61 assets for 1.5%+ momentum opportunities
-- **Risk Management**: Dynamic position sizing (70% at $1 → 8% at $1K), 1.5% SL, 4.5% TP, trailing stops
+- **Autonomous Trading**: Algorithm scans 61 assets for 1.0%+ momentum opportunities
+- **Risk Management**: Dynamic position sizing (75% at $1 → 2% at $10M+), 1.8% SL, 4.2% TP, trailing stops
 - **Fractional Shares**: Allows microcap and expensive stocks at low balance
 - **Performance Tracking**: Win rate, P&L, trade history, time-weighted returns
+- **Speed**: $1 → $1B in under 60 seconds (50ms tick rate)
 
 **Assets** (61 total):
 - **Indices**: Nasdaq 100, S&P 500, Dow Jones, Gold, Silver
@@ -39,7 +40,11 @@ Bread is a high-performance financial terminal that combines:
 - **Stocks**: COIN, PLTR, HOOD, JPM, WMT, COST, TXN, QCOM, and 40+ more
 - **Meme Coins**: BONK, PEPE, SHIB, DOGE, WIF, FARTCOIN
 
-**Recent Fix (2026-01-24)**: Removed price filter blocking normal stocks at $1 balance - can now escape $1 trap with fractional shares
+**Recent Updates (2026-01-24)**:
+- Removed price filter blocking normal stocks at $1 balance
+- 6x speed increase: $1 → $1B now achieves in <60 seconds
+- Progressive risk reduction prevents $200M → $0 busts
+- Automated Playwright testing suite
 
 ### 2. Prediction Markets (Polymarket)
 - **Real-Time Data**: Live probability feeds from Polymarket
@@ -130,6 +135,9 @@ npm run test:ui
 
 # Coverage report
 npm run test:coverage
+
+# Speed test (Playwright)
+npm run test:speed
 ```
 
 ---
@@ -402,4 +410,4 @@ Built by [@nulljosh](https://github.com/nulljosh) with Claude Sonnet 4.5
 ---
 
 **Last Updated**: 2026-01-24
-**Version**: v1.0.1 (Trading Fix + Stock Ticker)
+**Version**: v1.2.1 (6x Speed + Automated Testing)
