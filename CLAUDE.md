@@ -17,6 +17,31 @@ Autopilot is a high-alpha, low-latency financial terminal designed for extreme e
 
 ---
 
+## Common Issues
+
+### Localhost Polymarket API Proxy
+**Problem:** Markets won't load on localhost but work on Vercel
+
+**Cause:** Vercel deployment has authentication enabled, blocking proxy requests
+
+**Solution:** Update `vite.config.js` to proxy directly to Polymarket API:
+```javascript
+server: {
+  proxy: {
+    '/api/markets': {
+      target: 'https://gamma-api.polymarket.com',
+      changeOrigin: true,
+      secure: true,
+      rewrite: (path) => '/markets?closed=false&limit=50&order=volume24hr&ascending=false'
+    }
+  }
+}
+```
+
+**Note:** This proxy config only works in dev. Production uses Vercel serverless functions in `api/` folder.
+
+---
+
 ## Project Permissions
 
 Claude has permission to:
