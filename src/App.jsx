@@ -186,7 +186,7 @@ export default function App() {
   const [tick, setTick] = useState(0);
   const [showTrades, setShowTrades] = useState(false);
   const [lastTraded, setLastTraded] = useState(null);
-  const [perfMode, setPerfMode] = useState(false);
+  const [perfMode, setPerfMode] = useState(true);
   const [startTime, setStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [targetTrillion, setTargetTrillion] = useState(false);
@@ -247,7 +247,7 @@ export default function App() {
       } catch (err) {
         console.error('Simulator tick error:', err);
       }
-    }, perfMode ? 200 : 100); // Fast ticks for quick trading
+    }, perfMode ? 300 : 150); // Slower ticks for stable trading
 
     return () => clearInterval(iv);
   }, [running, balance, perfMode]);
@@ -295,40 +295,25 @@ export default function App() {
 
     let best = null;
     SYMS.forEach(sym => {
-      // Only skip lastTraded if balance > $5 (allow repeat trades when desperate)
-      if (balance > 5 && sym === lastTraded) return;
+      if (sym === lastTraded) return;
 
       const p = prices[sym];
-      // Use shorter history at low balance for faster trades, otherwise require 10 bars
-      const minHistory = balance < 3 ? 5 : 10;
-      if (p.length < minHistory) return;
+      if (p.length < 10) return;
 
       const current = p[p.length - 1];
 
-      // ALLOW micro-cap coins ONLY when balance < $3 (escape mode)
-      // Block them at $3+ to maintain quality
-      if (balance >= 3 && current < 0.01) return;
-
-      // More aggressive position sizing at low balance
       const sizePercent = balance < 2 ? 0.70 : balance < 5 ? 0.50 : balance < 10 ? 0.30 : 0.15;
       const positionSize = balance * sizePercent;
 
-      // Lenient price filter at low balance, strict otherwise
-      const maxPriceRatio = balance < 3 ? 3.0 : 0.5;
-      if (current > positionSize * maxPriceRatio) return;
+      // Allow fractional shares at low balance - skip minShares check entirely at <$2
+      // At higher balance, require at least 0.01 shares (prevent dust trades)
+      if (balance >= 2 && positionSize / current < 0.01) return;
 
-      // Skip if we can't afford meaningful position
-      const minShares = (balance < 3 && current < 0.01) ? 0.001 : 0.01;
-      if (positionSize / current < minShares) return;
-
-      const historyLen = Math.min(p.length, minHistory === 5 ? 5 : 10);
-      const avg = p.slice(-historyLen).reduce((a, b) => a + b, 0) / historyLen;
+      const avg = p.slice(-10).reduce((a, b) => a + b, 0) / 10;
       const strength = (current - avg) / avg;
 
-      // TWO-PHASE APPROACH:
-      // Phase 1 ($1.00-$3.00): Lenient to escape quickly (1.0% strength)
-      // Phase 2 ($3.00+): Strict for 60%+ win rate (1.5%+ strength)
-      const minStrength = balance < 3 ? 0.010 : balance < 10 ? 0.018 : 0.022;
+      // Ultra-strict thresholds for 60%+ win rate
+      const minStrength = balance < 2 ? 0.015 : balance < 10 ? 0.018 : 0.022;
 
       if (strength > minStrength && (!best || strength > best.strength)) {
         best = { sym, price: current, strength };
@@ -508,6 +493,22 @@ export default function App() {
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [busted, won, reset]);
 
+  // Merge commodities + stocks for ticker display
+  const tickerAssets = useMemo(() => {
+    const merged = { ...liveAssets };
+
+    // Add stocks with consistent format
+    Object.entries(stocks).forEach(([symbol, data]) => {
+      merged[symbol.toLowerCase()] = {
+        name: symbol,
+        spot: data.price,
+        chgPct: data.changePercent || 0,
+      };
+    });
+
+    return merged;
+  }, [liveAssets, stocks]);
+
   const filteredMarkets = useMemo(() => {
     let filtered = markets;
     if (pmCategory !== 'all') {
@@ -591,12 +592,12 @@ export default function App() {
         <div style={{ display: 'flex', gap: 24, padding: '8px 0', animation: 'scroll 20s linear infinite', whiteSpace: 'nowrap' }}>
           {[...Array(2)].map((_, idx) => (
             <div key={idx} style={{ display: 'flex', gap: 24 }}>
-              {Object.keys(liveAssets).map(k => (
+              {Object.keys(tickerAssets).map(k => (
                 <span key={`asset-${k}-${idx}`} style={{ display: 'flex', gap: 6, fontSize: 12, opacity: 0.8 }}>
-                  <span style={{ fontWeight: 600 }}>{liveAssets[k]?.name}</span>
-                  <span>${formatPrice(liveAssets[k]?.spot || 0)}</span>
-                  <span style={{ color: (liveAssets[k]?.chgPct || 0) >= 0 ? t.green : t.red }}>
-                    {(liveAssets[k]?.chgPct || 0) >= 0 ? '▲' : '▼'}{Math.abs(liveAssets[k]?.chgPct || 0).toFixed(2)}%
+                  <span style={{ fontWeight: 600 }}>{tickerAssets[k]?.name}</span>
+                  <span>${formatPrice(tickerAssets[k]?.spot || 0)}</span>
+                  <span style={{ color: (tickerAssets[k]?.chgPct || 0) >= 0 ? t.green : t.red }}>
+                    {(tickerAssets[k]?.chgPct || 0) >= 0 ? '▲' : '▼'}{Math.abs(tickerAssets[k]?.chgPct || 0).toFixed(2)}%
                   </span>
                 </span>
               ))}
@@ -606,8 +607,8 @@ export default function App() {
       </div>
 
       <div style={{ padding: 16, maxWidth: 1400, margin: '0 auto' }}>
-        {/* TRADING SIMULATOR - TEMPORARILY DISABLED WHILE FIXING */}
-        {/* <div style={{ marginBottom: 24 }}>
+        {/* TRADING SIMULATOR */}
+        <div style={{ marginBottom: 24 }}>
           <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: t.green }}>TRADING SIMULATOR</div>
           <Card dark={dark} t={t} style={{ padding: 16 }}>
             <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -736,7 +737,7 @@ export default function App() {
               )}
             </div>
           </Card>
-        </div> */}
+        </div>
 
         {/* POLYMARKET SECTION */}
         <div style={{ marginBottom: 24 }}>
