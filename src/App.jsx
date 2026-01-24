@@ -244,7 +244,7 @@ export default function App() {
       } catch (err) {
         console.error('Simulator tick error:', err);
       }
-    }, perfMode ? 100 : 50); // Fast ticks for quick simulation
+    }, perfMode ? 50 : 25); // Ultra-fast ticks for sub-60s challenge
 
     return () => clearInterval(iv);
   }, [running, balance, perfMode]);
@@ -322,8 +322,8 @@ export default function App() {
       const avg = p.slice(-10).reduce((a, b) => a + b, 0) / 10;
       const strength = (current - avg) / avg;
 
-      // Balanced thresholds for speed + win rate
-      const minStrength = balance < 2 ? 0.012 : balance < 10 ? 0.014 : balance < 100 ? 0.016 : 0.018;
+      // Aggressive thresholds for sub-60s target
+      const minStrength = balance < 2 ? 0.010 : balance < 10 ? 0.011 : balance < 100 ? 0.012 : 0.014;
 
       if (strength > minStrength && (!best || strength > best.strength)) {
         best = { sym, price: current, strength };
