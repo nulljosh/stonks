@@ -3,14 +3,19 @@ import { formatPrice } from '../utils/math';
 
 const Ticker = memo(({ items, theme }) => {
   return (
-    <div style={{ overflow: 'hidden', borderBottom: `0.5px solid ${theme.border}`, background: theme.surface }}>
+    <div style={{
+      overflowX: 'auto',
+      borderBottom: `0.5px solid ${theme.border}`,
+      background: theme.surface,
+      cursor: 'grab',
+      WebkitOverflowScrolling: 'touch'
+    }}>
       <div style={{
         display: 'flex',
         gap: 24,
-        padding: '8px 0',
-        animation: 'scroll 40s linear infinite',
+        padding: '8px 16px',
         whiteSpace: 'nowrap',
-        willChange: 'transform',
+        minWidth: 'max-content'
       }}>
         {[...Array(2)].map((_, idx) => (
           <div key={idx} style={{ display: 'flex', gap: 24 }}>
