@@ -2,7 +2,7 @@
 
 > Low-latency prediction markets + trading simulator + quantitative analysis. Built for speed, optimized for efficiency.
 
-**Live Demo**: https://autopilot-alpha.vercel.app | **Local**: `npm run dev` → http://localhost:5173
+**Live Demo**: https://bread.vercel.app | **Local**: `npm run dev` → http://localhost:5173
 
 ---
 
