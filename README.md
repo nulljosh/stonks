@@ -28,15 +28,18 @@ Autopilot is a high-performance financial terminal that combines:
 ## Features
 
 ### 1. Trading Simulator (Main UI)
-- **Autonomous Trading**: Algorithm scans 13 assets for momentum opportunities
-- **Risk Management**: 8% position sizing, 3.5% stop-loss, 7% take-profit, trailing stops
-- **Diversification**: Forces rotation between assets to prevent overconcentration
-- **Performance Tracking**: Win rate, P&L, trade history
+- **Autonomous Trading**: Algorithm scans 61 assets for 1.5%+ momentum opportunities
+- **Risk Management**: Dynamic position sizing (70% at $1 → 8% at $1K), 1.5% SL, 4.5% TP, trailing stops
+- **Fractional Shares**: Allows microcap and expensive stocks at low balance
+- **Performance Tracking**: Win rate, P&L, trade history, time-weighted returns
 
-**Assets**:
-- Indices: Nasdaq 100, S&P 500, Dow Jones
-- Metals: Gold, Silver
-- Tech: AAPL, MSFT, GOOGL, NVDA, TSLA, META, COIN, PLTR
+**Assets** (61 total):
+- **Indices**: Nasdaq 100, S&P 500, Dow Jones, Gold, Silver
+- **MAG7**: AAPL, MSFT, GOOGL, AMZN, META, TSLA, NVDA
+- **Stocks**: COIN, PLTR, HOOD, JPM, WMT, COST, TXN, QCOM, and 40+ more
+- **Meme Coins**: BONK, PEPE, SHIB, DOGE, WIF, FARTCOIN
+
+**Recent Fix (2026-01-24)**: Removed price filter blocking normal stocks at $1 balance - can now escape $1 trap with fractional shares
 
 ### 2. Prediction Markets (Polymarket)
 - **Real-Time Data**: Live probability feeds from Polymarket
@@ -398,5 +401,5 @@ Built by [@nulljosh](https://github.com/nulljosh) with Claude Sonnet 4.5
 
 ---
 
-**Last Updated**: 2026-01-09
-**Version**: v1.0.0 (Autopilot Launch)
+**Last Updated**: 2026-01-24
+**Version**: v1.0.1 (Trading Fix + Stock Ticker)
