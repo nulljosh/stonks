@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-// MAG7 + Popular stocks (20 total)
-const DEFAULT_SYMBOLS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'PLTR', 'HOOD', 'COST', 'JPM', 'WMT', 'TGT', 'PG', 'HIMS', 'COIN', 'SQ', 'SHOP', 'RKLB', 'SOFI'];
+// MAG7 + Popular stocks + CFDs (32 total)
+const DEFAULT_SYMBOLS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'PLTR', 'HOOD', 'COST', 'JPM', 'WMT', 'TGT', 'PG', 'HIMS', 'COIN', 'SQ', 'SHOP', 'RKLB', 'SOFI', 'XAGUSD', 'XCUUSD', 'XAUUSD', 'XIC', 'NAS100', 'T', 'US500', 'US30', 'IBM', 'DXY', 'IWM', 'DIS'];
 
 // Retry helper with exponential backoff
 const fetchWithRetry = async (url, maxRetries = 3, baseDelay = 1000) => {
