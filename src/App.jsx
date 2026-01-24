@@ -589,7 +589,6 @@ export default function App() {
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           <WeatherWidget t={t} />
           <span style={{ fontSize: 10, color: t.textTertiary }}>Updated {formatLastUpdated(lastUpdated)}</span>
-          {stocksError && <span style={{ fontSize: 9, color: t.red, opacity: 0.7 }}>⚠ Stock API down</span>}
           {pmError && <span style={{ fontSize: 9, color: t.red, opacity: 0.7 }}>⚠ Markets API down</span>}
           <button onClick={() => setShowMacro(!showMacro)} style={{ background: showMacro ? t.accent : 'transparent', border: `1px solid ${t.border}`, borderRadius: 8, padding: '4px 10px', color: showMacro ? '#fff' : t.textSecondary, fontSize: 11, cursor: 'pointer' }}>MACRO</button>
           <button onClick={() => setDark(!dark)} style={{ background: 'transparent', border: 'none', fontSize: 16, cursor: 'pointer' }}>{dark ? '☀️' : '🌙'}</button>
