@@ -1,4 +1,4 @@
-# Autopilot
+# Bread
 
 > Low-latency prediction markets + trading simulator + quantitative analysis. Built for speed, optimized for efficiency.
 
@@ -8,7 +8,7 @@
 
 ## Overview
 
-Autopilot is a high-performance financial terminal that combines:
+Bread is a high-performance financial terminal that combines:
 - **Trading Simulator**: $100 → $10K challenge with 13 assets (indices, metals, tech stocks)
 - **Prediction Markets**: Real-time Polymarket integration with 90%+ probability filters
 - **Monte Carlo Analysis**: Auto-parameterized simulations with bull/base/bear scenarios
@@ -251,7 +251,7 @@ No API keys required currently. All data sources are public:
 - [ ] **Price Alerts**: Browser notifications
 
 ### Phase 4: Trading Integration
-- [ ] **TradingView Webhooks**: Alert → Autopilot → Broker
+- [ ] **TradingView Webhooks**: Alert → Bread → Broker
 - [ ] **cTrader API**: Forex/CFD execution
 - [ ] **Interactive Brokers**: TWS API integration
 - [ ] **Paper Trading Mode**: Test strategies risk-free
@@ -314,7 +314,7 @@ npx vite-bundle-visualizer
 
 ## Meme Culture
 
-**"Nothing Ever Happens"** - The chud philosophy that markets rarely move significantly. Autopilot embraces this:
+**"Nothing Ever Happens"** - The chud philosophy that markets rarely move significantly. Bread embraces this:
 - Silent by default
 - Only alerts on >3% moves
 - VIX spike banner
