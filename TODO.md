@@ -1,6 +1,7 @@
 # TODO
 
 ## Active
+- [ ] Automated speed test with Playwright (run: `npm run test:speed`)
 - [ ] Localhost markets not loading (proxy issue?)
 - [ ] Sync simulator prices with live data
 
