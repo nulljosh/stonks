@@ -217,9 +217,9 @@ export default function App() {
           const next = {};
           SYMS.forEach(sym => {
             try {
-              if (Math.random() < 0.05) trends.current[sym] = (Math.random() - 0.45) * 0.008;
+              if (Math.random() < 0.05) trends.current[sym] = (Math.random() - 0.45) * 0.006;
               const drift = 0.0001;
-              const move = drift + trends.current[sym] + (Math.random() - 0.5) * 0.012;
+              const move = drift + trends.current[sym] + (Math.random() - 0.5) * 0.008;
               const last = prev[sym][prev[sym].length - 1];
               const base = ASSETS[sym].price;
 
@@ -331,16 +331,17 @@ export default function App() {
     });
 
     if (best) {
-      // Optimized risk reduction for higher win rate
+      // Aggressive reduction at high balances to protect gains
       const sizePercent = balance < 2 ? 0.65 :
                          balance < 5 ? 0.50 :
                          balance < 10 ? 0.32 :
                          balance < 100 ? 0.18 :
                          balance < 1000 ? 0.14 :
-                         balance < 10000 ? 0.11 :
-                         balance < 100000 ? 0.07 :
-                         balance < 1000000 ? 0.04 :
-                         balance < 10000000 ? 0.02 : 0.015; // 1.5% at $10M+
+                         balance < 10000 ? 0.10 :
+                         balance < 100000 ? 0.05 :      // Cut to 5% at $10k+
+                         balance < 1000000 ? 0.03 :     // 3% at $100k+
+                         balance < 10000000 ? 0.015 :   // 1.5% at $1M+
+                         balance < 100000000 ? 0.01 : 0.005; // 0.5% at $10M+
       const size = balance * sizePercent;
 
       // Safety check: don't open position if win would exceed target
@@ -360,8 +361,8 @@ export default function App() {
           sym: best.sym,
           entry: best.price,
           size,
-          stop: best.price * 0.985, // 1.5% stop loss (tighter risk control)
-          target: best.price * 1.045, // 4.5% take profit (better risk/reward ratio 1:3)
+          stop: best.price * 0.983, // 1.7% stop loss (matches lower volatility)
+          target: best.price * 1.05, // 5% take profit (better risk/reward ratio ~1:3)
         });
         setLastTraded(best.sym);
         setTrades(t => {
