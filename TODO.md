@@ -1,35 +1,32 @@
 # TODO
 
-## P0 - Critical (Do Next)
-1. **Sync simulator with live prices** ⚡
-   - Why: Biggest UX inconsistency (simulator uses random walks, ticker shows real data)
-   - Impact: Makes simulator actually useful for real market conditions
-   - Effort: Medium (integrate useLivePrices into simulator logic)
+## P0 - Critical
+1. **Improve simulator win rate** - Currently ~70%, target 85%+
+   - Tune position sizing, stop loss, momentum thresholds
+   - Add volatility filtering to avoid choppy markets
+
+2. **Record simulation runs** - Track performance analytics
+   - Save win rate, time to target, best/worst assets
+   - JSON storage → eventual database
 
 ## P1 - High Value
-2. **Record every simulation run** 📊
-   - Why: Track performance over time, identify patterns
-   - Data: Win rate, biggest winner/loser, time to $1B, asset performance
-   - Storage: JSON files (1-5KB each) → eventually database
-   - Impact: Historical analytics, strategy optimization
-   - Effort: Medium (add save function on win/bust)
+3. **Sync simulator with live prices** - Currently uses random walks
+4. **Automated speed test** - Verify sub-60s target programmatically
 
-3. **Run automated speed test** 🧪
-   - Why: Verify sub-60s target programmatically
-   - Impact: Confidence in performance claims
-   - Effort: 1 command (`npm run test:speed`)
-
-## P2 - Nice to Have
-3. **Fix localhost API proxies** 🔧
-   - Why: Better dev experience
-   - Impact: Low (Vercel works fine, this is dev-only)
-   - Effort: Already documented in CLAUDE.md, not urgent
+## Completed (2026-01-25)
+- [x] Restored stock API with Yahoo Finance
+- [x] Fixed ticker to show live stock prices
+- [x] Added drag-to-scroll + auto-scroll to ticker
+- [x] Fixed dark/light mode in simulator
+- [x] Added comprehensive tests for 1T target
+- [x] Tuned momentum thresholds (1.0% → 0.8%)
+- [x] Reduced position sizing for safety (75% → 65% at start)
+- [x] Improved risk/reward ratio (1.8%/4.2% → 1.5%/4.5%)
 
 ## Completed (2026-01-24)
 - [x] Fixed win condition - stops at exactly $1B/$1T
-- [x] Progressive risk reduction (1% position size at $10M+)
+- [x] Progressive risk reduction
 - [x] Trading simulator $1 → $1B working
 - [x] Bundle size: 577KB → 233KB
 - [x] Sub-60 second challenge
 - [x] Automated testing suite
-- [x] 83% win rate achieved

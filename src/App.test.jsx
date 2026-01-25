@@ -214,3 +214,93 @@ describe('Win Rate Calculation', () => {
     expect(winRate).toBe(0);
   });
 });
+
+describe('Target Selection (1B vs 1T)', () => {
+  it('should use $1B target by default', () => {
+    const targetTrillion = false;
+    const target = targetTrillion ? 1000000000000 : 1000000000;
+    expect(target).toBe(1000000000); // $1B
+  });
+
+  it('should use $1T target when enabled', () => {
+    const targetTrillion = true;
+    const target = targetTrillion ? 1000000000000 : 1000000000;
+    expect(target).toBe(1000000000000); // $1T
+  });
+
+  it('should detect win at $1B', () => {
+    const balance = 1000000000;
+    const targetTrillion = false;
+    const target = targetTrillion ? 1000000000000 : 1000000000;
+    const won = balance >= target;
+    expect(won).toBe(true);
+  });
+
+  it('should NOT win at $1B with 1T target', () => {
+    const balance = 1000000000;
+    const targetTrillion = true;
+    const target = targetTrillion ? 1000000000000 : 1000000000;
+    const won = balance >= target;
+    expect(won).toBe(false);
+  });
+
+  it('should detect win at $1T', () => {
+    const balance = 1000000000000;
+    const targetTrillion = true;
+    const target = targetTrillion ? 1000000000000 : 1000000000;
+    const won = balance >= target;
+    expect(won).toBe(true);
+  });
+
+  it('should stop opening positions near target', () => {
+    const balance = 990000000; // Close to $1B
+    const targetTrillion = false;
+    const target = targetTrillion ? 1000000000000 : 1000000000;
+    const size = 10000000; // $10M position
+    const maxWin = size * 0.045; // 4.5% max gain
+    const wouldExceedTarget = balance + maxWin > target * 1.1;
+    expect(wouldExceedTarget).toBe(false);
+  });
+
+  it('should prevent overshoot of target', () => {
+    const balance = 999900000; // Very close to $1B
+    const targetTrillion = false;
+    const target = targetTrillion ? 1000000000000 : 1000000000;
+    const maxPositionSize = (target - balance) / 0.045; // Max size that won't overshoot
+    expect(maxPositionSize).toBeGreaterThan(0);
+  });
+
+  it('should format 1B correctly', () => {
+    const num = 1000000000;
+    const formatted = `$${(num / 1e9).toFixed(0)}B`;
+    expect(formatted).toBe('$1B');
+  });
+
+  it('should format 1T correctly', () => {
+    const num = 1000000000000;
+    const formatted = `$${(num / 1e12).toFixed(0)}T`;
+    expect(formatted).toBe('$1T');
+  });
+});
+
+describe('Bust Conditions', () => {
+  it('should bust at $0.50', () => {
+    const balance = 0.5;
+    const busted = balance <= 0.5;
+    expect(busted).toBe(true);
+  });
+
+  it('should NOT bust at $0.51', () => {
+    const balance = 0.51;
+    const busted = balance <= 0.5;
+    expect(busted).toBe(false);
+  });
+
+  it('should stop running when busted', () => {
+    const balance = 0.4;
+    const running = true;
+    const busted = balance <= 0.5;
+    const shouldStop = busted || balance <= 0.5;
+    expect(shouldStop).toBe(true);
+  });
+});

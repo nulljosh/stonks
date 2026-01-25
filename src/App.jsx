@@ -322,8 +322,8 @@ export default function App() {
       const avg = p.slice(-10).reduce((a, b) => a + b, 0) / 10;
       const strength = (current - avg) / avg;
 
-      // Aggressive thresholds for sub-60s target
-      const minStrength = balance < 2 ? 0.010 : balance < 10 ? 0.011 : balance < 100 ? 0.012 : 0.014;
+      // Optimized thresholds for higher win rate
+      const minStrength = balance < 2 ? 0.008 : balance < 10 ? 0.009 : balance < 100 ? 0.010 : 0.012;
 
       if (strength > minStrength && (!best || strength > best.strength)) {
         best = { sym, price: current, strength };
@@ -331,16 +331,16 @@ export default function App() {
     });
 
     if (best) {
-      // Progressive risk reduction: aggressive throughout for speed
-      const sizePercent = balance < 2 ? 0.75 :
-                         balance < 5 ? 0.55 :
-                         balance < 10 ? 0.35 :
-                         balance < 100 ? 0.20 :
-                         balance < 1000 ? 0.15 :
-                         balance < 10000 ? 0.12 :
-                         balance < 100000 ? 0.08 :
-                         balance < 1000000 ? 0.05 :
-                         balance < 10000000 ? 0.03 : 0.02; // 2% at $10M+
+      // Optimized risk reduction for higher win rate
+      const sizePercent = balance < 2 ? 0.65 :
+                         balance < 5 ? 0.50 :
+                         balance < 10 ? 0.32 :
+                         balance < 100 ? 0.18 :
+                         balance < 1000 ? 0.14 :
+                         balance < 10000 ? 0.11 :
+                         balance < 100000 ? 0.07 :
+                         balance < 1000000 ? 0.04 :
+                         balance < 10000000 ? 0.02 : 0.015; // 1.5% at $10M+
       const size = balance * sizePercent;
 
       // Safety check: don't open position if win would exceed target
@@ -360,8 +360,8 @@ export default function App() {
           sym: best.sym,
           entry: best.price,
           size,
-          stop: best.price * 0.982, // 1.8% stop loss (slightly wider for speed)
-          target: best.price * 1.042, // 4.2% take profit (faster exits)
+          stop: best.price * 0.985, // 1.5% stop loss (tighter risk control)
+          target: best.price * 1.045, // 4.5% take profit (better risk/reward ratio 1:3)
         });
         setLastTraded(best.sym);
         setTrades(t => {
@@ -513,24 +513,19 @@ export default function App() {
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [busted, won, reset]);
 
-  // Memoize ticker items - use simulator ASSETS, filter meme coins
+  // Memoize ticker items - use live stock data
   const tickerItems = useMemo(() => {
-    const memeCoins = ['FARTCOIN', 'WIF', 'BONK', 'PEPE', 'DOGE', 'SHIB'];
+    if (!stocks || Object.keys(stocks).length === 0) {
+      return [];
+    }
 
-    return Object.entries(ASSETS)
-      .filter(([symbol]) => !memeCoins.includes(symbol))
-      .map(([symbol, data]) => {
-        const currentPrice = prices[symbol]?.[prices[symbol].length - 1] || data.price;
-        const change = ((currentPrice - data.price) / data.price) * 100;
-
-        return {
-          key: symbol,
-          name: data.name,
-          price: currentPrice,
-          change: change,
-        };
-      });
-  }, [prices]);
+    return Object.values(stocks).map(stock => ({
+      key: stock.symbol,
+      name: stock.symbol,
+      price: stock.price,
+      change: stock.changePercent || 0,
+    }));
+  }, [stocks]);
 
   const filteredMarkets = useMemo(() => {
     let filtered = markets;
@@ -618,8 +613,8 @@ export default function App() {
           <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: t.green }}>TRADING SIMULATOR</div>
           <Card dark={dark} t={t} style={{ padding: 16 }}>
             <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: 12, color: '#666' }}>$1 → ${targetTrillion ? '1T' : '1B'} • 61 assets • Fib levels</div>
-              <label style={{ fontSize: 11, color: '#666', display: 'flex', alignItems: 'center', gap: 6, cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.5 : 1 }}>
+              <div style={{ fontSize: 12, color: t.textSecondary }}>$1 → ${targetTrillion ? '1T' : '1B'} • 61 assets • Fib levels</div>
+              <label style={{ fontSize: 11, color: t.textSecondary, display: 'flex', alignItems: 'center', gap: 6, cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.5 : 1 }}>
                 <input
                   type="checkbox"
                   checked={targetTrillion}
@@ -632,44 +627,44 @@ export default function App() {
             </div>
 
             {busted && (
-              <div style={{ background: '#7f1d1d', borderRadius: 12, padding: 16, marginBottom: 16, textAlign: 'center' }}>
+              <div style={{ background: dark ? '#7f1d1d' : '#fee2e2', borderRadius: 12, padding: 16, marginBottom: 16, textAlign: 'center' }}>
                 <div style={{ fontSize: 20 }}>💀</div>
-                <div style={{ fontWeight: 600 }}>Busted at {formatNumber(balance)}</div>
-                <div style={{ fontSize: 11, color: '#fca5a5', marginTop: 4 }}>Real-world: {realWorldTime(tick)}</div>
+                <div style={{ fontWeight: 600, color: dark ? '#fff' : '#7f1d1d' }}>Busted at {formatNumber(balance)}</div>
+                <div style={{ fontSize: 11, color: dark ? '#fca5a5' : '#991b1b', marginTop: 4 }}>Real-world: {realWorldTime(tick)}</div>
               </div>
             )}
             {won && (
-              <div style={{ background: '#14532d', borderRadius: 12, padding: 16, marginBottom: 16, textAlign: 'center' }}>
+              <div style={{ background: dark ? '#14532d' : '#d1fae5', borderRadius: 12, padding: 16, marginBottom: 16, textAlign: 'center' }}>
                 <div style={{ fontSize: 20 }}>🏆</div>
-                <div style={{ fontWeight: 600 }}>${targetTrillion ? '1T' : '1B'} REACHED!</div>
-                <div style={{ fontSize: 12, color: '#86efac' }}>{exits.length} trades • {winRate.toFixed(0)}% wins • {formatTime(elapsedTime)}</div>
-                <div style={{ fontSize: 11, color: '#86efac', marginTop: 4 }}>Real-world: {realWorldTime(tick)} of trading</div>
-                {biggestWinner && <div style={{ fontSize: 11, color: '#4ade80', marginTop: 4 }}>MVP: {biggestWinner[0]} (+{formatNumber(biggestWinner[1]).replace('$', '')})</div>}
-                {biggestLoser && <div style={{ fontSize: 11, color: '#f87171', marginTop: 2 }}>Worst: {biggestLoser[0]} ({formatNumber(biggestLoser[1]).replace('$', '')})</div>}
+                <div style={{ fontWeight: 600, color: dark ? '#fff' : '#14532d' }}>${targetTrillion ? '1T' : '1B'} REACHED!</div>
+                <div style={{ fontSize: 12, color: dark ? '#86efac' : '#15803d' }}>{exits.length} trades • {winRate.toFixed(0)}% wins • {formatTime(elapsedTime)}</div>
+                <div style={{ fontSize: 11, color: dark ? '#86efac' : '#15803d', marginTop: 4 }}>Real-world: {realWorldTime(tick)} of trading</div>
+                {biggestWinner && <div style={{ fontSize: 11, color: dark ? '#4ade80' : '#16a34a', marginTop: 4 }}>MVP: {biggestWinner[0]} (+{formatNumber(biggestWinner[1]).replace('$', '')})</div>}
+                {biggestLoser && <div style={{ fontSize: 11, color: dark ? '#f87171' : '#dc2626', marginTop: 2 }}>Worst: {biggestLoser[0]} ({formatNumber(biggestLoser[1]).replace('$', '')})</div>}
               </div>
             )}
 
             {!busted && !won && (
-              <div style={{ background: '#1a1a1a', borderRadius: 14, padding: 16, marginBottom: 14 }}>
+              <div style={{ background: t.surface, borderRadius: 14, padding: 16, marginBottom: 14 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <span style={{ fontSize: 36, fontWeight: 700 }}>{formatNumber(equity)}</span>
-                  <span style={{ fontSize: 16, color: pnl >= 0 ? '#4ade80' : '#f87171' }}>
+                  <span style={{ fontSize: 36, fontWeight: 700, color: t.text }}>{formatNumber(equity)}</span>
+                  <span style={{ fontSize: 16, color: pnl >= 0 ? t.green : t.red }}>
                     {pnl >= 0 ? '+' : ''}{formatNumber(Math.abs(pnl)).replace('$', '')}
                   </span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#666', marginTop: 8 }}>
-                  <span>#{tick} {running && <span style={{ color: '#4ade80' }}>● live</span>}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: t.textSecondary, marginTop: 8 }}>
+                  <span>#{tick} {running && <span style={{ color: t.green }}>● live</span>}</span>
                   <span>{winRate.toFixed(0)}% wins • {exits.length} trades</span>
                 </div>
-                <div style={{ fontSize: 11, color: '#888', marginTop: 4 }}>
+                <div style={{ fontSize: 11, color: t.textTertiary, marginTop: 4 }}>
                   Time: {formatTime(elapsedTime)} {position && `• Position: ${formatNumber(position.size * position.entry).replace('$', '')} in ${position.sym}`}
                 </div>
               </div>
             )}
 
-            <div style={{ background: '#1a1a1a', borderRadius: 14, padding: 14, marginBottom: 14, minHeight: 160 }}>
+            <div style={{ background: t.surface, borderRadius: 14, padding: 14, marginBottom: 14, minHeight: 160 }}>
               <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-                <line x1="0" y1={toY(0)} x2={W} y2={toY(0)} stroke="#333" strokeDasharray="4" />
+                <line x1="0" y1={toY(0)} x2={W} y2={toY(0)} stroke={t.border} strokeDasharray="4" />
                 {SYMS.map(sym => prices[sym].length > 1 && (
                   <path
                     key={sym}
@@ -685,23 +680,23 @@ export default function App() {
                 {SYMS.map(sym => (
                   <div key={sym} style={{ display: 'flex', alignItems: 'center', gap: 4, opacity: position ? (position.sym === sym ? 1 : 0.3) : 0.6 }}>
                     <div style={{ width: 6, height: 6, borderRadius: 1, background: ASSETS[sym].color }} />
-                    <span style={{ fontSize: 9 }}>{sym}</span>
+                    <span style={{ fontSize: 9, color: t.textTertiary }}>{sym}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {position && (
-              <div style={{ background: '#1a1a1a', borderRadius: 12, padding: 12, marginBottom: 14, display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ background: t.surface, borderRadius: 12, padding: 12, marginBottom: 14, display: 'flex', justifyContent: 'space-between' }}>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: ASSETS[position.sym].color }}>{position.sym}</div>
-                  <div style={{ fontSize: 10, color: '#666' }}>${position.entry.toFixed(2)} × {position.size}</div>
+                  <div style={{ fontSize: 10, color: t.textSecondary }}>${position.entry.toFixed(2)} × {position.size}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 18, fontWeight: 600, color: unrealized >= 0 ? '#4ade80' : '#f87171' }}>
+                  <div style={{ fontSize: 18, fontWeight: 600, color: unrealized >= 0 ? t.green : t.red }}>
                     {unrealized >= 0 ? '+' : ''}{unrealized.toFixed(2)}
                   </div>
-                  <div style={{ fontSize: 10, color: '#666' }}>SL ${position.stop.toFixed(2)}</div>
+                  <div style={{ fontSize: 10, color: t.textSecondary }}>SL ${position.stop.toFixed(2)}</div>
                 </div>
               </div>
             )}
@@ -710,32 +705,32 @@ export default function App() {
               <button
                 onClick={() => setRunning(!running)}
                 disabled={busted || won}
-                style={{ flex: 1, padding: 16, borderRadius: 12, border: 'none', fontSize: 16, fontWeight: 600, fontFamily: font, background: (busted || won) ? '#333' : running ? '#dc2626' : '#22c55e', color: (busted || won) ? '#666' : '#fff', cursor: (busted || won) ? 'default' : 'pointer' }}
+                style={{ flex: 1, padding: 16, borderRadius: 12, border: 'none', fontSize: 16, fontWeight: 600, fontFamily: font, background: (busted || won) ? t.border : running ? t.red : t.green, color: '#fff', cursor: (busted || won) ? 'default' : 'pointer' }}
               >
                 {busted ? 'Busted' : won ? 'Won!' : running ? 'Stop' : 'Start'}
               </button>
-              <button onClick={reset} style={{ padding: 16, borderRadius: 12, border: '1px solid #333', background: 'transparent', color: '#666', fontFamily: font, fontSize: 16, cursor: 'pointer' }}>↺</button>
+              <button onClick={reset} style={{ padding: 16, borderRadius: 12, border: `1px solid ${t.border}`, background: 'transparent', color: t.textSecondary, fontFamily: font, fontSize: 16, cursor: 'pointer' }}>↺</button>
             </div>
-            <div style={{ textAlign: 'center', fontSize: 10, color: '#444', marginBottom: 14 }}>
+            <div style={{ textAlign: 'center', fontSize: 10, color: t.textTertiary, marginBottom: 14 }}>
               [Space] Start/Stop • [R] Reset
             </div>
 
-            <div style={{ background: '#1a1a1a', borderRadius: 12, overflow: 'hidden' }}>
-              <button onClick={() => setShowTrades(!showTrades)} style={{ width: '100%', padding: 12, background: 'transparent', border: 'none', display: 'flex', justifyContent: 'space-between', fontFamily: font, fontSize: 13, color: '#888', cursor: 'pointer' }}>
+            <div style={{ background: t.surface, borderRadius: 12, overflow: 'hidden' }}>
+              <button onClick={() => setShowTrades(!showTrades)} style={{ width: '100%', padding: 12, background: 'transparent', border: 'none', display: 'flex', justifyContent: 'space-between', fontFamily: font, fontSize: 13, color: t.textTertiary, cursor: 'pointer' }}>
                 <span>trades ({exits.length})</span>
                 <span>{showTrades ? '−' : '+'}</span>
               </button>
               {showTrades && (
                 <div style={{ padding: '0 12px 12px', maxHeight: 120, overflow: 'auto' }}>
                   {trades.length === 0 ? (
-                    <div style={{ color: '#444', fontSize: 12, textAlign: 'center', padding: 8 }}>waiting...</div>
+                    <div style={{ color: t.textTertiary, fontSize: 12, textAlign: 'center', padding: 8 }}>waiting...</div>
                   ) : (
                     [...trades].reverse().slice(0, 15).map((tr, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '4px 0', borderBottom: '1px solid #222' }}>
-                        <span style={{ color: tr.type === 'BUY' ? '#60a5fa' : parseFloat(tr.pnl) >= 0 ? '#4ade80' : '#f87171' }}>
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '4px 0', borderBottom: `1px solid ${t.border}` }}>
+                        <span style={{ color: tr.type === 'BUY' ? t.accent : parseFloat(tr.pnl) >= 0 ? t.green : t.red }}>
                           {tr.type} {tr.sym}
                         </span>
-                        {tr.pnl && <span style={{ color: parseFloat(tr.pnl) >= 0 ? '#4ade80' : '#f87171' }}>{parseFloat(tr.pnl) >= 0 ? '+' : ''}{tr.pnl}</span>}
+                        {tr.pnl && <span style={{ color: parseFloat(tr.pnl) >= 0 ? t.green : t.red }}>{parseFloat(tr.pnl) >= 0 ? '+' : ''}{tr.pnl}</span>}
                       </div>
                     ))
                   )}
