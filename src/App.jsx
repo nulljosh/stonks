@@ -5,7 +5,6 @@ import { useStocks } from './hooks/useStocks';
 import { formatPrice } from './utils/math';
 import { getTheme } from './utils/theme';
 import { defaultAssets } from './utils/assets';
-import WeatherWidget from './components/WeatherWidget';
 import Ticker from './components/Ticker';
 
 // Trading Simulator Assets (US50 + Indices + Crypto)
@@ -99,19 +98,9 @@ const BlinkingDot = ({ color, delay = 0, speed = 2 }) => (
 );
 
 const StatusBar = ({ t }) => (
-  <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 10 }}>
-    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-      <BlinkingDot color={t.green} delay={0} speed={3} />
-      <span style={{ color: t.textTertiary }}>LIVE</span>
-    </span>
-    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-      <BlinkingDot color={t.cyan} delay={0.5} speed={4} />
-      <span style={{ color: t.textTertiary }}>API</span>
-    </span>
-    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-      <BlinkingDot color={t.yellow} delay={1} speed={5} />
-      <span style={{ color: t.textTertiary }}>MC</span>
-    </span>
+  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10 }}>
+    <BlinkingDot color={t.green} delay={0} speed={3} />
+    <span style={{ color: t.textTertiary, fontWeight: 500 }}>LIVE</span>
   </div>
 );
 
@@ -609,37 +598,68 @@ export default function App() {
   // };
 
   return (
-    <div style={{ minHeight: '100vh', background: t.bg, color: t.text, fontFamily: font }}>
+    <div style={{ minHeight: '100dvh', background: t.bg, color: t.text, fontFamily: font }}>
       {/* Header */}
-      <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `0.5px solid ${t.border}` }}>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, color: t.textSecondary }}>
-            <a href="https://heyitsmejosh.com" style={{ color: t.textSecondary, textDecoration: 'none', opacity: 0.6 }}>home</a>
-            <span style={{ opacity: 0.4 }}>/</span>
-            <span style={{ fontSize: 15, fontWeight: 700, color: t.text }}>bread</span>
-          </div>
+      <header style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${t.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <a href="https://heyitsmejosh.com" style={{ color: t.text, textDecoration: 'none', fontSize: 15, fontWeight: 700, letterSpacing: '-0.3px' }}>bread</a>
+          <span style={{ width: 1, height: 14, background: t.border }} />
           <StatusBar t={t} />
-          <span style={{ fontSize: 11, fontWeight: 600, color: t.textTertiary, letterSpacing: '0.5px', opacity: 0.5 }}>NOTHING EVER HAPPENS</span>
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-          <WeatherWidget t={t} />
-          <span style={{ fontSize: 10, color: t.textTertiary }}>Updated {formatLastUpdated(lastUpdated)}</span>
-          {pmError && <span style={{ fontSize: 9, color: t.red, opacity: 0.7 }}>⚠ Markets API down</span>}
-          <button onClick={() => setShowMacro(!showMacro)} style={{ background: showMacro ? t.accent : 'transparent', border: `1px solid ${t.border}`, borderRadius: 8, padding: '4px 10px', color: showMacro ? '#fff' : t.textSecondary, fontSize: 11, cursor: 'pointer' }}>MACRO</button>
-          <button onClick={() => setDark(!dark)} style={{ background: 'transparent', border: 'none', fontSize: 16, cursor: 'pointer' }}>{dark ? '☀️' : '🌙'}</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 10, color: t.textTertiary, fontVariantNumeric: 'tabular-nums' }}>{formatLastUpdated(lastUpdated)}</span>
+          {pmError && <span style={{ fontSize: 9, color: t.red }}>API error</span>}
+          <span style={{ width: 1, height: 14, background: t.border }} />
+          <button
+            onClick={() => setShowMacro(!showMacro)}
+            style={{
+              background: showMacro ? t.accent : t.surface,
+              border: 'none',
+              borderRadius: 6,
+              padding: '5px 10px',
+              color: showMacro ? '#fff' : t.textSecondary,
+              fontSize: 10,
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 0.15s'
+            }}
+          >
+            MACRO
+          </button>
+          <button
+            onClick={() => setDark(!dark)}
+            aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+            style={{
+              background: t.surface,
+              border: 'none',
+              borderRadius: 6,
+              padding: 5,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.textSecondary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {dark ? (
+                <><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></>
+              ) : (
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              )}
+            </svg>
+          </button>
         </div>
-      </div>
+      </header>
 
       {/* Macro Banner */}
       {showMacro && (
-        <div style={{ padding: 16, background: `linear-gradient(135deg, ${t.red}20, ${t.orange}20)`, borderBottom: `0.5px solid ${t.border}` }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: t.orange, marginBottom: 8 }}>⚠️ MACRO RISK SYNTHESIS</div>
-          <div style={{ fontSize: 12, lineHeight: 1.6, color: t.textSecondary }}>
-            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.red }}>AI Bubble Risk:</strong> Circular funding between OpenAI ↔ Nvidia ↔ CoreWeave. $1T+ interconnected. Mag7 = 35% of S&P.</p>
-            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.yellow }}>US Debt:</strong> $36T national debt. Interest payments exceeding defense budget. 120% debt-to-GDP ratio.</p>
-            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.cyan }}>Crypto Thesis:</strong> BTC as digital gold hedge. ETF inflows $40B+ in 2025. Halving supply shock in effect.</p>
-            <p style={{ margin: '0 0 8px' }}><strong style={{ color: t.green }}>Gold/Silver:</strong> Central banks bought 1,037t in 2024. De-dollarization accelerating. BRICS gold-backed currency speculation.</p>
-            <p style={{ margin: 0 }}><strong style={{ color: t.textSecondary }}>Nothing Ever Happens:</strong> Markets rarely move. Stay patient. Trust the trend.</p>
+        <div style={{ padding: '12px 16px', background: t.surface, borderBottom: `1px solid ${t.border}` }}>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', fontSize: 11, color: t.textSecondary }}>
+            <span><span style={{ color: t.red }}>AI Bubble</span> Mag7 = 35% S&P</span>
+            <span><span style={{ color: t.yellow }}>Debt</span> $36T / 120% GDP</span>
+            <span><span style={{ color: t.cyan }}>BTC</span> ETF +$40B</span>
+            <span><span style={{ color: t.green }}>Gold</span> CB +1,037t</span>
+            <span style={{ color: t.textTertiary, fontStyle: 'italic' }}>Nothing ever happens</span>
           </div>
         </div>
       )}
