@@ -190,6 +190,12 @@ export default function App() {
   const trends = useRef(Object.fromEntries(SYMS.map(s => [s, 0])));
   const [tradeStats, setTradeStats] = useState({ wins: {}, losses: {} });
 
+  // Animation refs for smooth 60fps rendering
+  const animationRef = useRef(null);
+  const lastFrameTime = useRef(0);
+  const pricesRef = useRef(prices);
+  const tickRef = useRef(0);
+
   // Prediction Market State
   const [asset, setAsset] = useState('silver');
   const [scenario, setScenario] = useState('base');
@@ -206,48 +212,64 @@ export default function App() {
   const { markets, loading: pmLoading, error: pmError, refetch: refetchPm } = usePolymarket();
   const { stocks, error: stocksError } = useStocks();
 
-  // Trading Simulator Logic
+  // Trading Simulator Logic - requestAnimationFrame for smooth 60fps
   useEffect(() => {
     const target = targetTrillion ? 1000000000000 : 1000000000;
     if (!running || balance <= 0.5 || balance >= target) return;
 
-    const iv = setInterval(() => {
-      try {
-        setPrices(prev => {
-          const next = {};
-          SYMS.forEach(sym => {
-            try {
-              if (Math.random() < 0.05) trends.current[sym] = (Math.random() - 0.45) * 0.006;
-              const drift = 0.0001;
-              const move = drift + trends.current[sym] + (Math.random() - 0.5) * 0.008;
-              const last = prev[sym][prev[sym].length - 1];
-              const base = ASSETS[sym].price;
+    // Sync ref with current state on start
+    pricesRef.current = prices;
+    tickRef.current = tick;
+    lastFrameTime.current = performance.now();
 
-              if (typeof last !== 'number' || isNaN(last)) {
-                console.error('Invalid last price for', sym, last);
-                next[sym] = [base];
-                return;
-              }
+    // Simulation ticks per visual frame (higher = faster simulation)
+    const ticksPerFrame = perfMode ? 3 : 5;
 
-              const newPrice = Math.max(base * 0.7, Math.min(base * 1.5, last * (1 + move)));
-              const priceHistory = prev[sym].length >= 30 ? prev[sym].slice(-29) : prev[sym];
-              next[sym] = [...priceHistory, newPrice];
-            } catch (err) {
-              console.error('Price update error for', sym, err);
-              next[sym] = prev[sym] || [ASSETS[sym].price];
+    const animate = (currentTime) => {
+      // Run multiple simulation ticks per frame for speed
+      for (let t = 0; t < ticksPerFrame; t++) {
+        const next = {};
+        SYMS.forEach(sym => {
+          try {
+            if (Math.random() < 0.05) trends.current[sym] = (Math.random() - 0.45) * 0.006;
+            const drift = 0.0001;
+            const move = drift + trends.current[sym] + (Math.random() - 0.5) * 0.008;
+            const prev = pricesRef.current[sym];
+            const last = prev[prev.length - 1];
+            const base = ASSETS[sym].price;
+
+            if (typeof last !== 'number' || isNaN(last)) {
+              next[sym] = [base];
+              return;
             }
-          });
-          return next;
+
+            const newPrice = Math.max(base * 0.7, Math.min(base * 1.5, last * (1 + move)));
+            const priceHistory = prev.length >= 30 ? prev.slice(-29) : prev;
+            next[sym] = [...priceHistory, newPrice];
+          } catch (err) {
+            next[sym] = pricesRef.current[sym] || [ASSETS[sym].price];
+          }
         });
-
-        setTick(t => t + 1);
-      } catch (err) {
-        console.error('Simulator tick error:', err);
+        pricesRef.current = next;
+        tickRef.current += 1;
       }
-    }, perfMode ? 50 : 25); // Ultra-fast ticks for sub-60s challenge
 
-    return () => clearInterval(iv);
-  }, [running, balance, perfMode]);
+      // Batch state update once per frame for React rendering
+      setPrices(pricesRef.current);
+      setTick(tickRef.current);
+      lastFrameTime.current = currentTime;
+
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [running, balance, perfMode, targetTrillion]);
 
   useEffect(() => {
     if (!position || !running) return;
@@ -456,14 +478,31 @@ export default function App() {
     return `${tradingMinutes} minutes`;
   };
 
-  // Chart
+  // Chart - memoized for performance
   const W = 320, H = 120;
-  const allNorm = SYMS.flatMap(s => prices[s].map(p => (p - ASSETS[s].price) / ASSETS[s].price));
-  const nMin = Math.min(...allNorm, -0.02);
-  const nMax = Math.max(...allNorm, 0.02);
-  const toY = v => H - ((v - nMin) / (nMax - nMin || 0.01)) * H;
+  const chartData = useMemo(() => {
+    const allNorm = SYMS.flatMap(s => prices[s].map(p => (p - ASSETS[s].price) / ASSETS[s].price));
+    const nMin = Math.min(...allNorm, -0.02);
+    const nMax = Math.max(...allNorm, 0.02);
+    const toY = v => H - ((v - nMin) / (nMax - nMin || 0.01)) * H;
+
+    const paths = {};
+    SYMS.forEach(sym => {
+      if (prices[sym].length > 1) {
+        paths[sym] = prices[sym].map((p, i) => {
+          const norm = (p - ASSETS[sym].price) / ASSETS[sym].price;
+          return `${i ? 'L' : 'M'} ${(i / 99) * W} ${toY(norm)}`;
+        }).join(' ');
+      }
+    });
+
+    return { paths, toY, nMin, nMax };
+  }, [prices]);
+
+  const { paths: chartPaths, toY } = chartData;
   const makePath = sym => {
-    return prices[sym].map((p, i) => {
+    // Fallback for unmemoized case
+    return chartPaths[sym] || prices[sym].map((p, i) => {
       const norm = (p - ASSETS[sym].price) / ASSETS[sym].price;
       return `${i ? 'L' : 'M'} ${(i / 99) * W} ${toY(norm)}`;
     }).join(' ');
